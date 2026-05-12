@@ -6,13 +6,47 @@ from collections import defaultdict
 from lstep_parse import truthy
 
 
+# 系統①(流入経路タグ): Lstep CSV のヘッダーは全角『（）』だが、
+# 念のため半角『()』も許容。両方を候補としてチェックする。
+JISHA_FLOW_TAG_CANDIDATES = ("11.広告（自社運用）", "11.広告(自社運用)")
+GAICHU_FLOW_TAG_CANDIDATES = ("3.広告",)
+
+
+def _resolve_existing_key(d: Dict, candidates) -> str:
+    for k in candidates:
+        if k in d:
+            return k
+    return ""
+
+
+def _truthy_any(row: Dict, candidates) -> bool:
+    for k in candidates:
+        if k in row and truthy(row.get(k)):
+            return True
+    return False
+
+
+# Meta CV (=広告管理画面「ウェブサイトの登録完了」) の action_type 候補。
+# 旧 Apps Script `getCV()` と同じ優先順: complete_registration → offsite_conversion → lead。
+# 実値は meta_fetch.py の頻度ログで確認可能 (生データを後から再確認するため)。
+META_CV_ACTION_TYPES = (
+    "complete_registration",
+    "offsite_conversion.fb_pixel_complete_registration",
+    "onsite_web_app_complete_registration",
+    "onsite_web_complete_registration",
+    "omni_complete_registration",
+    "lead",
+)
+
+
 def _get_lead_count(row: Dict) -> int:
-    """Meta API の actions から lead を抽出"""
+    """Meta API actions から Meta CV を抽出 (優先順位付き)"""
     actions = row.get("actions") or []
-    for a in actions:
-        if a.get("action_type") == "lead":
+    by_type = {a.get("action_type"): a.get("value", 0) for a in actions if a.get("action_type")}
+    for t in META_CV_ACTION_TYPES:
+        if t in by_type:
             try:
-                return int(a.get("value", 0))
+                return int(float(by_type[t]))
             except (ValueError, TypeError):
                 return 0
     return 0
@@ -62,16 +96,20 @@ def aggregate(meta_jisha: List[Dict], meta_gaichu: List[Dict], lstep: List[Dict]
         d["meta_cv"] += _get_lead_count(row)
 
     # ===== 2. 日次: 真CV (Lstep データから) =====
-    # 優先1: 流入経路タグ '11.広告(自社運用)' / '3.広告' (もし列にあれば)
-    # 優先2: metaCR_xxx 列ベース (`_circle` 末尾=外注、 無し=自社)
+    # 系統①(流入経路タグ '11.広告(自社運用)' / '3.広告') を優先。
+    # CSV 行2 のヘッダーは全角カッコ『（）』だが、半角『()』も両方許容。
+    # 系統② (metaCR_xxx) はクリエ別用なのでフォールバックには使わない
+    # (ここで使うと佐野除外漏れ・重複カウントを招き、合計が壊れる)。
     daily_truecv = defaultdict(lambda: {"jisha": 0, "gaichu": 0})
     metacr_cols = []
     if lstep:
         metacr_cols = [c for c in lstep[0].keys() if c.startswith("metaCR_")]
 
-    has_流入経路 = bool(lstep) and (
-        "11.広告(自社運用)" in lstep[0] or "3.広告" in lstep[0]
-    )
+    jisha_key = _resolve_existing_key(lstep[0], JISHA_FLOW_TAG_CANDIDATES) if lstep else ""
+    gaichu_key = _resolve_existing_key(lstep[0], GAICHU_FLOW_TAG_CANDIDATES) if lstep else ""
+    has_流入経路 = bool(jisha_key or gaichu_key)
+    if lstep:
+        print(f"  [aggregate] 流入経路タグ判定: 自社={jisha_key or '未検出'} / 外注={gaichu_key or '未検出'}")
 
     for lrow in lstep:
         date = _parse_lstep_date(lrow.get("友だち追加日時", ""))
@@ -82,19 +120,10 @@ def aggregate(meta_jisha: List[Dict], meta_gaichu: List[Dict], lstep: List[Dict]
         is_gaichu = False
 
         if has_流入経路:
-            # 流入経路タグ優先
-            if truthy(lrow.get("11.広告(自社運用)")):
+            if jisha_key and truthy(lrow.get(jisha_key)):
                 is_jisha = True
-            if truthy(lrow.get("3.広告")):
+            if gaichu_key and truthy(lrow.get(gaichu_key)):
                 is_gaichu = True
-        else:
-            # フォールバック: metaCR_xxx 列から判定
-            for col in metacr_cols:
-                if truthy(lrow.get(col)):
-                    if col.endswith("_circle"):
-                        is_gaichu = True
-                    else:
-                        is_jisha = True
 
         if is_jisha:
             daily_truecv[date]["jisha"] += 1

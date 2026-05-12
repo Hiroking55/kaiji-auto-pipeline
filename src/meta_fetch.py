@@ -99,4 +99,17 @@ def fetch_meta_data(account_id: str, label: str, days: int = 30) -> List[Dict]:
     for row in rows:
         row["system"] = label  # 'jisha' or 'gaichu'
 
+    # 調査用: actions の action_type 出現頻度を集計してログ出力
+    # (タスク3: _get_lead_count の action_type が "lead" でいいかの判定材料)
+    action_type_freq: Dict[str, int] = {}
+    for row in rows:
+        for a in row.get("actions") or []:
+            t = a.get("action_type") or "(none)"
+            action_type_freq[t] = action_type_freq.get(t, 0) + 1
+    if action_type_freq:
+        top = sorted(action_type_freq.items(), key=lambda x: -x[1])[:15]
+        print(f"  [meta_fetch:{label}] action_type 頻度 top15: {top}")
+    else:
+        print(f"  [meta_fetch:{label}] actions が全行で空でした")
+
     return rows
