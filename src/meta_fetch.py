@@ -69,11 +69,24 @@ def fetch_meta_data(account_id: str, label: str, days: int = 30) -> List[Dict]:
 
         if "error" in data:
             err = data["error"]
-            # レート制限: is_transient=true なら待機して再試行
-            if err.get("is_transient") and retry < 5:
+            # リトライ対象:
+            # - is_transient: true (一時的エラー)
+            # - code 1: API unknown
+            # - code 2: Service temporarily unavailable
+            # - code 4: Application request limit reached (レート制限)
+            # - code 17: User request limit reached
+            # - code 32: Page request limit reached
+            # - code 613: Calls to this api have exceeded the rate limit
+            is_retryable = (
+                err.get("is_transient") or
+                err.get("code") in (1, 2, 4, 17, 32, 613) or
+                err.get("error_subcode") in (1504044,)
+            )
+            if is_retryable and retry < 6:
                 retry += 1
-                wait = 30 * retry
-                print(f"  [meta_fetch:{label}] レート制限。 {wait}秒待機後リトライ ({retry}/5)")
+                wait = min(60 * retry, 300)  # 60s, 120s, ... max 300s
+                msg = err.get("message", "")[:80]
+                print(f"  [meta_fetch:{label}] エラー (リトライ {retry}/6, {wait}秒待機): code={err.get('code')} {msg}")
                 time.sleep(wait)
                 continue
             raise RuntimeError(f"Meta API error ({label}): {err}")
