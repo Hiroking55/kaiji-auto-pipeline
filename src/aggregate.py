@@ -61,17 +61,44 @@ def aggregate(meta_jisha: List[Dict], meta_gaichu: List[Dict], lstep: List[Dict]
         d["cost"] += float(row.get("spend") or 0)
         d["meta_cv"] += _get_lead_count(row)
 
-    # ===== 2. 日次: 真CV (Lstep 流入経路タグから) =====
-    # 自社系統①: '11.広告(自社運用)' が真
-    # 外注系統①: '3.広告' が真
+    # ===== 2. 日次: 真CV (Lstep データから) =====
+    # 優先1: 流入経路タグ '11.広告(自社運用)' / '3.広告' (もし列にあれば)
+    # 優先2: metaCR_xxx 列ベース (`_circle` 末尾=外注、 無し=自社)
     daily_truecv = defaultdict(lambda: {"jisha": 0, "gaichu": 0})
+    metacr_cols = []
+    if lstep:
+        metacr_cols = [c for c in lstep[0].keys() if c.startswith("metaCR_")]
+
+    has_流入経路 = bool(lstep) and (
+        "11.広告(自社運用)" in lstep[0] or "3.広告" in lstep[0]
+    )
+
     for lrow in lstep:
         date = _parse_lstep_date(lrow.get("友だち追加日時", ""))
         if not date:
             continue
-        if truthy(lrow.get("11.広告(自社運用)")):
+
+        is_jisha = False
+        is_gaichu = False
+
+        if has_流入経路:
+            # 流入経路タグ優先
+            if truthy(lrow.get("11.広告(自社運用)")):
+                is_jisha = True
+            if truthy(lrow.get("3.広告")):
+                is_gaichu = True
+        else:
+            # フォールバック: metaCR_xxx 列から判定
+            for col in metacr_cols:
+                if truthy(lrow.get(col)):
+                    if col.endswith("_circle"):
+                        is_gaichu = True
+                    else:
+                        is_jisha = True
+
+        if is_jisha:
             daily_truecv[date]["jisha"] += 1
-        if truthy(lrow.get("3.広告")):
+        if is_gaichu:
             daily_truecv[date]["gaichu"] += 1
 
     # ===== 3. 日次行を整形: 各日 3 行 (自社/外注/合計) =====

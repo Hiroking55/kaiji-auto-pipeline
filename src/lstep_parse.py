@@ -1,7 +1,25 @@
 """Lstep CSV (CP932) パース"""
 import csv
+import glob
 import os
 from typing import List, Dict
+
+
+def _resolve_csv_path(path: str) -> str:
+    """指定パスが無い場合、 同じディレクトリの最新 .csv を探す"""
+    if os.path.exists(path):
+        return path
+    # data/lstep/ 内の任意の .csv を fallback (ファイル名がタイムスタンプ含むケース対応)
+    dir_path = os.path.dirname(path) or "."
+    candidates = sorted(
+        glob.glob(os.path.join(dir_path, "*.csv")),
+        key=os.path.getmtime,
+        reverse=True,
+    )
+    if candidates:
+        print(f"  [lstep_parse] {path} 未検出 → 代替ファイル使用: {candidates[0]}")
+        return candidates[0]
+    return ""
 
 
 def parse_lstep_csv(path: str) -> List[Dict]:
@@ -12,10 +30,13 @@ def parse_lstep_csv(path: str) -> List[Dict]:
     - 行3〜: データ行
 
     CSV はデフォルト CP932 (Shift-JIS) 出力。
+    ファイル名は latest.csv 推奨だが、 member_*.csv 等タイムスタンプ付きも自動検出。
     """
-    if not os.path.exists(path):
-        print(f"  [lstep_parse] {path} が存在しません。 空配列を返します。")
+    resolved = _resolve_csv_path(path)
+    if not resolved:
+        print(f"  [lstep_parse] {path} および {os.path.dirname(path)}/ 内に .csv が見つかりません。 空配列を返します。")
         return []
+    path = resolved
 
     # CP932 で開く。失敗したら UTF-8 にフォールバック
     encoding = "cp932"
