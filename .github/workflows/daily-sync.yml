@@ -1,0 +1,45 @@
+name: Daily Sync
+
+on:
+  # JST 00:00, 12:00, 18:00 = UTC 15:00 (前日), 03:00, 09:00
+  schedule:
+    - cron: '0 15 * * *'   # JST 00:00
+    - cron: '0 3 * * *'    # JST 12:00
+    - cron: '0 9 * * *'    # JST 18:00
+
+  # Lstep CSV push 時に即実行
+  push:
+    paths:
+      - 'data/lstep/**'
+      - 'src/**'
+
+  # 手動実行
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run pipeline
+        env:
+          FB_ACCESS_TOKEN: ${{ secrets.FB_ACCESS_TOKEN }}
+          FB_AD_ACCOUNT_JISHA: ${{ secrets.FB_AD_ACCOUNT_JISHA }}
+          FB_AD_ACCOUNT_GAICHU: ${{ secrets.FB_AD_ACCOUNT_GAICHU }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DB_DAILY_ID: ${{ secrets.NOTION_DB_DAILY_ID }}
+          NOTION_DB_CREATIVE_ID: ${{ secrets.NOTION_DB_CREATIVE_ID }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: python src/main.py
