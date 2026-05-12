@@ -38,6 +38,11 @@ def _notion_call(fn, *args, **kwargs):
 # 旧 Apps Script の syncKPICardsToNotion が更新していた KPI カード群がここに居る。
 DEFAULT_NOTION_PARENT_PAGE_ID = "35bafb87-4028-80e9-99ac-dd07e86cf4fc"
 
+# DB「日次推移 (3軸)」 ID
+# 自社/外注/合計 の 3 系統を各日 1 行ずつ書き込む。Line chart の Series=系統 で
+# 3 本の線として表示する用途。既存 DB1 (合計のみ) には触らない。
+DEFAULT_NOTION_DB_DAILY_3AXIS_ID = "35eafb87-4028-81b6-b3b0-e60d8547925b"
+
 
 def _get_existing_pages(notion: Client, db_id: str, title_prop_name: str = "日付") -> dict:
     """既存ページを title (日付) で索引化"""
@@ -95,6 +100,68 @@ def sync_daily_to_db1(notion: Client, db_id: str, daily_rows: list):
             print(f"  [notion DB1] {title_text} 失敗: {e}")
 
     print(f"  [notion DB1] 新規 {created} / 更新 {updated} / 合計 {len(total_rows)} 件")
+
+
+def sync_daily_3axis_to_db(notion: Client, db_id: str, daily_rows: list):
+    """日次 3 軸 (自社/外注/合計) を Notion DB に投入。
+    既存 DB1 (合計のみ) には触らず、新 DB に独立して書き込む。
+    Line chart の Series=系統 で 3 本の線として可視化する想定。"""
+    # 既存ページを (タイトル, 系統) の複合キーで索引化
+    existing = {}
+    cursor = None
+    while True:
+        kwargs = {"database_id": db_id, "page_size": 100}
+        if cursor:
+            kwargs["start_cursor"] = cursor
+        resp = _notion_call(notion.databases.query, **kwargs)
+        for page in resp["results"]:
+            props = page["properties"]
+            title_rt = props.get("日付", {}).get("title", [])
+            title = title_rt[0].get("plain_text", "").strip() if title_rt else ""
+            sys_sel = props.get("系統", {}).get("select")
+            sys_name = sys_sel.get("name") if sys_sel else ""
+            if title and sys_name:
+                existing[(title, sys_name)] = page["id"]
+        if not resp.get("has_more"):
+            break
+        cursor = resp.get("next_cursor")
+
+    created = updated = failed = 0
+    for row in daily_rows:
+        try:
+            date_obj = datetime.strptime(row["date"], "%Y-%m-%d")
+        except ValueError:
+            continue
+        weekday = WEEKDAY_JA[date_obj.weekday()]
+        title_text = f"{date_obj.strftime('%m/%d')} ({weekday})"
+        month_str = date_obj.strftime("%Y-%m")
+        system = row["system"]  # "自社" / "外注" / "合計"
+
+        properties = {
+            "日付": {"title": [{"text": {"content": title_text}}]},
+            "系統": {"select": {"name": system}},
+            "Click": {"number": row["click"]},
+            "Cost": {"number": row["cost"]},
+            "Imp": {"number": row["imp"]},
+            "Meta CV": {"number": row["meta_cv"]},
+            "真CV": {"number": row["true_cv"]},
+            "真CPA": {"number": row["true_cpa"]},
+            "月": {"select": {"name": month_str}},
+        }
+
+        try:
+            key = (title_text, system)
+            if key in existing:
+                _notion_call(notion.pages.update, page_id=existing[key], properties=properties)
+                updated += 1
+            else:
+                _notion_call(notion.pages.create, parent={"database_id": db_id}, properties=properties)
+                created += 1
+        except Exception as e:
+            print(f"  [DB1-3軸] {title_text}/{system} 失敗: {type(e).__name__} {str(e)[:100]}")
+            failed += 1
+
+    print(f"  [DB1-3軸] 新規 {created} / 更新 {updated} / 失敗 {failed} / 合計 {len(daily_rows)} 件")
 
 
 def sync_creative_to_db2(notion: Client, db_id: str, creative_rows: list):
@@ -289,6 +356,7 @@ def sync_to_notion(results: dict):
 
     db_daily = os.environ.get("NOTION_DB_DAILY_ID")
     db_creative = os.environ.get("NOTION_DB_CREATIVE_ID")
+    db_daily_3axis = os.environ.get("NOTION_DB_DAILY_3AXIS_ID", DEFAULT_NOTION_DB_DAILY_3AXIS_ID)
     parent_page = os.environ.get("NOTION_PARENT_PAGE_ID", DEFAULT_NOTION_PARENT_PAGE_ID)
 
     if db_daily:
@@ -300,6 +368,11 @@ def sync_to_notion(results: dict):
         sync_creative_to_db2(notion, db_creative, results["creative"])
     else:
         print("  [notion] NOTION_DB_CREATIVE_ID 未設定: クリエ別同期スキップ")
+
+    if db_daily_3axis:
+        sync_daily_3axis_to_db(notion, db_daily_3axis, results["daily"])
+    else:
+        print("  [notion] NOTION_DB_DAILY_3AXIS_ID 未設定: 3軸日次同期スキップ")
 
     dashboard = results.get("dashboard")
     if not dashboard or not parent_page:
