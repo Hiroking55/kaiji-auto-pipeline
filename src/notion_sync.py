@@ -1,9 +1,11 @@
 """Notion API で DB1 (日次) / DB2 (クリエ別) / KPI カードを更新"""
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from notion_client import Client
 from notion_client.errors import RequestTimeoutError, HTTPResponseError, APIResponseError
+
+JST = timezone(timedelta(hours=9))
 
 
 WEEKDAY_JA = "月火水木金土日"
@@ -105,7 +107,13 @@ def sync_daily_to_db1(notion: Client, db_id: str, daily_rows: list):
 def sync_daily_3axis_to_db(notion: Client, db_id: str, daily_rows: list):
     """日次 3 軸 (自社/外注/合計) を Notion DB に投入。
     既存 DB1 (合計のみ) には触らず、新 DB に独立して書き込む。
-    Line chart の Series=系統 で 3 本の線として可視化する想定。"""
+    Line chart の Series=系統 で 3 本の線として可視化する想定。
+    実行時間短縮のため当月分のみを対象にする (約 30 行 × 3 軸 = 最大 93 行)。"""
+    cur_month = datetime.now(JST).strftime("%Y-%m")
+    target_rows = [r for r in daily_rows if r.get("date", "").startswith(cur_month)]
+    print(f"  [DB1-3軸] 対象月={cur_month} / 当月行数={len(target_rows)}")
+    daily_rows = target_rows
+
     # 既存ページを (タイトル, 系統) の複合キーで索引化
     existing = {}
     cursor = None
