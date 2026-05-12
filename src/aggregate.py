@@ -1,9 +1,16 @@
 """集計ロジック: Meta+Lstep → 日次合計 / 系統別 / クリエ別"""
-from typing import List, Dict
-from datetime import datetime
+from typing import List, Dict, Tuple
+from datetime import datetime, date, timedelta, timezone
 from collections import defaultdict
 
 from lstep_parse import truthy
+
+JST = timezone(timedelta(hours=9))
+
+# KPI ダッシュボード用パラメータ (Notion 親ページの KPIカードに反映)
+DEFAULT_TARGET_CV = 600       # 月次真CV 目標
+DEFAULT_BUDGET = 1_800_000    # 月次予算 (¥)
+DEFAULT_CPA_THRESHOLD = 3_000  # 真CPA 基準 (¥)
 
 
 # 系統①(流入経路タグ): Lstep CSV のヘッダーは全角『（）』だが、
@@ -254,8 +261,141 @@ def aggregate(meta_jisha: List[Dict], meta_gaichu: List[Dict], lstep: List[Dict]
         if month_summary["true_cv"] > 0 else 0
     )
 
+    # ===== 6. ダッシュボード KPI (Notion 親ページの KPIカード用) =====
+    dashboard = _compute_dashboard(daily_rows)
+
     return {
         "daily": daily_rows,
         "creative": creative_rows,
         "month_summary": month_summary,
+        "dashboard": dashboard,
+    }
+
+
+# ---------- ダッシュボード KPI 計算 ----------
+
+def _empty_metrics() -> Dict:
+    return {"imp": 0, "click": 0, "cost": 0, "meta_cv": 0, "true_cv": 0, "true_cpa": 0}
+
+
+def _accumulate(rows: List[Dict]) -> Dict:
+    """daily_rows のうち渡されたサブセットを合算"""
+    agg = _empty_metrics()
+    for r in rows:
+        for k in ("imp", "click", "cost", "meta_cv", "true_cv"):
+            agg[k] += r[k]
+    agg["true_cpa"] = int(round(agg["cost"] / agg["true_cv"])) if agg["true_cv"] > 0 else 0
+    return agg
+
+
+def _current_week_range(today: date) -> Tuple[date, date]:
+    """月曜始まり日曜終わりの『今週』の範囲 (月跨ぎカット)。
+    月初の不完全週は (1日, 最初の月曜の前日) として 1 つの週扱いにする
+    (Apps Script の仕様に合わせる)。"""
+    month_start = today.replace(day=1)
+    if today.month == 12:
+        next_month_start = today.replace(year=today.year + 1, month=1, day=1)
+    else:
+        next_month_start = today.replace(month=today.month + 1, day=1)
+    month_last = next_month_start - timedelta(days=1)
+
+    if month_start.weekday() == 0:
+        first_monday = month_start
+    else:
+        first_monday = month_start + timedelta(days=(7 - month_start.weekday()))
+
+    if today < first_monday:
+        return month_start, first_monday - timedelta(days=1)
+
+    monday = today - timedelta(days=today.weekday())
+    sunday = min(monday + timedelta(days=6), month_last)
+    return monday, sunday
+
+
+def _week_index_in_month(today: date) -> int:
+    """月内の第何週か。月初の不完全週を第1週とし、最初の月曜以降を第2週から数える
+    (Apps Script の仕様)。"""
+    month_start = today.replace(day=1)
+    if month_start.weekday() == 0:
+        first_monday = month_start
+    else:
+        first_monday = month_start + timedelta(days=(7 - month_start.weekday()))
+
+    if today < first_monday:
+        return 1  # 月初の不完全週
+    days_since_first_monday = (today - first_monday).days
+    if first_monday == month_start:
+        return days_since_first_monday // 7 + 1
+    return days_since_first_monday // 7 + 2
+
+
+def _month_days_remaining(today: date) -> int:
+    """今日を含めない月末までの残り日数。"""
+    if today.month == 12:
+        next_month_start = today.replace(year=today.year + 1, month=1, day=1)
+    else:
+        next_month_start = today.replace(month=today.month + 1, day=1)
+    return (next_month_start - today).days - 1
+
+
+def _compute_dashboard(daily_rows: List[Dict]) -> Dict:
+    """月次・週次・当日の KPI を 自社/外注/合計 3軸で集計。"""
+    today_jst = datetime.now(JST).date()
+    cur_month = today_jst.strftime("%Y-%m")
+
+    # 当日 = 昨日(JST) (Meta API は yesterday まで返す)
+    today_disp = today_jst - timedelta(days=1)
+    today_str = today_disp.strftime("%Y-%m-%d")
+
+    # 週次レンジ
+    week_start, week_end = _current_week_range(today_jst)
+    week_idx = _week_index_in_month(today_jst)
+    week_label = f"第{week_idx}週 ({week_start.strftime('%m/%d')}-{week_end.strftime('%m/%d')})"
+
+    def filter_rows(system: str, predicate) -> List[Dict]:
+        return [r for r in daily_rows if r["system"] == system and predicate(r["date"])]
+
+    def is_in_month(d: str) -> bool:
+        return d.startswith(cur_month)
+
+    def is_in_week(d: str) -> bool:
+        try:
+            dd = datetime.strptime(d, "%Y-%m-%d").date()
+        except ValueError:
+            return False
+        return week_start <= dd <= week_end
+
+    def is_today(d: str) -> bool:
+        return d == today_str
+
+    summary = {}
+    for scope, predicate in (("monthly", is_in_month),
+                              ("weekly", is_in_week),
+                              ("today", is_today)):
+        summary[scope] = {
+            "jisha": _accumulate(filter_rows("自社", predicate)),
+            "gaichu": _accumulate(filter_rows("外注", predicate)),
+            "total": _accumulate(filter_rows("合計", predicate)),
+        }
+
+    achieved = summary["monthly"]["total"]["true_cv"]
+    achievement_rate = (achieved / DEFAULT_TARGET_CV * 100) if DEFAULT_TARGET_CV > 0 else 0
+    remaining = max(0, DEFAULT_TARGET_CV - achieved)
+    days_left = _month_days_remaining(today_jst)
+
+    return {
+        "today_date": today_str,                                # "2026-05-12"
+        "today_label": today_disp.strftime("%m/%d") + " (" + "月火水木金土日"[today_disp.weekday()] + ")",
+        "week_label": week_label,                               # "第3週 (05/11-05/17)"
+        "week_start": week_start.strftime("%Y-%m-%d"),
+        "week_end": week_end.strftime("%Y-%m-%d"),
+        "month_days_left": days_left,
+        "achievement_rate": round(achievement_rate, 1),
+        "remaining_target": remaining,
+        "target_cv": DEFAULT_TARGET_CV,
+        "budget": DEFAULT_BUDGET,
+        "cpa_threshold": DEFAULT_CPA_THRESHOLD,
+        "monthly": summary["monthly"],
+        "weekly": summary["weekly"],
+        "today": summary["today"],
     }

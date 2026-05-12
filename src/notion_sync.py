@@ -1,10 +1,14 @@
-"""Notion API で DB1 (日次) / DB2 (クリエ別) を更新"""
+"""Notion API で DB1 (日次) / DB2 (クリエ別) / KPI カードを更新"""
 import os
 from datetime import datetime
 from notion_client import Client
 
 
 WEEKDAY_JA = "月火水木金土日"
+
+# 親ページ ID (ダッシュボード "meta広告 管理ダッシュボード")
+# 旧 Apps Script の syncKPICardsToNotion が更新していた KPI カード群がここに居る。
+DEFAULT_NOTION_PARENT_PAGE_ID = "35bafb87-4028-80e9-99ac-dd07e86cf4fc"
 
 
 def _get_existing_pages(notion: Client, db_id: str, title_prop_name: str = "日付") -> dict:
@@ -98,12 +102,161 @@ def sync_creative_to_db2(notion: Client, db_id: str, creative_rows: list):
     print(f"  [notion DB2] 新規 {created} / 更新 {updated} / 合計 {len(creative_rows)} 件")
 
 
+# ========== KPI カード 同期 ==========
+
+def _parse_kpi_label(label: str):
+    """callout ラベルから (period, scope, metric) を抽出。
+    特殊ラベル (達成率/残り目標) は ('special', None, name)。
+    対応不可は None。"""
+    if "達成率" in label:
+        return ("special", None, "achievement_rate")
+    if "残り目標" in label:
+        return ("special", None, "remaining_target")
+
+    if "当日" in label:
+        period = "today"
+    elif "週次" in label:
+        period = "weekly"
+    elif "月次" in label:
+        period = "monthly"
+    else:
+        return None
+
+    if "自外合計" in label:
+        scope = "total"
+    elif "自社" in label:
+        scope = "jisha"
+    elif "外注" in label:
+        scope = "gaichu"
+    else:
+        return None
+
+    if "真CPA" in label:
+        metric = "true_cpa"
+    elif "真CV" in label:
+        metric = "true_cv"
+    elif "コスト" in label:
+        metric = "cost"
+    else:
+        return None
+
+    return (period, scope, metric)
+
+
+def _format_kpi_value(metric: str, value) -> str:
+    if metric == "true_cv":
+        return f"{value:,} 件"
+    if metric in ("cost", "true_cpa"):
+        return f"¥{value:,}"
+    if metric == "achievement_rate":
+        return f"{value}%"
+    if metric == "remaining_target":
+        return f"(あと{value:,}リスト)"
+    return str(value)
+
+
+def _get_kpi_value(parsed, dashboard: dict):
+    period, scope, metric = parsed
+    if period == "special":
+        return _format_kpi_value(metric, dashboard.get(metric, 0))
+    data = dashboard.get(period, {}).get(scope)
+    if not data:
+        return None
+    return _format_kpi_value(metric, data.get(metric, 0))
+
+
+def _rich_text_of(block: dict) -> str:
+    t = block.get("type", "")
+    rt = block.get(t, {}).get("rich_text", [])
+    return "".join(r.get("plain_text", "") for r in rt)
+
+
+def sync_kpi_cards(notion: Client, page_id: str, dashboard: dict):
+    """親ページ配下の KPIカード (heading_1 値) を更新。
+    構造: heading_2 (月次/週次セクション) → column_list → column → callout → heading_1。
+    callout のラベルから (period, scope, metric) を推定して heading_1 の rich_text を上書き。"""
+    children = notion.blocks.children.list(block_id=page_id)
+
+    # 1. heading_2 でセクション境界を識別、column_list ID を集める
+    sections_column_lists = []
+    current_section = None
+    for b in children["results"]:
+        t = b["type"]
+        if t == "heading_2":
+            text = _rich_text_of(b)
+            if "月次サマリ" in text:
+                current_section = "monthly"
+            elif "週次サマリ" in text:
+                current_section = "weekly"
+            else:
+                current_section = None
+        elif t == "column_list" and current_section:
+            sections_column_lists.append(b["id"])
+
+    updated = 0
+    skipped = 0
+    failed = 0
+    for col_list_id in sections_column_lists:
+        cols = notion.blocks.children.list(block_id=col_list_id)
+        for col in cols["results"]:
+            callouts = notion.blocks.children.list(block_id=col["id"])
+            for c in callouts["results"]:
+                if c["type"] != "callout":
+                    continue
+                label = _rich_text_of(c)
+                parsed = _parse_kpi_label(label)
+                if not parsed:
+                    skipped += 1
+                    continue
+                new_value = _get_kpi_value(parsed, dashboard)
+                if new_value is None:
+                    skipped += 1
+                    continue
+
+                # callout 配下の heading_1 を更新
+                nested = notion.blocks.children.list(block_id=c["id"])
+                for n in nested["results"]:
+                    if n["type"] != "heading_1":
+                        continue
+                    try:
+                        notion.blocks.update(
+                            block_id=n["id"],
+                            heading_1={
+                                "rich_text": [{"type": "text", "text": {"content": new_value}}],
+                            },
+                        )
+                        updated += 1
+                    except Exception as e:
+                        print(f"  [KPI] {label!r} 更新失敗: {e}")
+                        failed += 1
+
+    # 更新マーカーの callout を最新時刻に
+    try:
+        for b in children["results"]:
+            if b["type"] == "callout" and "BOT-AUTO-SYNC" in _rich_text_of(b):
+                stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+                notion.blocks.update(
+                    block_id=b["id"],
+                    callout={
+                        "rich_text": [
+                            {"type": "text", "text": {"content": f"🤖[BOT-AUTO-SYNC] 更新: {stamp}"}},
+                        ],
+                    },
+                )
+                break
+    except Exception as e:
+        print(f"  [KPI] 更新マーカー失敗: {e}")
+
+    print(f"  [KPI] カード更新 {updated} / スキップ {skipped} / 失敗 {failed}")
+
+
 def sync_to_notion(results: dict):
-    """日次 + クリエ別を Notion に同期"""
+    """日次 + クリエ別 + KPIカード を Notion に同期"""
     notion = Client(auth=os.environ["NOTION_TOKEN"])
 
     db_daily = os.environ.get("NOTION_DB_DAILY_ID")
     db_creative = os.environ.get("NOTION_DB_CREATIVE_ID")
+    parent_page = os.environ.get("NOTION_PARENT_PAGE_ID", DEFAULT_NOTION_PARENT_PAGE_ID)
 
     if db_daily:
         sync_daily_to_db1(notion, db_daily, results["daily"])
@@ -114,3 +267,17 @@ def sync_to_notion(results: dict):
         sync_creative_to_db2(notion, db_creative, results["creative"])
     else:
         print("  [notion] NOTION_DB_CREATIVE_ID 未設定: クリエ別同期スキップ")
+
+    dashboard = results.get("dashboard")
+    if not dashboard or not parent_page:
+        print("  [notion] dashboard データ無し or PAGE_ID 未設定: KPIカード同期スキップ")
+        return
+
+    # 安全弁: 月次コストが 0 のときは KPIカード書き込みをスキップ。
+    # ローカルテストや CSV だけのドライランで Notion 正解値を 0 で塗りつぶさないため。
+    monthly_cost = dashboard.get("monthly", {}).get("total", {}).get("cost", 0)
+    if monthly_cost <= 0:
+        print(f"  [notion] 月次コスト=¥{monthly_cost} (Meta API データ未取得?): KPIカード書き込みをスキップ")
+        return
+
+    sync_kpi_cards(notion, parent_page, dashboard)

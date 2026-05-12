@@ -61,6 +61,12 @@ def main():
         ms = results["month_summary"]
         print(f"  → 当月合計({ms['month']}): Cost ¥{ms['cost']:,} / 真CV {ms['true_cv']} / 真CPA ¥{ms['true_cpa']:,}")
 
+        # ダッシュボード 3軸(自社/外注/合計)内訳
+        dash = results.get("dashboard", {})
+        for scope_label, key in (("自社", "jisha"), ("外注", "gaichu"), ("合計", "total")):
+            m = dash.get("monthly", {}).get(key, {})
+            print(f"  → 月次{scope_label}: 真CV={m.get('true_cv',0)} / Cost=¥{m.get('cost',0):,} / 真CPA=¥{m.get('true_cpa',0):,}")
+
         # 4. Notion 同期
         print("[4/4] Notion 同期")
         sync_to_notion(results)
