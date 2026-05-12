@@ -1,16 +1,23 @@
 """Meta Marketing API でデイリー広告データを取得"""
 import os
 import time
+import json
 import requests
+from datetime import datetime, timezone, timedelta
 from typing import List, Dict
 
 GRAPH_API_VERSION = "v22.0"
+JST = timezone(timedelta(hours=9))
 
 
 def fetch_meta_data(account_id: str, label: str, days: int = 30) -> List[Dict]:
     """
     指定アカウントの広告インサイトを日次×広告レベルで取得。
     label: 'jisha' or 'gaichu' (集計時の識別用)
+
+    JST 基準で 「過去 N 日 〜 昨日 (JST)」 を取得する。
+    date_preset=last_30d は UTC/PDT 基準で動くため、 JST 基準でズレる。
+    明示的な time_range で 5/11 (JST) も確実に取得。
     """
     token = os.environ["FB_ACCESS_TOKEN"]
     base = f"https://graph.facebook.com/{GRAPH_API_VERSION}/act_{account_id}/insights"
@@ -27,11 +34,20 @@ def fetch_meta_data(account_id: str, label: str, days: int = 30) -> List[Dict]:
         "date_stop",
     ])
 
+    # JST 基準で過去 N 日 〜 昨日 (JST) を明示指定
+    now_jst = datetime.now(JST)
+    yesterday_jst = now_jst - timedelta(days=1)
+    since = (now_jst - timedelta(days=days)).strftime("%Y-%m-%d")
+    until = yesterday_jst.strftime("%Y-%m-%d")
+    time_range = json.dumps({"since": since, "until": until})
+
+    print(f"  [meta_fetch:{label}] time_range = {since} 〜 {until} (JST)")
+
     params = {
         "access_token": token,
         "fields": fields,
         "level": "ad",
-        "date_preset": f"last_{days}d",
+        "time_range": time_range,
         "time_increment": 1,
         "limit": 500,
     }
