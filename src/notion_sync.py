@@ -1,10 +1,38 @@
 """Notion API で DB1 (日次) / DB2 (クリエ別) / KPI カードを更新"""
 import os
+import time
 from datetime import datetime
 from notion_client import Client
+from notion_client.errors import RequestTimeoutError, HTTPResponseError, APIResponseError
 
 
 WEEKDAY_JA = "月火水木金土日"
+
+# Notion API は不安定で timeout/レート上限が出やすい。GitHub Actions の outbound 接続も
+# 遅延することがあるので timeout を伸ばす + 各呼び出しにリトライを噛ませる。
+NOTION_TIMEOUT_MS = 60_000  # 60 秒
+NOTION_RETRY_MAX = 4
+NOTION_RETRY_WAIT_BASE = 3  # 3, 6, 9, 12 秒で再試行
+
+
+def _notion_call(fn, *args, **kwargs):
+    """Notion API 呼び出しを timeout/HTTP エラー時にリトライ付きで実行。"""
+    last_err = None
+    for attempt in range(NOTION_RETRY_MAX):
+        try:
+            return fn(*args, **kwargs)
+        except (RequestTimeoutError, HTTPResponseError) as e:
+            last_err = e
+            wait = NOTION_RETRY_WAIT_BASE * (attempt + 1)
+            print(f"  [notion] {type(e).__name__} retry {attempt+1}/{NOTION_RETRY_MAX} (wait {wait}s): {str(e)[:80]}")
+            time.sleep(wait)
+        except APIResponseError as e:
+            # 429 (rate limit) など、Notion からの構造化エラー
+            last_err = e
+            wait = NOTION_RETRY_WAIT_BASE * (attempt + 1)
+            print(f"  [notion] APIResponseError code={e.code} retry {attempt+1}/{NOTION_RETRY_MAX} (wait {wait}s)")
+            time.sleep(wait)
+    raise last_err
 
 # 親ページ ID (ダッシュボード "meta広告 管理ダッシュボード")
 # 旧 Apps Script の syncKPICardsToNotion が更新していた KPI カード群がここに居る。
@@ -174,8 +202,9 @@ def _rich_text_of(block: dict) -> str:
 def sync_kpi_cards(notion: Client, page_id: str, dashboard: dict):
     """親ページ配下の KPIカード (heading_1 値) を更新。
     構造: heading_2 (月次/週次セクション) → column_list → column → callout → heading_1。
-    callout のラベルから (period, scope, metric) を推定して heading_1 の rich_text を上書き。"""
-    children = notion.blocks.children.list(block_id=page_id)
+    callout のラベルから (period, scope, metric) を推定して heading_1 の rich_text を上書き。
+    各 Notion API 呼び出しはリトライ付き (_notion_call) で実行。"""
+    children = _notion_call(notion.blocks.children.list, block_id=page_id)
 
     # 1. heading_2 でセクション境界を識別、column_list ID を集める
     sections_column_lists = []
@@ -197,9 +226,9 @@ def sync_kpi_cards(notion: Client, page_id: str, dashboard: dict):
     skipped = 0
     failed = 0
     for col_list_id in sections_column_lists:
-        cols = notion.blocks.children.list(block_id=col_list_id)
+        cols = _notion_call(notion.blocks.children.list, block_id=col_list_id)
         for col in cols["results"]:
-            callouts = notion.blocks.children.list(block_id=col["id"])
+            callouts = _notion_call(notion.blocks.children.list, block_id=col["id"])
             for c in callouts["results"]:
                 if c["type"] != "callout":
                     continue
@@ -214,12 +243,13 @@ def sync_kpi_cards(notion: Client, page_id: str, dashboard: dict):
                     continue
 
                 # callout 配下の heading_1 を更新
-                nested = notion.blocks.children.list(block_id=c["id"])
+                nested = _notion_call(notion.blocks.children.list, block_id=c["id"])
                 for n in nested["results"]:
                     if n["type"] != "heading_1":
                         continue
                     try:
-                        notion.blocks.update(
+                        _notion_call(
+                            notion.blocks.update,
                             block_id=n["id"],
                             heading_1={
                                 "rich_text": [{"type": "text", "text": {"content": new_value}}],
@@ -227,7 +257,7 @@ def sync_kpi_cards(notion: Client, page_id: str, dashboard: dict):
                         )
                         updated += 1
                     except Exception as e:
-                        print(f"  [KPI] {label!r} 更新失敗: {e}")
+                        print(f"  [KPI] {label!r} 更新失敗: {type(e).__name__} {str(e)[:100]}")
                         failed += 1
 
     # 更新マーカーの callout を最新時刻に
@@ -235,7 +265,8 @@ def sync_kpi_cards(notion: Client, page_id: str, dashboard: dict):
         for b in children["results"]:
             if b["type"] == "callout" and "BOT-AUTO-SYNC" in _rich_text_of(b):
                 stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
-                notion.blocks.update(
+                _notion_call(
+                    notion.blocks.update,
                     block_id=b["id"],
                     callout={
                         "rich_text": [
@@ -252,7 +283,9 @@ def sync_kpi_cards(notion: Client, page_id: str, dashboard: dict):
 
 def sync_to_notion(results: dict):
     """日次 + クリエ別 + KPIカード を Notion に同期"""
-    notion = Client(auth=os.environ["NOTION_TOKEN"])
+    # Notion API は GitHub Actions の outbound 接続経由だと timeout しやすいので
+    # client の timeout を明示的に伸ばす (デフォルトは短い)。
+    notion = Client(auth=os.environ["NOTION_TOKEN"], timeout_ms=NOTION_TIMEOUT_MS)
 
     db_daily = os.environ.get("NOTION_DB_DAILY_ID")
     db_creative = os.environ.get("NOTION_DB_CREATIVE_ID")
@@ -280,4 +313,7 @@ def sync_to_notion(results: dict):
         print(f"  [notion] 月次コスト=¥{monthly_cost} (Meta API データ未取得?): KPIカード書き込みをスキップ")
         return
 
+    # DB1/DB2 で大量に書き込んだ直後はレート制限で API レスポンスが遅延する。
+    # KPIカード書き込みに入る前に小休止して回避。
+    time.sleep(3)
     sync_kpi_cards(notion, parent_page, dashboard)
