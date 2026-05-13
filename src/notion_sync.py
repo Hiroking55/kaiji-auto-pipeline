@@ -101,8 +101,9 @@ def sync_daily_to_db1(notion: Client, db_id: str, daily_rows: list):
 
 
 def sync_creative_to_db2(notion: Client, db_id: str, creative_rows: list):
-    """クリエ別行を Notion DB2 に投入 (title: CR名)"""
-    existing = _get_existing_pages(notion, db_id, "CR名")
+    """クリエ別行を Notion DB2 に投入。
+    DB2 の title プロパティ名は「広告名」 (旧コードは「CR名」 で誤索引化 → 重複量産)。"""
+    existing = _get_existing_pages(notion, db_id, "広告名")
 
     created = updated = 0
     for row in creative_rows:
@@ -110,7 +111,7 @@ def sync_creative_to_db2(notion: Client, db_id: str, creative_rows: list):
         system_label = "自社" if row["system"] == "jisha" else ("外注" if row["system"] == "gaichu" else row["system"])
 
         properties = {
-            "CR名": {"title": [{"text": {"content": cr_name}}]},
+            "広告名": {"title": [{"text": {"content": cr_name}}]},
             "系統": {"select": {"name": system_label}},
             "Imp": {"number": row["imp"]},
             "Click": {"number": row["click"]},
