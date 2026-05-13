@@ -428,8 +428,8 @@ def _compute_dashboard(daily_rows: List[Dict]) -> Dict:
     today_jst = datetime.now(JST).date()
     cur_month = today_jst.strftime("%Y-%m")
 
-    # 当日 = 昨日(JST) (Meta API は yesterday まで返す)
-    today_disp = today_jst - timedelta(days=1)
+    # 当日 = 今日(JST) (include_today=True で Meta API も当日返す)
+    today_disp = today_jst
     today_str = today_disp.strftime("%Y-%m-%d")
 
     # 週次レンジ
