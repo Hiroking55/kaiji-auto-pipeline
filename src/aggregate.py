@@ -1,9 +1,69 @@
 """集計ロジック: Meta+Lstep → 日次合計 / 系統別 / クリエ別"""
+import re
 from typing import List, Dict, Tuple
 from datetime import datetime, date, timedelta, timezone
 from collections import defaultdict
 
 from lstep_parse import truthy
+
+
+def _normalize_for_match(s: str) -> str:
+    """ad_name と metaCR_suffix を比較しやすい形に正規化。
+    例: "Video_S-03_B_2026-04-21" → "s03b" / "metaCR_s-03-b" → "s03b" → 一致する。"""
+    if not s:
+        return ""
+    s = s.lower()
+    # 末尾日付削除: _20260421 / _20260420-1234 / _2026-04-21 / -2026-04-21
+    s = re.sub(r'[-_]?20\d{6}-?\d*$', '', s)
+    s = re.sub(r'[-_]?20\d{2}-\d{2}-\d{2}.*$', '', s)
+    # バージョンタグ_v01 等を末尾から削除
+    s = re.sub(r'[-_]v\d+.*$', '', s)
+    # 「 - コピー」 等を削除
+    s = re.sub(r'[-_\s]*-\s*コピー.*$', '', s)
+    # よくあるプレフィックス削除
+    s = re.sub(r'^(video|static|metacr|ノンタゲ_advantage\+_|ノンタゲ_)_?', '', s)
+    # 区切り削除
+    s = re.sub(r'[-_\s\.()（）]', '', s)
+    return s
+
+
+# 明示マッピング辞書(自動マッチで取れない外注/自社系を補完。 必要に応じて追加)
+# キー: ad_name を _normalize_for_match で正規化した文字列に含まれるフラグメント
+# 値: 対応する metaCR_xxx (Lstep カラム名と一致)
+EXPLICIT_AD_TO_METACR = {
+    # ----- 外注系 -----
+    "500万再生生み出す": "metaCR_500man-business",
+    "180万人が認めた": "metaCR_video-a1",
+    "本気で動画編集を仕事": "metaCR_honki-yatsu",
+    "熱量本気で動画編集": "metaCR_hannen-yatsu",
+    "熱量本気で仕事": "metaCR_hannen-yatsu",
+    "半年で動画編集を仕事": "metaCR_hannen-kakugo",
+    "副業に繋がる動画編集力を6ヶ月": "metaCR_hukugyo-6m",
+    "3ヶ月で未経験からプロクリエイター": "metaCR_video-b",
+    "無料説明会案内3つの特徴": "metaCR_setsumeikai-3tokucho",
+    "putti理由": "metaCR_putti-riyu",
+    "プッチさんバナー": "metaCR_putti banner",
+    # PR系(外注)
+    "video_pr_a": "metaCR_pr-a",
+    "video_pr_b": "metaCR_pr-b",
+    "video_pr_c": "metaCR_pr-c",
+    "pra案": "metaCR_pr-a",
+    "pr副業": "metaCR_video-a1",
+    # カイジ編集局PR.ver 系 (外注 たけまる)
+    "カイジ編集局prverc": "metaCR_takemaru-c-C",
+    "カイジ編集局prvera": "metaCR_takemaru-c-C",
+    "カイジ編集局pr冒頭3full": "metaCR_video-c",
+    "カイジ編集局pr冒頭2full": "metaCR_video-b",
+    # ----- 自社系 (ノンタゲ_Advantage+_) -----
+    "ai消える": "metaCR_AIkieru",
+    "副業ai": "metaCR_hukugyouAI",
+    "ugcキム": "metaCR_UGCkim",
+    "ugcishii": "metaCR_UGCishii",
+    "たけまるc": "metaCR_takemaru-c",
+    "puttibanner": "metaCR_putti banner",
+    # 自社 AI_PR 系
+    "ai_pr_副業": "metaCR_hukugyouAI",
+}
 
 JST = timezone(timedelta(hours=9))
 
@@ -208,18 +268,43 @@ def aggregate(meta_jisha: List[Dict], meta_gaichu: List[Dict], lstep: List[Dict]
             if col.startswith("metaCR_"):
                 metacr_columns.append(col)
 
-    # metaCR_<suffix> → CR名 のマッピング: CR名 が "metaCR_xxx" を含むか、 完全に xxx と一致するか で判定
-    # シンプル化: CR名末尾の英数字 (suffix) と metaCR_<suffix> をマッチング
+    # ad_name → metaCR_xxx のマッピング (多段アプローチ):
+    #   1. 正規化マッチ(日付/プレフィックス/区切り削除して比較)
+    #   2. 明示辞書(EXPLICIT_AD_TO_METACR)で補完
     cr_to_metacr = {}
+    unmatched_cr = []
     for cr_name in creative.keys():
+        norm_cr = _normalize_for_match(cr_name)
+        matched = False
+        # Step 1: 正規化マッチ
         for col in metacr_columns:
             suffix = col.replace("metaCR_", "")
-            # CR名 が suffix を含む / suffix が CR名 を含む / CR名 == suffix
-            if (suffix and (suffix in cr_name or cr_name in suffix or
-                            suffix.lower() == cr_name.lower())):
+            norm_suffix = _normalize_for_match(suffix)
+            if not norm_cr or not norm_suffix:
+                continue
+            # 完全一致 or 含むマッチ(短い方が4文字以上)
+            if norm_cr == norm_suffix or \
+               (len(norm_suffix) >= 4 and norm_suffix in norm_cr) or \
+               (len(norm_cr) >= 4 and norm_cr in norm_suffix):
                 cr_to_metacr[cr_name] = col
                 creative[cr_name]["suffix"] = suffix
+                matched = True
                 break
+        # Step 2: 明示辞書で補完
+        if not matched:
+            for keyword, target_metacr in EXPLICIT_AD_TO_METACR.items():
+                if keyword in norm_cr and target_metacr in metacr_columns:
+                    cr_to_metacr[cr_name] = target_metacr
+                    creative[cr_name]["suffix"] = target_metacr.replace("metaCR_", "")
+                    matched = True
+                    break
+        if not matched:
+            unmatched_cr.append(cr_name)
+
+    if unmatched_cr:
+        print(f"  [aggregate] クリエ別マッチング: ad_name で metaCR 未対応 {len(unmatched_cr)} 件 (真CV=0 になります)")
+        for cn in unmatched_cr[:10]:
+            print(f"    - {cn[:60]}")
 
     # CR別 真CV カウント
     for lrow in lstep:

@@ -101,9 +101,33 @@ def sync_daily_to_db1(notion: Client, db_id: str, daily_rows: list):
 
 
 def sync_creative_to_db2(notion: Client, db_id: str, creative_rows: list):
-    """クリエ別行を Notion DB2 に投入。
-    DB2 の title プロパティ名は「広告名」 (旧コードは「CR名」 で誤索引化 → 重複量産)。"""
-    existing = _get_existing_pages(notion, db_id, "広告名")
+    """クリエ別行を Notion DB2 に投入 (1 行 = 広告名 × 月)。
+
+    DB2 の title プロパティ名は「広告名」 (旧コードは「CR名」 で誤索引化 → 重複量産)。
+    索引化は「広告名 + 月」 の複合キー(これで月別累計が独立して保持される)。
+    "月" を必須セット(空欄だと月ビューから消える事故防止)。
+    """
+    cur_month = datetime.now(JST).strftime("%Y-%m")
+
+    # 既存ページを (広告名, 月) の複合キーで索引化
+    existing = {}
+    cursor = None
+    while True:
+        kwargs = {"database_id": db_id, "page_size": 100}
+        if cursor:
+            kwargs["start_cursor"] = cursor
+        resp = _notion_call(notion.databases.query, **kwargs)
+        for page in resp["results"]:
+            props = page["properties"]
+            title_rt = props.get("広告名", {}).get("title", [])
+            title = "".join(rt.get("plain_text", "") for rt in title_rt).strip()
+            month_sel = props.get("月", {}).get("select")
+            month = (month_sel or {}).get("name", "")
+            if title:
+                existing[(title, month)] = page["id"]
+        if not resp.get("has_more"):
+            break
+        cursor = resp.get("next_cursor")
 
     created = updated = 0
     for row in creative_rows:
@@ -113,6 +137,7 @@ def sync_creative_to_db2(notion: Client, db_id: str, creative_rows: list):
         properties = {
             "広告名": {"title": [{"text": {"content": cr_name}}]},
             "系統": {"select": {"name": system_label}},
+            "月": {"select": {"name": cur_month}},  # 月を必ずセット (空欄事故防止)
             "Imp": {"number": row["imp"]},
             "Click": {"number": row["click"]},
             "Cost": {"number": row["cost"]},
@@ -122,16 +147,17 @@ def sync_creative_to_db2(notion: Client, db_id: str, creative_rows: list):
         }
 
         try:
-            if cr_name in existing:
-                notion.pages.update(page_id=existing[cr_name], properties=properties)
+            key = (cr_name, cur_month)
+            if key in existing:
+                _notion_call(notion.pages.update, page_id=existing[key], properties=properties)
                 updated += 1
             else:
-                notion.pages.create(parent={"database_id": db_id}, properties=properties)
+                _notion_call(notion.pages.create, parent={"database_id": db_id}, properties=properties)
                 created += 1
         except Exception as e:
-            print(f"  [notion DB2] {cr_name} 失敗: {e}")
+            print(f"  [notion DB2] {cr_name} 失敗: {type(e).__name__} {str(e)[:80]}")
 
-    print(f"  [notion DB2] 新規 {created} / 更新 {updated} / 合計 {len(creative_rows)} 件")
+    print(f"  [notion DB2] 月={cur_month} | 新規 {created} / 更新 {updated} / 合計 {len(creative_rows)} 件")
 
 
 # ========== KPI カード 同期 ==========
