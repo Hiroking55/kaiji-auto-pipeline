@@ -63,6 +63,13 @@ EXPLICIT_AD_TO_METACR = {
     "puttibanner": "metaCR_putti banner",
     # 自社 AI_PR 系
     "ai_pr_副業": "metaCR_hukugyouAI",
+    # 自社 yusaku (勇作さん) 系: CR名 = ノンタゲ_Advantage+_yusaku_bannerXX
+    "yusaku_banner01": "metaCR_yusaku-01",
+    "yusaku_banner02": "metaCR_yusaku-02",
+    "yusaku_banner04": "metaCR_yusaku-04",
+    "yusaku_banner05": "metaCR_yusaku-05",
+    "yusaku_banner06": "metaCR_yusaku-06",
+    "yusaku_banner07": "metaCR_yusaku-07",
 }
 
 JST = timezone(timedelta(hours=9))
