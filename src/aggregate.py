@@ -74,6 +74,14 @@ EXPLICIT_AD_TO_METACR = {
     "個別マップ01": "metaCR_roadmap-01",
     "個別マップ02": "metaCR_roadmap-02",
     "個別マップ03": "metaCR_roadmap-03",
+    # 自社 田舎 系 (kaiji-inaka): CR名 = ノンタゲ_Advantage+-田舎-XX (ハイフン揺れあり、normalize後に "田舎0X" でマッチ)
+    "田舎01": "metaCR_kaiji-inaka-01",
+    "田舎02": "metaCR_kaiji-inaka-02",
+    "田舎03": "metaCR_kaiji-inaka-03",
+    # 自社 質問会 系 (kaiji-qa): CR名 = ノンタゲ_Advantage+_質問会XX
+    "質問会01": "metaCR_kaiji-qa-01",
+    "質問会02": "metaCR_kaiji-qa-02",
+    "質問会03": "metaCR_kaiji-qa-03",
 }
 
 JST = timezone(timedelta(hours=9))
