@@ -70,6 +70,10 @@ EXPLICIT_AD_TO_METACR = {
     "yusaku_banner05": "metaCR_yusaku-05",
     "yusaku_banner06": "metaCR_yusaku-06",
     "yusaku_banner07": "metaCR_yusaku-07",
+    # 自社 個別ロードマップ作成会 系: CR名 = ノンタゲ_Advantage+_個別マップXX
+    "個別マップ01": "metaCR_roadmap-01",
+    "個別マップ02": "metaCR_roadmap-02",
+    "個別マップ03": "metaCR_roadmap-03",
 }
 
 JST = timezone(timedelta(hours=9))
