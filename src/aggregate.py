@@ -358,10 +358,27 @@ def aggregate(meta_jisha: List[Dict], meta_gaichu: List[Dict], lstep: List[Dict]
             print(f"    - {cn[:60]}")
 
     # CR別 真CV カウント
+    # 🚨 二重計上防止: 複数の CR名 が同一 metaCR タグにマップされる場合 (= リネーム残存 /
+    #    A/Bバリアント / 名前揺れ 等)、 そのタグの真CV は「cost 最大の CR 1つ」 だけに帰属させる。
+    #    (旧実装は全 CR に加算 → 同タグ複数CRで真CV二重計上事故。 2026-05 修正)
+    col_to_crs = defaultdict(list)
+    for cr_name, metacr_col in cr_to_metacr.items():
+        col_to_crs[metacr_col].append(cr_name)
+    col_to_primary = {
+        col: max(names, key=lambda n: creative[n]["cost"])
+        for col, names in col_to_crs.items()
+    }
+    # 副次CR (= primary 以外) はタグ重複なので真CV対象から外す旨をログ
+    for col, names in col_to_crs.items():
+        if len(names) > 1:
+            primary = col_to_primary[col]
+            others = [n for n in names if n != primary]
+            print(f"  [aggregate] 同一タグ {col} に {len(names)} CR → 真CVは '{primary[:30]}' に帰属 / 除外: {[o[:20] for o in others]}")
+
     for lrow in lstep:
-        for cr_name, metacr_col in cr_to_metacr.items():
-            if truthy(lrow.get(metacr_col)):
-                creative[cr_name]["true_cv"] += 1
+        for col, primary in col_to_primary.items():
+            if truthy(lrow.get(col)):
+                creative[primary]["true_cv"] += 1
 
     creative_rows = []
     for cr_name, data in creative.items():
