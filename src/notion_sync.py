@@ -159,6 +159,25 @@ def sync_creative_to_db2(notion: Client, db_id: str, creative_rows: list):
 
     print(f"  [notion DB2] 月={cur_month} | 新規 {created} / 更新 {updated} / 合計 {len(creative_rows)} 件")
 
+    # L5: 当月の孤児行を自動アーカイブ (= CRリネーム等で旧名行が二重計上になるのを自己修復)
+    #     現在の creative_rows に無い当月行 = Meta から消えた旧名 → trash へ (Notion上は復元可能)
+    #     安全ガード: creative_rows が異常に少ない時 (= Meta取得失敗の可能性) はスキップして誤アーカイブを防ぐ
+    if len(creative_rows) >= 20:
+        current_names = {row["cr_name"] for row in creative_rows}
+        archived = 0
+        for (title, month), page_id in existing.items():
+            if month == cur_month and title not in current_names:
+                try:
+                    _notion_call(notion.pages.update, page_id=page_id, archived=True)
+                    archived += 1
+                    print(f"  [notion DB2] 孤児アーカイブ: {title}")
+                except Exception as e:
+                    print(f"  [notion DB2] アーカイブ失敗 {title}: {type(e).__name__} {str(e)[:60]}")
+        if archived:
+            print(f"  [notion DB2] 当月孤児行 {archived} 件をアーカイブ (= 旧CR名の二重計上を解消)")
+    else:
+        print(f"  [notion DB2] creative_rows={len(creative_rows)} が少数のため孤児クリーンアップをスキップ (誤アーカイブ防止)")
+
 
 # ========== KPI カード 同期 ==========
 
