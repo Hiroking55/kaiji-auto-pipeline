@@ -99,6 +99,26 @@ def fetch_meta_data(account_id: str, label: str, days: int = 30, include_today: 
         retry = 0
         url = data.get("paging", {}).get("next")
 
+    # L1: ページング重複の防御的除去 (= 同一 ad_id × date_start が複数回返るケース対策)
+    #     cursor ページングでも稀に重複が起きる。 重複したまま合算すると spend が膨張する。
+    seen = set()
+    deduped = []
+    dup_count = 0
+    for row in rows:
+        key = (row.get("ad_id"), row.get("date_start"))
+        if key in seen:
+            dup_count += 1
+            continue
+        seen.add(key)
+        deduped.append(row)
+    if dup_count:
+        print(f"  [meta_fetch:{label}] ⚠️ 重複行 {dup_count} 件を除去 ({len(rows)}→{len(deduped)} 行)")
+    rows = deduped
+
+    # L4: 監査ログ (= 広告レベル合算 spend。 後で account_total と突合)
+    total_spend = sum(float(r.get("spend") or 0) for r in rows)
+    print(f"  [meta_fetch:{label}] 広告レベル合算 spend = ¥{total_spend:,.0f} ({len(rows)} 行)")
+
     for row in rows:
         row["system"] = label  # 'jisha' or 'gaichu'
 
@@ -116,3 +136,35 @@ def fetch_meta_data(account_id: str, label: str, days: int = 30, include_today: 
         print(f"  [meta_fetch:{label}] actions が全行で空でした")
 
     return rows
+
+
+def fetch_account_total(account_id: str, label: str, days: int = 30, include_today: bool = True) -> float:
+    """L2: アカウントレベルの総消化金額を取得 (= 広告レベル合算の整合性検証用 ground truth)。
+    fetch_meta_data と同一 time_range で level=account を取得し、 単一の spend 合計を返す。
+    取得失敗時は -1.0 (= 検証スキップの印)。"""
+    token = os.environ["FB_ACCESS_TOKEN"]
+    base = f"https://graph.facebook.com/{GRAPH_API_VERSION}/act_{account_id}/insights"
+    now_jst = datetime.now(JST)
+    until_jst = now_jst if include_today else now_jst - timedelta(days=1)
+    since = (now_jst - timedelta(days=days)).strftime("%Y-%m-%d")
+    until = until_jst.strftime("%Y-%m-%d")
+    params = {
+        "access_token": token,
+        "fields": "spend",
+        "level": "account",
+        "time_range": json.dumps({"since": since, "until": until}),
+        "limit": 1,
+    }
+    try:
+        r = requests.get(base, params=params, timeout=60)
+        data = r.json()
+        if "error" in data:
+            print(f"  [account_total:{label}] エラー: {data['error'].get('message','')[:80]}")
+            return -1.0
+        rows = data.get("data", [])
+        total = sum(float(x.get("spend") or 0) for x in rows)
+        print(f"  [account_total:{label}] アカウント実額 = ¥{total:,.0f} ({since}〜{until})")
+        return total
+    except Exception as e:
+        print(f"  [account_total:{label}] 取得失敗: {type(e).__name__} {str(e)[:80]}")
+        return -1.0

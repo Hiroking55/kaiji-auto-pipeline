@@ -22,7 +22,7 @@ except ImportError:
 # src/ を import path に追加
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from meta_fetch import fetch_meta_data
+from meta_fetch import fetch_meta_data, fetch_account_total
 from lstep_parse import parse_lstep_csv
 from aggregate import aggregate
 from notion_sync import sync_to_notion
@@ -50,6 +50,12 @@ def main():
         gaichu = fetch_meta_data(os.environ["FB_AD_ACCOUNT_GAICHU"], "gaichu")
         print(f"  → {len(gaichu)} 行")
 
+        # L2: アカウント実額 (ground truth) を取得 — 広告レベル合算との突合に使う
+        acct_total = {
+            "jisha": fetch_account_total(os.environ["FB_AD_ACCOUNT_JISHA"], "jisha"),
+            "gaichu": fetch_account_total(os.environ["FB_AD_ACCOUNT_GAICHU"], "gaichu"),
+        }
+
         # 2. Lstep CSV
         print(f"[2/4] Lstep CSV: {lstep_csv}")
         lstep = parse_lstep_csv(lstep_csv)
@@ -67,6 +73,40 @@ def main():
             m = dash.get("monthly", {}).get(key, {})
             print(f"  → 月次{scope_label}: 真CV={m.get('true_cv',0)} / Cost=¥{m.get('cost',0):,} / 真CPA=¥{m.get('true_cpa',0):,}")
 
+        # ===== L2: アカウント実額 vs 広告レベル合算 の整合性検証 =====
+        # 乖離が大きい = 集計が実額とズレている (= ダッシュボードの数字が信用できない)
+        recon_lines = []
+        recon_alert = False
+        cost_by_sys = results.get("creative_cost_by_system", {})
+        for key, label in (("jisha", "自社"), ("gaichu", "外注")):
+            agg_cost = cost_by_sys.get(key, 0)
+            real = acct_total.get(key, -1.0)
+            if real is None or real < 0:
+                recon_lines.append(f"  {label}: 実額取得失敗 (検証スキップ) / 広告合算 ¥{agg_cost:,}")
+                continue
+            diff = agg_cost - real
+            pct = (diff / real * 100) if real > 0 else 0
+            flag = "⚠️" if abs(pct) > 2 else "✅"
+            if abs(pct) > 2:
+                recon_alert = True
+            recon_lines.append(
+                f"  {flag} {label}: 広告合算 ¥{agg_cost:,} vs アカウント実額 ¥{real:,.0f} "
+                f"(乖離 {pct:+.1f}%)"
+            )
+        recon_text = "📊 整合性検証 (広告合算 vs Meta実額)\n" + "\n".join(recon_lines)
+        print(recon_text)
+
+        # ===== L3: 未マッチ高消化 CR 警告 =====
+        unmatched = results.get("unmatched_high_cost", [])
+        unmatched_text = ""
+        if unmatched:
+            lines = [f"  - {u['cr_name'][:40]} ({u['system']}): ¥{u['cost']:,}" for u in unmatched[:15]]
+            unmatched_text = (
+                f"🚨 未マッチ高消化CR {len(unmatched)}件 (= metaCR紐付け漏れ → 真CV計上されず)\n"
+                + "\n".join(lines)
+            )
+            print(unmatched_text)
+
         # 4. Notion 同期
         print("[4/4] Notion 同期")
         sync_to_notion(results)
@@ -74,11 +114,15 @@ def main():
         # 完了通知
         end = datetime.now(JST)
         elapsed = (end - start).seconds
+        head = "⚠️ パイプライン完了 (要確認)" if (recon_alert or unmatched) else "✅ パイプライン完了"
         msg = (
-            f"✅ パイプライン完了 ({stamp}, {elapsed}秒)\n"
+            f"{head} ({stamp}, {elapsed}秒)\n"
             f"当月: Cost ¥{ms['cost']:,} / 真CV {ms['true_cv']} / 真CPA ¥{ms['true_cpa']:,}\n"
-            f"日次行: {len(results['daily'])} / クリエ別: {len(results['creative'])}"
+            f"日次行: {len(results['daily'])} / クリエ別: {len(results['creative'])}\n"
+            f"\n{recon_text}"
         )
+        if unmatched_text:
+            msg += f"\n\n{unmatched_text}"
         notify(msg)
         print(f"[{end.strftime('%Y-%m-%d %H:%M:%S JST')}] === 完了 ({elapsed}秒) ===")
 

@@ -380,6 +380,26 @@ def aggregate(meta_jisha: List[Dict], meta_gaichu: List[Dict], lstep: List[Dict]
         })
     creative_rows.sort(key=lambda x: -x["cost"])  # コスト降順
 
+    # L3: 未マッチかつ高消化の CR を抽出 (= 新規CRの metaCR 紐付け漏れを即検知するため)
+    #     消化 >= ¥1,000 なのに真CV未対応 = 辞書追加/命名ルール漏れの可能性が高い
+    UNMATCHED_ALERT_THRESHOLD = 1000
+    unmatched_set = set(unmatched_cr)
+    unmatched_high_cost = sorted(
+        [
+            {"cr_name": r["cr_name"], "system": r["system"], "cost": r["cost"]}
+            for r in creative_rows
+            if r["cr_name"] in unmatched_set and r["cost"] >= UNMATCHED_ALERT_THRESHOLD
+        ],
+        key=lambda x: -x["cost"],
+    )
+
+    # L2: 広告レベル合算 spend を 系統別に集計 (= main.py で account_total と突合)
+    creative_cost_by_system = {"jisha": 0, "gaichu": 0}
+    for r in creative_rows:
+        sysk = "jisha" if r["system"] == "jisha" else ("gaichu" if r["system"] == "gaichu" else None)
+        if sysk:
+            creative_cost_by_system[sysk] += r["cost"]
+
     # ===== 5. 当月合計 (KPI カード用) =====
     now = datetime.now()
     cur_month = now.strftime("%Y-%m")
@@ -405,6 +425,8 @@ def aggregate(meta_jisha: List[Dict], meta_gaichu: List[Dict], lstep: List[Dict]
         "creative": creative_rows,
         "month_summary": month_summary,
         "dashboard": dashboard,
+        "unmatched_high_cost": unmatched_high_cost,           # L3: 未マッチ高消化CR
+        "creative_cost_by_system": creative_cost_by_system,   # L2: 系統別 広告合算spend
     }
 
 
