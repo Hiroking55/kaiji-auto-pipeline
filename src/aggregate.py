@@ -16,8 +16,9 @@ def _normalize_for_match(s: str) -> str:
     # 末尾日付削除: _20260421 / _20260420-1234 / _2026-04-21 / -2026-04-21
     s = re.sub(r'[-_]?20\d{6}-?\d*$', '', s)
     s = re.sub(r'[-_]?20\d{2}-\d{2}-\d{2}.*$', '', s)
-    # バージョンタグ_v01 等を末尾から削除
-    s = re.sub(r'[-_]v\d+.*$', '', s)
+    # バージョンタグ_v01 等を「末尾のみ」削除 (= 末尾 _v2 は消すが、-v2-01 のような中間バージョンは残す。
+    #  旧実装 [-_]v\d+.*$ は roadmap-v2-01 を "roadmap" に潰して roadmap-01〜03 と衝突させていた)
+    s = re.sub(r'[-_]v\d+$', '', s)
     # 「 - コピー」 等を削除
     s = re.sub(r'[-_\s]*-\s*コピー.*$', '', s)
     # よくあるプレフィックス削除
@@ -54,34 +55,65 @@ EXPLICIT_AD_TO_METACR = {
     "カイジ編集局prvera": "metaCR_takemaru-c-C",
     "カイジ編集局pr冒頭3full": "metaCR_video-c",
     "カイジ編集局pr冒頭2full": "metaCR_video-b",
-    # ----- 自社系 (ノンタゲ_Advantage+_) -----
+    # ----- 自社系 -----
+    # 🚨 重要: キーは _normalize_for_match() 後の文字列に対する substring。
+    #   normalize は区切り(_ - スペース . ())を全削除するので、キーにも区切りを含めてはいけない。
+    #   (旧実装は "yusaku_banner01" 等 underscore入りキーで、normalize後 "yusakubanner01" に
+    #    マッチせず 真CV=0 計上事故になっていた。2026-05 全面修正)
+    # AI / UGC / プッチ / たけまる
     "ai消える": "metaCR_AIkieru",
     "副業ai": "metaCR_hukugyouAI",
     "ugcキム": "metaCR_UGCkim",
-    "ugcishii": "metaCR_UGCishii",
+    "ugc石井": "metaCR_UGCishii",          # 修正: CR名は日本語表記「UGC石井」
     "たけまるc": "metaCR_takemaru-c",
+    "プッチbanner": "metaCR_putti banner",  # 修正: CR名は日本語表記「プッチbanner」
     "puttibanner": "metaCR_putti banner",
-    # 自社 AI_PR 系
-    "ai_pr_副業": "metaCR_hukugyouAI",
-    # 自社 yusaku (勇作さん) 系: CR名 = ノンタゲ_Advantage+_yusaku_bannerXX
-    "yusaku_banner01": "metaCR_yusaku-01",
-    "yusaku_banner02": "metaCR_yusaku-02",
-    "yusaku_banner04": "metaCR_yusaku-04",
-    "yusaku_banner05": "metaCR_yusaku-05",
-    "yusaku_banner06": "metaCR_yusaku-06",
-    "yusaku_banner07": "metaCR_yusaku-07",
-    # 自社 個別ロードマップ作成会 系: CR名 = ノンタゲ_Advantage+_個別マップXX
+    "aipr副業": "metaCR_hukugyouAI",        # 修正: 区切り無し (旧 "ai_pr_副業")
+    # yusaku (勇作さん): CR名 = ノンタゲ_Advantage+_yusaku_bannerXX(_v2) → normalize "yusakubannerXX"
+    "yusakubanner01": "metaCR_yusaku-01",
+    "yusakubanner02": "metaCR_yusaku-02",
+    "yusakubanner03": "metaCR_yusaku-03",
+    "yusakubanner04": "metaCR_yusaku-04",
+    "yusakubanner05": "metaCR_yusaku-05",
+    "yusakubanner06": "metaCR_yusaku-06",
+    "yusakubanner07": "metaCR_yusaku-07",
+    # 個別ロードマップ作成会: CR名 = ノンタゲ_Advantage+_個別マップXX
     "個別マップ01": "metaCR_roadmap-01",
     "個別マップ02": "metaCR_roadmap-02",
     "個別マップ03": "metaCR_roadmap-03",
-    # 自社 田舎 系 (kaiji-inaka): CR名 = ノンタゲ_Advantage+-田舎-XX (ハイフン揺れあり、normalize後に "田舎0X" でマッチ)
+    # 田舎 (kaiji-inaka)
     "田舎01": "metaCR_kaiji-inaka-01",
     "田舎02": "metaCR_kaiji-inaka-02",
     "田舎03": "metaCR_kaiji-inaka-03",
-    # 自社 質問会 系 (kaiji-qa): CR名 = ノンタゲ_Advantage+_質問会XX
+    # 質問会 (kaiji-qa)
     "質問会01": "metaCR_kaiji-qa-01",
     "質問会02": "metaCR_kaiji-qa-02",
     "質問会03": "metaCR_kaiji-qa-03",
+    # === 2026-05 追加分 (= これまで辞書未登録で 真CV=0 計上事故になっていた) ===
+    # INT (インタビュー): CR名 = meta_INT0520_PR / meta_INT0522_PR → normalize "metaint05XXpr"
+    "int0520": "metaCR_int-01",
+    "int0522": "metaCR_int-02",
+    # AI プレゼント: CR名 = meta_AI_プレゼント → normalize "metaaiプレゼント"
+    "aiプレゼント": "metaCR_ai-present-01",
+    # マイアミ: CR名 = マイアミ_0521 → normalize "マイアミ0521"
+    "マイアミ": "metaCR_miami-01",
+    # procreator: CR名 = meta_procreator → normalize "metaprocreator"
+    "procreator": "metaCR_procreator-01",
+    # kaiji-reel: CR名 = kaiji_new_reel → normalize "kaijinewreel"
+    "kaijinewreel": "metaCR_kaiji-reel-01",
+    # newbanner: CR名 = kaiji_newbanner_0519_XX → normalize "kaijinewbanner0519XX"
+    "newbanner051901": "metaCR_newbanner-01",
+    "newbanner051902": "metaCR_newbanner-02",
+    "newbanner051903": "metaCR_newbanner-03",
+    "newbanner051904": "metaCR_newbanner-04",
+    "newbanner051905": "metaCR_newbanner-05",
+    "newbanner0519price01": "metaCR_newbanner-price-01",
+    "newbanner0519price02": "metaCR_newbanner-price-02",
+    "newbanner0519price03": "metaCR_newbanner-price-03",
+    "newbanner0519price04": "metaCR_newbanner-price-04",
+    # roadmap-v2 (= 未配信だが先行登録): CR名 = roadmap-v2-0X → normalize "roadmapv20X"
+    "roadmapv201": "metaCR_roadmap-v2-01",
+    "roadmapv202": "metaCR_roadmap-v2-02",
 }
 
 JST = timezone(timedelta(hours=9))
