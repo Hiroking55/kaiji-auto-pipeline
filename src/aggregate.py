@@ -319,6 +319,28 @@ def aggregate(meta_jisha: List[Dict], meta_gaichu: List[Dict], lstep: List[Dict]
             if col.startswith("metaCR_"):
                 metacr_columns.append(col)
 
+    # 4-2b. マルチチャネルCVタグ (= TikTok/LINE/X/ネイティブ)。
+    # 命名規則: <channel>CR_<suffix> (例: tiktokCR_01 / lineCR_01 / xCR_01 / nativeCR_01)。
+    # Meta(metaCR_)は広告API統合済なのでクリエ別マッチングで処理。 それ以外のチャネルは
+    # 広告コストAPIが未統合のため、 ここでは「チャネル別 真CV件数」 のみ独立集計する
+    # (= タグを metaCR_ にしないと計上漏れになる事故を防ぐ + 将来コストAPI統合時の土台)。
+    NON_META_CR_RE = re.compile(r'^(tiktok|line|x|native)CR_')
+    channel_cv_columns = {}  # channel -> [Lstepカラム名]
+    if lstep:
+        for col in lstep[0].keys():
+            m = NON_META_CR_RE.match(col)
+            if m:
+                channel_cv_columns.setdefault(m.group(1), []).append(col)
+    channel_cv = {}  # channel -> 真CV件数
+    for ch, cols in channel_cv_columns.items():
+        cnt = 0
+        for lrow in lstep:
+            if any(truthy(lrow.get(c)) for c in cols):
+                cnt += 1
+        channel_cv[ch] = cnt
+    if channel_cv:
+        print(f"  [aggregate] 非Metaチャネル真CV (コストAPI未統合・件数のみ): {channel_cv}")
+
     # ad_name → metaCR_xxx のマッピング (多段アプローチ):
     #   1. 正規化マッチ(日付/プレフィックス/区切り削除して比較)
     #   2. 明示辞書(EXPLICIT_AD_TO_METACR)で補完
@@ -444,6 +466,7 @@ def aggregate(meta_jisha: List[Dict], meta_gaichu: List[Dict], lstep: List[Dict]
         "dashboard": dashboard,
         "unmatched_high_cost": unmatched_high_cost,           # L3: 未マッチ高消化CR
         "creative_cost_by_system": creative_cost_by_system,   # L2: 系統別 広告合算spend
+        "channel_cv": channel_cv,                             # マルチチャネル 真CV (非Meta: tiktok/line/x/native)
     }
 
 
