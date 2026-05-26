@@ -13,7 +13,7 @@ export default function BossCard({ boss }: BossCardProps) {
   const hpPercentage = getHpPercentage(boss);
 
   return (
-    <Link href={`/battle/${boss.id}`} className="block">
+    <Link href={`/battle?id=${boss.id}`} className="block">
       <div
         className={`rounded-xl p-4 border transition-all duration-200 ${
           boss.is_defeated

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getBossDetail } from '@/lib/client-actions';
 import { formatCurrency } from '@/lib/game-engine';
@@ -22,10 +22,10 @@ function hpPercent(boss: Boss): number {
   return Math.max(0, Math.min(100, Math.round((boss.current_hp / boss.original_hp) * 100)));
 }
 
-export default function BattlePage() {
+function BattleContent() {
   const router = useRouter();
-  const params = useParams();
-  const id = params.id as string;
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id') || '';
   const [detail, setDetail] = useState<BossDetailData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -200,5 +200,20 @@ export default function BattlePage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function BattlePage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-4xl mb-3 animate-pulse">&#x2694;&#xFE0F;</p>
+          <p className="text-sm" style={{ color: '#8888aa' }}>読み込み中...</p>
+        </div>
+      </div>
+    }>
+      <BattleContent />
+    </Suspense>
   );
 }
