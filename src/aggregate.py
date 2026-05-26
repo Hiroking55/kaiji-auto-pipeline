@@ -119,9 +119,24 @@ EXPLICIT_AD_TO_METACR = {
 JST = timezone(timedelta(hours=9))
 
 # KPI ダッシュボード用パラメータ (Notion 親ページの KPIカードに反映)
-DEFAULT_TARGET_CV = 600       # 月次真CV 目標
+# 未定義の月は DEFAULT_* にフォールバック。 月別に上書きしたい場合は下の dict に追加。
+DEFAULT_TARGET_CV = 470       # 月次真CV 目標
 DEFAULT_BUDGET = 1_800_000    # 月次予算 (¥)
 DEFAULT_CPA_THRESHOLD = 3_000  # 真CPA 基準 (¥)
+
+# 月別オーバーライド (キー = "YYYY-MM")
+MONTHLY_TARGET_CV = {
+    "2026-05": 470,
+    "2026-06": 1633,      # 6月マルチチャネルスケール計画
+}
+MONTHLY_BUDGET = {
+    "2026-05": 1_800_000,
+    "2026-06": 6_532_000,  # 6月全チャネル合計予算
+}
+MONTHLY_CPA_THRESHOLD = {
+    "2026-05": 3_000,
+    "2026-06": 4_000,      # 6月 目標CPA
+}
 
 
 # 系統①(流入経路タグ): Lstep CSV のヘッダーは全角『（）』だが、
@@ -576,9 +591,13 @@ def _compute_dashboard(daily_rows: List[Dict]) -> Dict:
             "total": _accumulate(filter_rows("合計", predicate)),
         }
 
+    target_cv = MONTHLY_TARGET_CV.get(cur_month, DEFAULT_TARGET_CV)
+    budget = MONTHLY_BUDGET.get(cur_month, DEFAULT_BUDGET)
+    cpa_threshold = MONTHLY_CPA_THRESHOLD.get(cur_month, DEFAULT_CPA_THRESHOLD)
+
     achieved = summary["monthly"]["total"]["true_cv"]
-    achievement_rate = (achieved / DEFAULT_TARGET_CV * 100) if DEFAULT_TARGET_CV > 0 else 0
-    remaining = max(0, DEFAULT_TARGET_CV - achieved)
+    achievement_rate = (achieved / target_cv * 100) if target_cv > 0 else 0
+    remaining = max(0, target_cv - achieved)
     days_left = _month_days_remaining(today_jst)
 
     return {
@@ -590,9 +609,9 @@ def _compute_dashboard(daily_rows: List[Dict]) -> Dict:
         "month_days_left": days_left,
         "achievement_rate": round(achievement_rate, 1),
         "remaining_target": remaining,
-        "target_cv": DEFAULT_TARGET_CV,
-        "budget": DEFAULT_BUDGET,
-        "cpa_threshold": DEFAULT_CPA_THRESHOLD,
+        "target_cv": target_cv,
+        "budget": budget,
+        "cpa_threshold": cpa_threshold,
         "monthly": summary["monthly"],
         "weekly": summary["weekly"],
         "today": summary["today"],
