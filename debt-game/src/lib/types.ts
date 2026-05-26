@@ -82,6 +82,9 @@ export interface DashboardData {
   originalTotalDebt: number;
   previousDayDebt: number | null;
   monthlyPaid: number;
+  monthlyPaymentCount: number;
+  monthlyXpEarned: number;
+  largestHitThisMonth: number;
   dailyBudget: number;
   monthlyBudget: number;
   estimatedPayoff: string | null;

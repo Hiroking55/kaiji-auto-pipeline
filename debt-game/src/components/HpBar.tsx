@@ -8,25 +8,21 @@ interface HpBarProps {
 
 export default function HpBar({ percentage, showLabel = false, size = 'md' }: HpBarProps) {
   const clamped = Math.max(0, Math.min(100, percentage));
-  const barColor = clamped > 60 ? '#f83030' : clamped > 30 ? '#f8c830' : '#30f848';
-  const trackClass = size === 'sm' ? 'pixel-bar-track pixel-bar-track-sm' : 'pixel-bar-track';
+  const barColor = clamped > 60 ? '#e84040' : clamped > 30 ? '#e8a020' : '#40c850';
+  const trackClass = size === 'sm' ? 'mh-hp-track mh-hp-track-sm' : 'mh-hp-track';
 
   return (
     <div className="w-full">
       {showLabel && (
-        <div className="flex justify-between text-xs mb-1" style={{ color: '#9090c0' }}>
-          <span>HP</span>
-          <span>{clamped}%</span>
+        <div className="flex justify-between text-xs mb-1">
+          <span style={{ color: '#a09078' }}>HP</span>
+          <span style={{ color: '#f0e8d8' }}>{clamped}%</span>
         </div>
       )}
       <div className={trackClass}>
         <div
-          className="pixel-bar-fill"
-          style={{
-            width: `${clamped}%`,
-            backgroundColor: barColor,
-            boxShadow: `inset 0 -3px 0 rgba(0,0,0,0.3), inset 0 2px 0 rgba(255,255,255,0.2)`,
-          }}
+          className="mh-hp-fill"
+          style={{ width: `${clamped}%`, backgroundColor: barColor }}
         />
       </div>
     </div>

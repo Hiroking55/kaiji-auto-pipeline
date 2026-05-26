@@ -1,230 +1,290 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #0a0a1a;
-  --bg-window: #1a1040;
-  --bg-dark: #0e0e2a;
-  --text-primary: #ffffff;
-  --text-secondary: #9090c0;
-  --border-outer: #6060a0;
-  --border-inner: #ffffff;
-  --accent-gold: #f8d830;
-  --accent-orange: #f87830;
-  --hp-red: #f83030;
-  --hp-yellow: #f8c830;
-  --hp-green: #30f848;
-  --xp-blue: #3080f8;
-  --mp-purple: #a848f8;
+  --bg-primary: #12100e;
+  --bg-panel: #1e1a14;
+  --bg-card: #2a2218;
+  --bg-card-hover: #342a1e;
+  --bg-input: #18140e;
+  --border-main: #4a3c28;
+  --border-light: #3a3020;
+  --border-accent: #c89830;
+  --text-primary: #f0e8d8;
+  --text-secondary: #a09078;
+  --text-muted: #706050;
+  --accent-orange: #ff8820;
+  --accent-red: #e84040;
+  --accent-green: #40c850;
+  --accent-gold: #ffc830;
+  --accent-blue: #4890d0;
+  --quest-active: #ff8820;
+  --quest-clear: #40c850;
 }
 
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100dvh;
-  image-rendering: pixelated;
-  -webkit-font-smoothing: none;
 }
 
-/* Pixel Window - RPG dialogue box style */
-.pixel-window {
-  background: var(--bg-window);
-  border: 3px solid var(--border-inner);
-  outline: 3px solid var(--border-outer);
-  outline-offset: 0px;
-  padding: 12px;
+/* MonHun Quest Panel */
+.mh-panel {
+  background: var(--bg-card);
+  border: 2px solid var(--border-main);
+  border-radius: 4px;
   position: relative;
 }
 
-.pixel-window-dark {
-  background: var(--bg-dark);
-  border: 2px solid var(--border-outer);
-  outline: 2px solid #404070;
-  outline-offset: 0px;
-  padding: 10px;
+.mh-panel::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border: 1px solid var(--border-light);
+  border-radius: 2px;
+  pointer-events: none;
 }
 
-/* Pixel HP Bar */
-.pixel-bar-track {
-  background: #202040;
-  border: 2px solid #404070;
-  height: 16px;
+/* Accent panel (gold border) */
+.mh-panel-accent {
+  background: var(--bg-card);
+  border: 2px solid var(--border-accent);
+  border-radius: 4px;
+  position: relative;
+}
+
+.mh-panel-accent::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border: 1px solid rgba(200, 152, 48, 0.3);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* Dark sub-panel */
+.mh-panel-dark {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-light);
+  border-radius: 3px;
+}
+
+/* Quest Card */
+.mh-quest-card {
+  background: linear-gradient(180deg, #2e2418 0%, #261e14 100%);
+  border: 2px solid var(--border-main);
+  border-radius: 4px;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+.mh-quest-card:active {
+  transform: scale(0.98);
+  border-color: var(--border-accent);
+}
+
+/* HP Bar */
+.mh-hp-track {
+  background: #181410;
+  border: 1px solid var(--border-main);
+  border-radius: 2px;
+  height: 14px;
   position: relative;
   overflow: hidden;
 }
 
-.pixel-bar-track-sm {
-  height: 10px;
+.mh-hp-track-sm {
+  height: 8px;
 }
 
-.pixel-bar-fill {
+.mh-hp-fill {
   height: 100%;
-  transition: width 0.5s steps(20);
-  image-rendering: pixelated;
+  border-radius: 1px;
+  transition: width 0.6s ease-out;
+  position: relative;
 }
 
-/* Pixel Button */
-.pixel-btn {
-  background: var(--bg-window);
-  border: 3px solid var(--border-inner);
-  outline: 3px solid var(--border-outer);
-  outline-offset: 0px;
-  padding: 10px 16px;
-  color: #ffffff;
-  cursor: pointer;
-  transition: transform 0.1s;
-  text-align: center;
-  font-weight: bold;
+.mh-hp-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%, rgba(0,0,0,0.15) 100%);
 }
 
-.pixel-btn:active {
-  transform: scale(0.96);
-  filter: brightness(0.85);
+/* Input */
+.mh-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-main);
+  border-radius: 3px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font-size: 14px;
+  width: 100%;
 }
 
-.pixel-btn-gold {
-  background: linear-gradient(180deg, #f8d830 0%, #c8a020 100%);
-  color: #1a1040;
-  border-color: #f8f0a0;
-  outline-color: #907010;
-}
-
-.pixel-btn-attack {
-  background: linear-gradient(180deg, #f87830 0%, #c85020 100%);
-  color: #ffffff;
-  border-color: #f8b880;
-  outline-color: #803010;
-}
-
-.pixel-btn-blue {
-  background: linear-gradient(180deg, #3080f8 0%, #2060c0 100%);
-  color: #ffffff;
-  border-color: #80b8f8;
-  outline-color: #103880;
-}
-
-/* Pixel Input */
-.pixel-input {
-  background: #0e0e2a;
-  border: 2px solid #6060a0;
+.mh-input:focus {
   outline: none;
-  padding: 8px 12px;
-  color: #ffffff;
+  border-color: var(--border-accent);
+  box-shadow: 0 0 0 1px var(--border-accent);
 }
 
-.pixel-input:focus {
-  border-color: #f8d830;
-  box-shadow: 0 0 0 1px #f8d830;
-}
-
-/* Pixel Select */
-.pixel-select {
-  background: #0e0e2a;
-  border: 2px solid #6060a0;
-  padding: 8px 12px;
-  color: #ffffff;
+.mh-select {
+  background: var(--bg-input);
+  border: 1px solid var(--border-main);
+  border-radius: 3px;
+  padding: 10px 32px 10px 12px;
+  color: var(--text-primary);
+  font-size: 14px;
+  width: 100%;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M0 0h8L4 8z' fill='%239090c0'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a09078'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
-  padding-right: 32px;
 }
 
-.pixel-select:focus {
-  border-color: #f8d830;
+.mh-select:focus {
+  outline: none;
+  border-color: var(--border-accent);
 }
 
-/* Scanline overlay */
-.scanlines::after {
+/* Button */
+.mh-btn {
+  background: linear-gradient(180deg, #3a3020 0%, #2a2218 100%);
+  border: 2px solid var(--border-main);
+  border-radius: 4px;
+  padding: 12px 20px;
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.1s;
+  text-align: center;
+}
+
+.mh-btn:active {
+  transform: scale(0.97);
+  filter: brightness(0.9);
+}
+
+.mh-btn-primary {
+  background: linear-gradient(180deg, #ff9830 0%, #d07018 100%);
+  border-color: #ffc070;
+  color: #1a1008;
+}
+
+.mh-btn-gold {
+  background: linear-gradient(180deg, #ffc830 0%, #c89820 100%);
+  border-color: #ffe080;
+  color: #1a1008;
+}
+
+.mh-btn-danger {
+  background: linear-gradient(180deg, #c03030 0%, #902020 100%);
+  border-color: #e06060;
+  color: #ffffff;
+}
+
+/* Star Rating */
+.star-filled { color: #ffc830; }
+.star-empty { color: #3a3020; }
+
+/* Timer badge */
+.mh-timer {
+  background: #181410;
+  border: 1px solid var(--border-main);
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Status tag */
+.mh-tag {
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  border: 1px solid;
+}
+
+.mh-tag-clear {
+  background: rgba(64, 200, 80, 0.15);
+  color: #40c850;
+  border-color: #40c850;
+}
+
+.mh-tag-active {
+  background: rgba(255, 136, 32, 0.15);
+  color: #ff8820;
+  border-color: #ff8820;
+}
+
+.mh-tag-danger {
+  background: rgba(232, 64, 64, 0.15);
+  color: #e84040;
+  border-color: #e84040;
+}
+
+/* Section header */
+.mh-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mh-section-header::before {
   content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.08) 2px,
-    rgba(0, 0, 0, 0.08) 4px
-  );
-  z-index: 9999;
+  width: 3px;
+  height: 16px;
+  background: var(--accent-gold);
+  border-radius: 1px;
 }
 
-/* Pixel text glow */
-.text-glow-gold {
-  text-shadow: 0 0 8px #f8d830, 0 0 2px #f8d830;
+.mh-section-header h2 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
-.text-glow-red {
-  text-shadow: 0 0 8px #f83030, 0 0 2px #f83030;
-}
-
-.text-glow-green {
-  text-shadow: 0 0 8px #30f848, 0 0 2px #30f848;
-}
-
-.text-glow-blue {
-  text-shadow: 0 0 8px #3080f8, 0 0 2px #3080f8;
+/* Divider */
+.mh-divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: 12px 0;
 }
 
 /* Animations */
-@keyframes xp-glow {
-  0% { text-shadow: 0 0 4px #f8d830; }
-  50% { text-shadow: 0 0 16px #f8d830, 0 0 32px #f8d830; }
-  100% { text-shadow: 0 0 4px #f8d830; }
-}
-
-@keyframes pixel-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
 @keyframes slide-up {
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
-@keyframes damage-flash {
-  0% { filter: brightness(1); }
-  25% { filter: brightness(2) hue-rotate(30deg); }
-  50% { filter: brightness(1); }
-  75% { filter: brightness(1.5); }
-  100% { filter: brightness(1); }
+@keyframes xp-glow {
+  0% { text-shadow: 0 0 4px #ffc830; }
+  50% { text-shadow: 0 0 16px #ffc830, 0 0 30px #ffc830; }
+  100% { text-shadow: 0 0 4px #ffc830; }
 }
 
-.animate-xp {
-  animation: xp-glow 1.5s ease-in-out infinite;
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
-.animate-bounce-pixel {
-  animation: pixel-bounce 1s steps(4) infinite;
+.animate-slide-up { animation: slide-up 0.3s ease-out; }
+.animate-xp { animation: xp-glow 1.5s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+/* Quest clear overlay */
+.quest-clear-stamp {
+  color: var(--quest-clear);
+  text-shadow: 0 0 10px rgba(64, 200, 80, 0.5);
+  letter-spacing: 4px;
 }
 
-.animate-blink {
-  animation: blink 1s steps(1) infinite;
-}
-
-.animate-slide-up {
-  animation: slide-up 0.3s ease-out;
-}
-
-.animate-damage {
-  animation: damage-flash 0.5s steps(4);
-}
-
-/* Pixel cursor for interactive elements */
-.pixel-cursor {
-  cursor: pointer;
-}
-
-/* Defeated boss style */
-.defeated {
-  filter: grayscale(0.7) brightness(0.6);
+/* Defeated quest */
+.quest-defeated {
+  opacity: 0.5;
+  filter: grayscale(0.4);
 }

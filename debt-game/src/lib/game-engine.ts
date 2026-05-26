@@ -128,17 +128,50 @@ export function getHpColor(percentage: number): string {
   return '#44ff44';
 }
 
+export function getQuestDifficulty(boss: Boss): number {
+  const amountScore = Math.min(5, Math.ceil(boss.original_hp / 300000));
+  const rateScore = Math.min(4, Math.ceil(boss.interest_rate / 5));
+  return Math.max(1, Math.min(9, amountScore + rateScore));
+}
+
+export function getQuestDaysRemaining(boss: Boss): number | null {
+  if (boss.is_defeated) return 0;
+  if (boss.min_monthly === 0) return null;
+
+  const monthlyInterest = boss.current_hp * (boss.interest_rate / 100 / 12);
+  if (boss.min_monthly <= monthlyInterest) return null;
+
+  let remaining = boss.current_hp;
+  let months = 0;
+  while (remaining > 0 && months < 360) {
+    const interest = remaining * (boss.interest_rate / 100 / 12);
+    remaining = remaining + interest - boss.min_monthly;
+    months++;
+  }
+  if (months >= 360) return null;
+  return months * 30;
+}
+
+export function getHunterRankTitle(level: number): string {
+  if (level >= 50) return '伝説のハンター';
+  if (level >= 30) return 'マスターハンター';
+  if (level >= 20) return '上位ハンター';
+  if (level >= 10) return '一人前ハンター';
+  if (level >= 5) return '駆け出しハンター';
+  return '新米ハンター';
+}
+
 export function getBossDefaults(debtType: string): { name: string; emoji: string; subtitle: string; sort_order: number } {
   switch (debtType) {
     case 'student_loan':
-      return { name: '奨学金の亡霊', emoji: '👻', subtitle: '～低金利だが長期戦～', sort_order: 4 };
+      return { name: '奨学金の亡霊', emoji: '👻', subtitle: '低金利だが長期戦の古龍種', sort_order: 4 };
     case 'credit_card':
-      return { name: 'リボの悪魔', emoji: '😈', subtitle: '～毎月HP回復する厄介者～', sort_order: 2 };
+      return { name: 'リボの悪魔', emoji: '😈', subtitle: '毎月HP回復する厄介な牙竜種', sort_order: 2 };
     case 'loan':
-      return { name: '金利の竜', emoji: '🐉', subtitle: '～高金利のパワー型～', sort_order: 3 };
+      return { name: '金利の竜', emoji: '🐉', subtitle: '高金利のパワー型飛竜種', sort_order: 3 };
     case 'consumer_finance':
-      return { name: 'サラ金の魔王', emoji: '👿', subtitle: '～利息18%の暴君～', sort_order: 1 };
+      return { name: 'サラ金の魔王', emoji: '👿', subtitle: '利息18%の暴君・古龍種', sort_order: 1 };
     default:
-      return { name: '謎の敵', emoji: '❓', subtitle: '～未知の借金～', sort_order: 5 };
+      return { name: '謎の敵', emoji: '❓', subtitle: '未知のモンスター', sort_order: 5 };
   }
 }
