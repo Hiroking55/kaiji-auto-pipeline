@@ -34,8 +34,8 @@ export default function StatusPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="text-4xl mb-3 animate-pulse">&#x1F4CA;</p>
-          <p className="text-sm" style={{ color: '#8888aa' }}>読み込み中...</p>
+          <p className="text-3xl mb-3 animate-bounce-pixel">📊</p>
+          <p className="text-sm animate-blink" style={{ color: '#9090c0' }}>Now Loading...</p>
         </div>
       </div>
     );
@@ -49,68 +49,62 @@ export default function StatusPage() {
     .sort((a, b) => a.level - b.level);
 
   return (
-    <div className="px-4 pt-6">
+    <div className="px-3 pt-5">
       {/* Player Stats Header */}
-      <div className="text-center mb-6">
-        <p className="text-4xl mb-2">&#x1F4CA;</p>
-        <h1 className="text-xl font-bold" style={{ color: '#ffd700' }}>
-          {player.name} のステータス
+      <div className="pixel-window text-center mb-4">
+        <p className="text-3xl mb-2">👤</p>
+        <h1 className="text-lg font-bold text-glow-gold" style={{ color: '#f8d830' }}>
+          {player.name}
         </h1>
-        <p className="text-sm" style={{ color: '#8888aa' }}>
+        <p className="text-xs" style={{ color: '#9090c0' }}>
           Lv.{player.level} {player.title}
         </p>
       </div>
 
       {/* Battle Stats */}
-      <div className="mb-6">
-        <h2 className="text-base font-bold mb-3" style={{ color: '#e0e0e0' }}>
-          戦闘記録
-        </h2>
-        <div className="grid grid-cols-2 gap-3">
-          <div
-            className="rounded-xl p-4 border border-white/10"
-            style={{ backgroundColor: '#16213e' }}
-          >
-            <p className="text-xs" style={{ color: '#8888aa' }}>総返済額</p>
-            <p className="text-lg font-bold" style={{ color: '#44ff44' }}>
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-3">
+          <span style={{ color: '#f8d830' }}>▶</span>
+          <h2 className="text-sm font-bold" style={{ color: '#ffffff' }}>
+            せんとうきろく
+          </h2>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="pixel-window-dark">
+            <p className="text-[10px]" style={{ color: '#9090c0' }}>そうへんさいがく</p>
+            <p className="text-sm font-bold text-glow-green" style={{ color: '#30f848' }}>
               {formatCurrency(totalPaid)}
             </p>
           </div>
-          <div
-            className="rounded-xl p-4 border border-white/10"
-            style={{ backgroundColor: '#16213e' }}
-          >
-            <p className="text-xs" style={{ color: '#8888aa' }}>撃破ボス数</p>
-            <p className="text-lg font-bold" style={{ color: '#ffd700' }}>
+          <div className="pixel-window-dark">
+            <p className="text-[10px]" style={{ color: '#9090c0' }}>げきはボスすう</p>
+            <p className="text-sm font-bold text-glow-gold" style={{ color: '#f8d830' }}>
               {bossesDefeated} / {bosses.length}
             </p>
           </div>
-          <div
-            className="rounded-xl p-4 border border-white/10"
-            style={{ backgroundColor: '#16213e' }}
-          >
-            <p className="text-xs" style={{ color: '#8888aa' }}>ログイン連続</p>
-            <p className="text-lg font-bold" style={{ color: '#4488ff' }}>
-              {player.login_streak}日
+          <div className="pixel-window-dark">
+            <p className="text-[10px]" style={{ color: '#9090c0' }}>れんぞくログイン</p>
+            <p className="text-sm font-bold text-glow-blue" style={{ color: '#3080f8' }}>
+              {player.login_streak}にち
             </p>
           </div>
-          <div
-            className="rounded-xl p-4 border border-white/10"
-            style={{ backgroundColor: '#16213e' }}
-          >
-            <p className="text-xs" style={{ color: '#8888aa' }}>最大連続記録</p>
-            <p className="text-lg font-bold" style={{ color: '#ff6600' }}>
-              {player.max_streak}日
+          <div className="pixel-window-dark">
+            <p className="text-[10px]" style={{ color: '#9090c0' }}>さいだいれんぞく</p>
+            <p className="text-sm font-bold" style={{ color: '#f87830' }}>
+              {player.max_streak}にち
             </p>
           </div>
         </div>
       </div>
 
       {/* Title Collection */}
-      <div className="mb-6">
-        <h2 className="text-base font-bold mb-3" style={{ color: '#e0e0e0' }}>
-          称号コレクション
-        </h2>
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-3">
+          <span style={{ color: '#f8d830' }}>▶</span>
+          <h2 className="text-sm font-bold" style={{ color: '#ffffff' }}>
+            しょうごうコレクション
+          </h2>
+        </div>
         <div className="space-y-2">
           {titleEntries.map(({ level, title }) => {
             const isCurrent = title === player.title;
@@ -119,42 +113,43 @@ export default function StatusPage() {
             return (
               <div
                 key={level}
-                className={`rounded-xl p-3 border flex items-center justify-between ${
-                  isCurrent
-                    ? 'border-yellow-500/50'
-                    : isEarned
-                    ? 'border-white/10'
-                    : 'border-white/5 opacity-40'
-                }`}
+                className={isEarned ? 'pixel-window-dark' : 'pixel-window-dark'}
                 style={{
-                  backgroundColor: isCurrent ? '#16213e' : '#16213e',
-                  boxShadow: isCurrent ? '0 0 12px rgba(255, 215, 0, 0.2)' : undefined,
+                  opacity: isEarned ? 1 : 0.4,
+                  borderColor: isCurrent ? '#f8d830' : undefined,
+                  boxShadow: isCurrent ? '0 0 8px #f8d83040' : undefined,
                 }}
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">
-                    {isEarned ? '&#x1F451;' : '&#x1F512;'}
-                  </span>
-                  <div>
-                    <p
-                      className="font-bold text-sm"
-                      style={{ color: isCurrent ? '#ffd700' : isEarned ? '#e0e0e0' : '#8888aa' }}
-                    >
-                      {title}
-                    </p>
-                    <p className="text-xs" style={{ color: '#8888aa' }}>
-                      Lv.{level} で解放
-                    </p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">
+                      {isEarned ? '👑' : '🔒'}
+                    </span>
+                    <div>
+                      <p
+                        className="font-bold text-xs"
+                        style={{ color: isCurrent ? '#f8d830' : isEarned ? '#ffffff' : '#9090c0' }}
+                      >
+                        {title}
+                      </p>
+                      <p className="text-[10px]" style={{ color: '#9090c0' }}>
+                        Lv.{level} でかいほう
+                      </p>
+                    </div>
                   </div>
+                  {isCurrent && (
+                    <span
+                      className="text-[10px] font-bold px-2 py-0.5"
+                      style={{
+                        backgroundColor: '#f8d83020',
+                        color: '#f8d830',
+                        border: '1px solid #f8d830',
+                      }}
+                    >
+                      いま
+                    </span>
+                  )}
                 </div>
-                {isCurrent && (
-                  <span
-                    className="text-xs font-bold px-2 py-1 rounded"
-                    style={{ backgroundColor: '#ffd70020', color: '#ffd700' }}
-                  >
-                    現在
-                  </span>
-                )}
               </div>
             );
           })}
@@ -163,9 +158,12 @@ export default function StatusPage() {
 
       {/* Achievement List */}
       <div className="mb-6">
-        <h2 className="text-base font-bold mb-3" style={{ color: '#e0e0e0' }}>
-          実績
-        </h2>
+        <div className="flex items-center gap-2 mb-3">
+          <span style={{ color: '#f8d830' }}>▶</span>
+          <h2 className="text-sm font-bold" style={{ color: '#ffffff' }}>
+            じっせき
+          </h2>
+        </div>
         <div className="space-y-2">
           {achievements.map((achievement) => {
             const isEarned = earnedAchievements.includes(achievement.id);
@@ -173,41 +171,44 @@ export default function StatusPage() {
             return (
               <div
                 key={achievement.id}
-                className={`rounded-xl p-3 border flex items-center gap-3 ${
-                  isEarned ? 'border-white/10' : 'border-white/5 opacity-40'
-                }`}
-                style={{ backgroundColor: '#16213e' }}
+                className="pixel-window-dark"
+                style={{ opacity: isEarned ? 1 : 0.4 }}
               >
-                <span className="text-2xl">
-                  {isEarned ? achievement.icon : '&#x1F512;'}
-                </span>
-                <div className="flex-1">
-                  <p
-                    className="font-bold text-sm"
-                    style={{ color: isEarned ? '#e0e0e0' : '#8888aa' }}
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">
+                    {isEarned ? achievement.icon : '🔒'}
+                  </span>
+                  <div className="flex-1">
+                    <p
+                      className="font-bold text-xs"
+                      style={{ color: isEarned ? '#ffffff' : '#9090c0' }}
+                    >
+                      {achievement.name}
+                    </p>
+                    <p className="text-[10px]" style={{ color: '#9090c0' }}>
+                      {achievement.description}
+                    </p>
+                  </div>
+                  <span
+                    className="text-[10px] font-bold px-2 py-0.5"
+                    style={{
+                      backgroundColor: isEarned ? '#30f84820' : '#40407020',
+                      color: isEarned ? '#30f848' : '#9090c0',
+                      border: `1px solid ${isEarned ? '#30f848' : '#404070'}`,
+                    }}
                   >
-                    {achievement.name}
-                  </p>
-                  <p className="text-xs" style={{ color: '#8888aa' }}>
-                    {achievement.description}
-                  </p>
+                    {isEarned ? 'たっせい' : `+${achievement.xp_reward}EXP`}
+                  </span>
                 </div>
-                <span
-                  className="text-xs font-medium px-2 py-1 rounded"
-                  style={{
-                    backgroundColor: isEarned ? '#44ff4420' : '#8888aa20',
-                    color: isEarned ? '#44ff44' : '#8888aa',
-                  }}
-                >
-                  {isEarned ? '達成' : `+${achievement.xp_reward}XP`}
-                </span>
               </div>
             );
           })}
           {achievements.length === 0 && (
-            <p className="text-center py-8" style={{ color: '#8888aa' }}>
-              実績はまだありません
-            </p>
+            <div className="pixel-window text-center">
+              <p style={{ color: '#9090c0' }}>
+                じっせきはまだありません
+              </p>
+            </div>
           )}
         </div>
       </div>
