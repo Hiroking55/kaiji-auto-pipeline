@@ -12,10 +12,10 @@ export default function XpBar({ current, max, level }: XpBarProps) {
   return (
     <div className="w-full">
       <div className="flex justify-between items-center text-[11px] mb-1.5">
-        <span className="font-extrabold glow-gold" style={{ color: '#e8b849' }}>
+        <span className="font-extrabold glow-gold" style={{ color: '#b89450' }}>
           HR {level}
         </span>
-        <span className="font-medium" style={{ color: '#8890b0' }}>
+        <span className="font-medium" style={{ color: '#7c7870' }}>
           {current} / {max}
         </span>
       </div>
@@ -24,7 +24,7 @@ export default function XpBar({ current, max, level }: XpBarProps) {
           className="hp-fill"
           style={{
             width: `${pct}%`,
-            background: 'linear-gradient(90deg, #5b9ee8, #9b6ee8)',
+            background: 'linear-gradient(90deg, #4878b0, #7858a0)',
             boxShadow: '0 0 12px rgba(91, 158, 232, 0.3)',
           }}
         />

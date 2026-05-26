@@ -45,7 +45,7 @@ export default function NavBar() {
               <span
                 className="text-[10px] font-bold tracking-wide"
                 style={{
-                  color: isActive ? '#e8b849' : '#505878',
+                  color: isActive ? '#b89450' : '#4a4640',
                   textShadow: isActive ? '0 0 12px rgba(232,184,73,0.4)' : 'none',
                 }}
               >

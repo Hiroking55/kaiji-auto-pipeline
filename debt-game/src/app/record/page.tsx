@@ -78,16 +78,16 @@ function RecordForm() {
     <div className="min-h-screen pb-24">
       <div className="max-w-md mx-auto px-4 pt-6 space-y-4">
         <div className="text-center">
-          <h1 className="text-2xl font-extrabold glow-gold" style={{ color: '#e8b849' }}>クエスト出発</h1>
-          <p className="text-xs mt-1 font-medium" style={{ color: '#8890b0' }}>返済を記録して討伐ダメージを与えよう</p>
+          <h1 className="text-2xl font-extrabold glow-gold" style={{ color: '#b89450' }}>クエスト出発</h1>
+          <p className="text-xs mt-1 font-medium" style={{ color: '#7c7870' }}>返済を記録して討伐ダメージを与えよう</p>
         </div>
 
         <div className="glass p-5">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#e8b849' }}>討伐対象</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#b89450' }}>討伐対象</label>
               {bosses.length === 0 ? (
-                <p className="text-sm" style={{ color: '#505878' }}>討伐可能なモンスターがいません</p>
+                <p className="text-sm" style={{ color: '#4a4640' }}>討伐可能なモンスターがいません</p>
               ) : (
                 <select value={selectedBossId} onChange={(e) => setSelectedBossId(e.target.value)} className="select-glass">
                   {bosses.map((b) => <option key={b.id} value={b.id}>{b.emoji} {b.name} (HP: {formatCurrency(b.current_hp)})</option>)}
@@ -95,26 +95,26 @@ function RecordForm() {
               )}
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#e8b849' }}>攻撃力（返済額）</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#b89450' }}>攻撃力（返済額）</label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-extrabold" style={{ color: '#e8b849' }}>¥</span>
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-extrabold" style={{ color: '#b89450' }}>¥</span>
                 <input type="number" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0" min="1" required className="input-glass pl-9" />
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#e8b849' }}>出撃日</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#b89450' }}>出撃日</label>
               <input type="date" value={paidAt} onChange={(e) => setPaidAt(e.target.value)} required className="input-glass" style={{ colorScheme: 'dark' }} />
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#e8b849' }}>攻撃タイプ</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#b89450' }}>攻撃タイプ</label>
               <div className="grid grid-cols-2 gap-3">
                 {(['normal', 'extra'] as const).map(t => (
                   <button key={t} type="button" onClick={() => setType(t)}
                     className="py-3 rounded-xl text-sm font-bold transition-all"
                     style={{
                       background: type === t ? (t === 'normal' ? 'rgba(232,144,64,0.15)' : 'rgba(232,184,73,0.15)') : 'rgba(10,14,28,0.5)',
-                      border: `1.5px solid ${type === t ? (t === 'normal' ? '#e89040' : '#e8b849') : 'rgba(255,255,255,0.06)'}`,
-                      color: type === t ? (t === 'normal' ? '#e89040' : '#e8b849') : '#505878',
+                      border: `1.5px solid ${type === t ? (t === 'normal' ? '#c07838' : '#b89450') : 'rgba(255,255,255,0.06)'}`,
+                      color: type === t ? (t === 'normal' ? '#c07838' : '#b89450') : '#4a4640',
                       boxShadow: type === t ? `0 0 16px ${t === 'normal' ? 'rgba(232,144,64,0.15)' : 'rgba(232,184,73,0.15)'}` : 'none',
                     }}>
                     {t === 'normal' ? '⚔️ 通常攻撃' : '💥 必殺技'}
@@ -123,7 +123,7 @@ function RecordForm() {
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#e8b849' }}>メモ（任意）</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#b89450' }}>メモ（任意）</label>
               <input type="text" value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="例: ボーナスから返済" className="input-glass" />
             </div>
             <button type="submit" disabled={submitting || bosses.length === 0 || !amount} className="w-full btn-primary">
@@ -135,12 +135,12 @@ function RecordForm() {
         {/* Recent */}
         <div>
           <div className="section-bar">
-            <h2 className="text-[15px] font-extrabold" style={{ color: '#eef0f6' }}>最近の狩猟記録</h2>
+            <h2 className="text-[15px] font-extrabold" style={{ color: '#e8e6e2' }}>最近の狩猟記録</h2>
           </div>
           {recentPayments.length === 0 ? (
             <div className="glass p-8 text-center">
               <p className="text-2xl mb-2">🗡️</p>
-              <p className="text-xs" style={{ color: '#505878' }}>まだ狩猟記録がありません</p>
+              <p className="text-xs" style={{ color: '#4a4640' }}>まだ狩猟記録がありません</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -150,15 +150,15 @@ function RecordForm() {
                     <div className="flex items-center gap-2.5">
                       <span className="text-xl">{p.boss_emoji}</span>
                       <div>
-                        <p className="text-xs font-bold" style={{ color: '#eef0f6' }}>{p.boss_name}</p>
-                        <p className="text-[10px]" style={{ color: '#8890b0' }}>
-                          {p.paid_at}{p.type === 'extra' && <span className="ml-1.5" style={{ color: '#e8b849' }}>★ 必殺技</span>}
+                        <p className="text-xs font-bold" style={{ color: '#e8e6e2' }}>{p.boss_name}</p>
+                        <p className="text-[10px]" style={{ color: '#7c7870' }}>
+                          {p.paid_at}{p.type === 'extra' && <span className="ml-1.5" style={{ color: '#b89450' }}>★ 必殺技</span>}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-extrabold" style={{ color: '#e89040' }}>-{formatCurrency(p.amount)}</p>
-                      <p className="text-[10px] font-bold" style={{ color: '#9b6ee8' }}>+{p.xp_earned} EXP</p>
+                      <p className="text-xs font-extrabold" style={{ color: '#c07838' }}>-{formatCurrency(p.amount)}</p>
+                      <p className="text-[10px] font-bold" style={{ color: '#7858a0' }}>+{p.xp_earned} EXP</p>
                     </div>
                   </div>
                 </div>
@@ -174,26 +174,26 @@ function RecordForm() {
           <div className="w-full max-w-sm glass-accent p-6 animate-slide-up">
             <div className="text-center mb-4">
               <p className="text-5xl mb-3">{result.bossDefeated ? '💀' : result.type === 'extra' ? '💥' : '⚔️'}</p>
-              <p className="text-sm font-bold" style={{ color: '#eef0f6' }}>{result.bossEmoji} {result.bossName} に</p>
-              <p className="text-2xl font-extrabold mt-1 glow-red" style={{ color: '#e89040' }}>
+              <p className="text-sm font-bold" style={{ color: '#e8e6e2' }}>{result.bossEmoji} {result.bossName} に</p>
+              <p className="text-2xl font-extrabold mt-1 glow-red" style={{ color: '#c07838' }}>
                 {formatCurrency(result.amount)} ダメージ！
               </p>
             </div>
-            <p className="text-xl font-extrabold text-center animate-glow my-4" style={{ color: '#e8b849' }}>+{result.xpEarned} EXP</p>
+            <p className="text-xl font-extrabold text-center animate-glow my-4" style={{ color: '#b89450' }}>+{result.xpEarned} EXP</p>
             {result.levelUp && (
               <div className="glass-inner p-3 text-center mb-3" style={{ borderColor: 'rgba(232,184,73,0.3)' }}>
-                <p className="text-sm font-extrabold glow-gold" style={{ color: '#e8b849' }}>🎉 HR UP! → HR {result.newLevel}</p>
+                <p className="text-sm font-extrabold glow-gold" style={{ color: '#b89450' }}>🎉 HR UP! → HR {result.newLevel}</p>
               </div>
             )}
             {result.bossDefeated && (
               <div className="glass-inner p-3 text-center mb-3" style={{ borderColor: 'rgba(76,206,123,0.3)' }}>
-                <p className="text-sm font-extrabold glow-green" style={{ color: '#4cce7b' }}>QUEST CLEAR!</p>
+                <p className="text-sm font-extrabold glow-green" style={{ color: '#40a060' }}>QUEST CLEAR!</p>
               </div>
             )}
             {result.achievementsEarned.length > 0 && (
               <div className="glass-inner p-3 mb-3">
-                <p className="text-xs font-bold mb-1" style={{ color: '#e8b849' }}>🏆 勲章獲得！</p>
-                {result.achievementsEarned.map((n, i) => <p key={i} className="text-xs" style={{ color: '#eef0f6' }}>{n}</p>)}
+                <p className="text-xs font-bold mb-1" style={{ color: '#b89450' }}>🏆 勲章獲得！</p>
+                {result.achievementsEarned.map((n, i) => <p key={i} className="text-xs" style={{ color: '#e8e6e2' }}>{n}</p>)}
               </div>
             )}
             <button onClick={() => setResult(null)} className="w-full btn-secondary mt-2">OK</button>
