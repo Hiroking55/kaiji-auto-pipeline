@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #0f0f23;
+  --bg-secondary: #1a1a2e;
+  --bg-card: #16213e;
+  --text-primary: #e0e0e0;
+  --text-secondary: #8888aa;
+  --accent-gold: #ffd700;
+  --accent-orange: #ff6600;
+  --hp-red: #ff4444;
+  --hp-yellow: #ffaa00;
+  --hp-green: #44ff44;
+  --xp-blue: #4488ff;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100dvh;
+}
+
+@keyframes xp-glow {
+  0% { text-shadow: 0 0 5px var(--accent-gold); }
+  50% { text-shadow: 0 0 20px var(--accent-gold), 0 0 40px var(--accent-gold); }
+  100% { text-shadow: 0 0 5px var(--accent-gold); }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-xp {
+  animation: xp-glow 1.5s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
