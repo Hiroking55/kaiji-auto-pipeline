@@ -6,6 +6,7 @@ import { setupGame, resetAllData } from '@/lib/client-actions';
 
 interface DebtEntry {
   debtType: string;
+  customName: string;
   amount: string;
   interestRate: string;
   minMonthly: string;
@@ -21,6 +22,7 @@ const DEBT_TYPES = [
 
 const EMPTY_DEBT: DebtEntry = {
   debtType: 'credit_card',
+  customName: '',
   amount: '',
   interestRate: '',
   minMonthly: '',
@@ -65,6 +67,7 @@ export default function SetupPage() {
           .filter((d) => Number(d.amount) > 0)
           .map((d) => ({
             debtType: d.debtType,
+            customName: d.customName.trim() || undefined,
             amount: Number(d.amount),
             interestRate: Number(d.interestRate),
             minMonthly: Number(d.minMonthly),
@@ -92,6 +95,7 @@ export default function SetupPage() {
           .filter((d) => Number(d.amount) > 0)
           .map((d) => ({
             debtType: d.debtType,
+            customName: d.customName.trim() || undefined,
             amount: Number(d.amount),
             interestRate: Number(d.interestRate),
             minMonthly: Number(d.minMonthly),
@@ -238,6 +242,20 @@ export default function SetupPage() {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div className="mb-3">
+                  <label className="block text-xs font-medium mb-1" style={labelStyle}>
+                    ボス名（任意）
+                  </label>
+                  <input
+                    type="text"
+                    value={debt.customName}
+                    onChange={(e) => updateDebt(index, 'customName', e.target.value)}
+                    placeholder="例: 楽天カードの悪魔"
+                    className="w-full rounded-lg px-3 py-2 text-sm border focus:outline-none focus:border-blue-500"
+                    style={inputStyle}
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 mb-3">
