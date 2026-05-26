@@ -21,15 +21,19 @@ export default function BossCard({ boss }: BossCardProps) {
         className={`glass-sm p-4 transition-all duration-200 active:scale-[0.98] ${boss.is_defeated ? 'quest-defeated' : ''}`}
         style={{
           borderColor: boss.is_defeated
-            ? 'rgba(76, 206, 123, 0.15)'
-            : 'rgba(255, 255, 255, 0.06)',
+            ? 'rgba(56, 192, 112, 0.15)'
+            : 'rgba(255, 255, 255, 0.05)',
         }}
       >
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
             <div
               className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl"
-              style={{ background: 'rgba(10, 14, 28, 0.6)' }}
+              style={{
+                background: 'rgba(8, 10, 20, 0.6)',
+                boxShadow: 'inset 0 0 8px rgba(0,0,0,0.3)',
+                border: '1px solid rgba(255,255,255,0.03)',
+              }}
             >
               {boss.emoji}
             </div>

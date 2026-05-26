@@ -8,7 +8,7 @@ interface HpBarProps {
 
 export default function HpBar({ percentage, showLabel = false, size = 'md' }: HpBarProps) {
   const clamped = Math.max(0, Math.min(100, percentage));
-  const color = clamped > 60 ? '#e85d5d' : clamped > 30 ? '#e8b849' : '#4cce7b';
+  const color = clamped > 60 ? '#d84848' : clamped > 30 ? '#d4a832' : '#38c070';
   const sizeClass = size === 'sm' ? 'hp-track hp-track-sm' : size === 'lg' ? 'hp-track hp-track-lg' : 'hp-track';
 
   return (
