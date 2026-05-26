@@ -44,8 +44,8 @@ function BattleContent() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="text-4xl mb-3 animate-pulse">&#x2694;&#xFE0F;</p>
-          <p className="text-sm" style={{ color: '#8888aa' }}>読み込み中...</p>
+          <p className="text-3xl mb-3 animate-bounce-pixel">⚔️</p>
+          <p className="text-sm animate-blink" style={{ color: '#9090c0' }}>Now Loading...</p>
         </div>
       </div>
     );
@@ -55,147 +55,133 @@ function BattleContent() {
   const hpPercentage = hpPercent(boss);
 
   return (
-    <div className="px-4 pt-6">
+    <div className="px-3 pt-5">
       {/* Boss Display */}
-      <div className="text-center mb-6">
-        <p className="text-6xl mb-3">{boss.emoji}</p>
-        <h1 className="text-2xl font-bold" style={{ color: '#e0e0e0' }}>
+      <div className="pixel-window text-center mb-4">
+        <p className="text-5xl mb-2">{boss.emoji}</p>
+        <h1 className="text-xl font-bold" style={{ color: '#ffffff' }}>
           {boss.name}
         </h1>
-        <p className="text-sm mt-1" style={{ color: '#8888aa' }}>
+        <p className="text-xs mt-1" style={{ color: '#9090c0' }}>
           {boss.subtitle}
         </p>
         {boss.is_defeated && (
           <span
-            className="inline-block mt-2 text-sm font-bold px-3 py-1 rounded"
-            style={{ backgroundColor: '#44ff4420', color: '#44ff44' }}
+            className="inline-block mt-2 text-xs font-bold px-3 py-1"
+            style={{
+              backgroundColor: '#30f84830',
+              color: '#30f848',
+              border: '2px solid #30f848',
+            }}
           >
-            DEFEATED
+            ☆ 撃破済み ☆
           </span>
         )}
       </div>
 
       {/* HP Bar (Large) */}
-      <div className="mb-6">
-        <div className="flex justify-between text-sm mb-2">
-          <span style={{ color: '#8888aa' }}>HP</span>
-          <span style={{ color: '#e0e0e0' }}>
+      <div className="pixel-window mb-4">
+        <div className="flex justify-between text-xs mb-2">
+          <span style={{ color: '#f83030' }}>HP</span>
+          <span style={{ color: '#ffffff' }}>
             {formatCurrency(boss.current_hp)} / {formatCurrency(boss.original_hp)}
           </span>
         </div>
         <HpBar percentage={hpPercentage} size="md" />
-        <p className="text-right text-xs mt-1" style={{ color: '#8888aa' }}>
-          {hpPercentage}% 残り
+        <p className="text-right text-[10px] mt-1" style={{ color: '#9090c0' }}>
+          のこり {hpPercentage}%
         </p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 mb-6">
-        <div
-          className="rounded-xl p-4 border border-white/10"
-          style={{ backgroundColor: '#16213e' }}
-        >
-          <p className="text-xs" style={{ color: '#8888aa' }}>月間利息</p>
-          <p className="text-lg font-bold" style={{ color: '#ff4444' }}>
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="pixel-window-dark">
+          <p className="text-[10px]" style={{ color: '#9090c0' }}>げつかんりそく</p>
+          <p className="text-sm font-bold text-glow-red" style={{ color: '#f83030' }}>
             {formatCurrency(monthlyInterest)}
           </p>
         </div>
-        <div
-          className="rounded-xl p-4 border border-white/10"
-          style={{ backgroundColor: '#16213e' }}
-        >
-          <p className="text-xs" style={{ color: '#8888aa' }}>日割り利息</p>
-          <p className="text-lg font-bold" style={{ color: '#ff6600' }}>
+        <div className="pixel-window-dark">
+          <p className="text-[10px]" style={{ color: '#9090c0' }}>にちわりりそく</p>
+          <p className="text-sm font-bold" style={{ color: '#f87830' }}>
             {formatCurrency(dailyInterest)}
           </p>
         </div>
-        <div
-          className="rounded-xl p-4 border border-white/10"
-          style={{ backgroundColor: '#16213e' }}
-        >
-          <p className="text-xs" style={{ color: '#8888aa' }}>撃破予想</p>
-          <p className="text-lg font-bold" style={{ color: '#4488ff' }}>
-            {monthsToDefeat !== null ? `${monthsToDefeat}ヶ月` : '---'}
+        <div className="pixel-window-dark">
+          <p className="text-[10px]" style={{ color: '#9090c0' }}>げきはよそう</p>
+          <p className="text-sm font-bold text-glow-blue" style={{ color: '#3080f8' }}>
+            {monthsToDefeat !== null ? `${monthsToDefeat}ヶげつ` : '---'}
           </p>
         </div>
-        <div
-          className="rounded-xl p-4 border border-white/10"
-          style={{ backgroundColor: '#16213e' }}
-        >
-          <p className="text-xs" style={{ color: '#8888aa' }}>総ダメージ</p>
-          <p className="text-lg font-bold" style={{ color: '#44ff44' }}>
+        <div className="pixel-window-dark">
+          <p className="text-[10px]" style={{ color: '#9090c0' }}>そうダメージ</p>
+          <p className="text-sm font-bold text-glow-green" style={{ color: '#30f848' }}>
             {formatCurrency(totalPaid)}
           </p>
         </div>
       </div>
 
       {/* Battle Log */}
-      <div className="mb-6">
-        <h2 className="text-base font-bold mb-3" style={{ color: '#e0e0e0' }}>
-          戦闘ログ
-        </h2>
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-3">
+          <span style={{ color: '#f8d830' }}>▶</span>
+          <h2 className="text-sm font-bold" style={{ color: '#ffffff' }}>
+            せんとうログ
+          </h2>
+        </div>
         {payments.length > 0 ? (
           <div className="space-y-2">
             {payments.map((payment) => (
               <div
                 key={payment.id}
-                className="rounded-xl p-3 border border-white/10 flex items-center justify-between"
-                style={{ backgroundColor: '#16213e' }}
+                className="pixel-window-dark flex items-center justify-between"
               >
                 <div>
-                  <p className="text-sm font-medium" style={{ color: '#e0e0e0' }}>
-                    {payment.type === 'extra' ? '必殺技' : '通常攻撃'}
+                  <p className="text-xs font-bold" style={{ color: '#ffffff' }}>
+                    {payment.type === 'extra' ? '★ ひっさつわざ' : '▸ つうじょうこうげき'}
                   </p>
-                  <p className="text-xs" style={{ color: '#8888aa' }}>
+                  <p className="text-[10px]" style={{ color: '#9090c0' }}>
                     {new Date(payment.paid_at).toLocaleDateString('ja-JP')}
                     {payment.memo && ` - ${payment.memo}`}
                   </p>
                 </div>
                 <div className="text-right">
                   <p
-                    className="text-sm font-bold"
-                    style={{ color: payment.type === 'extra' ? '#ffd700' : '#44ff44' }}
+                    className="text-xs font-bold"
+                    style={{ color: payment.type === 'extra' ? '#f8d830' : '#30f848' }}
                   >
                     -{formatCurrency(payment.amount)}
                   </p>
-                  <p className="text-xs" style={{ color: '#4488ff' }}>
-                    +{payment.xp_earned}XP
+                  <p className="text-[10px]" style={{ color: '#3080f8' }}>
+                    +{payment.xp_earned}EXP
                   </p>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-center py-6" style={{ color: '#8888aa' }}>
-            まだ戦闘記録がありません
-          </p>
+          <div className="pixel-window text-center">
+            <p style={{ color: '#9090c0' }}>
+              まだせんとうきろくがありません
+            </p>
+          </div>
         )}
       </div>
 
       {/* Action Buttons */}
       {!boss.is_defeated && (
-        <div className="flex gap-3 mb-6">
+        <div className="flex gap-2 mb-6">
           <Link
             href={`/record?boss=${id}&type=normal`}
-            className="flex-1 text-center py-3 rounded-xl font-bold text-base transition-all active:scale-[0.97]"
-            style={{
-              backgroundColor: '#4488ff',
-              color: '#ffffff',
-              boxShadow: '0 0 12px rgba(68, 136, 255, 0.3)',
-            }}
+            className="flex-1 pixel-btn pixel-btn-attack text-sm"
           >
-            &#x2694;&#xFE0F; 攻撃する
+            ⚔️ こうげき
           </Link>
           <Link
             href={`/record?boss=${id}&type=extra`}
-            className="flex-1 text-center py-3 rounded-xl font-bold text-base transition-all active:scale-[0.97]"
-            style={{
-              backgroundColor: '#ffd700',
-              color: '#0f0f23',
-              boxShadow: '0 0 12px rgba(255, 215, 0, 0.3)',
-            }}
+            className="flex-1 pixel-btn pixel-btn-gold text-sm"
           >
-            &#x1F4A5; 必殺技
+            💥 ひっさつわざ
           </Link>
         </div>
       )}
@@ -208,8 +194,8 @@ export default function BattlePage() {
     <Suspense fallback={
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="text-4xl mb-3 animate-pulse">&#x2694;&#xFE0F;</p>
-          <p className="text-sm" style={{ color: '#8888aa' }}>読み込み中...</p>
+          <p className="text-3xl mb-3 animate-bounce-pixel">⚔️</p>
+          <p className="text-sm animate-blink" style={{ color: '#9090c0' }}>Now Loading...</p>
         </div>
       </div>
     }>

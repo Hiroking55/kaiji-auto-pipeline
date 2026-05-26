@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
-import { Noto_Sans_JP } from 'next/font/google';
+import { DotGothic16 } from 'next/font/google';
 import NavBar from '@/components/NavBar';
 import './globals.css';
 
-const notoSansJP = Noto_Sans_JP({
+const dotGothic = DotGothic16({
+  weight: '400',
   subsets: ['latin'],
   display: 'swap',
 });
@@ -19,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" className={notoSansJP.className}>
-      <body style={{ backgroundColor: '#0f0f23' }}>
+    <html lang="ja" className={dotGothic.className}>
+      <body className="scanlines" style={{ backgroundColor: '#0a0a1a' }}>
         <div className="max-w-md mx-auto pb-20">
           {children}
         </div>

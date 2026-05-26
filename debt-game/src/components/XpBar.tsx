@@ -12,23 +12,20 @@ export default function XpBar({ current, max, level }: XpBarProps) {
   return (
     <div className="w-full">
       <div className="flex justify-between items-center text-xs mb-1">
-        <span className="font-bold" style={{ color: '#ffd700' }}>
+        <span className="font-bold text-glow-gold" style={{ color: '#f8d830' }}>
           Lv.{level}
         </span>
-        <span style={{ color: '#8888aa' }}>
-          {current}/{max}
+        <span style={{ color: '#9090c0' }}>
+          EXP {current}/{max}
         </span>
       </div>
-      <div
-        className="w-full h-3 rounded-full overflow-hidden"
-        style={{ backgroundColor: '#1a1a2e' }}
-      >
+      <div className="pixel-bar-track pixel-bar-track-sm">
         <div
-          className="h-3 rounded-full transition-all duration-700 ease-out"
+          className="pixel-bar-fill"
           style={{
             width: `${percentage}%`,
-            background: 'linear-gradient(90deg, #4488ff, #44bbff)',
-            boxShadow: '0 0 8px #4488ff80',
+            backgroundColor: '#3080f8',
+            boxShadow: 'inset 0 -2px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.3)',
           }}
         />
       </div>

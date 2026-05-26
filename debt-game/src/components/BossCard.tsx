@@ -14,39 +14,36 @@ export default function BossCard({ boss }: BossCardProps) {
 
   return (
     <Link href={`/battle?id=${boss.id}`} className="block">
-      <div
-        className={`rounded-xl p-4 border transition-all duration-200 ${
-          boss.is_defeated
-            ? 'opacity-50 border-green-500/50'
-            : 'border-white/10 active:scale-[0.98]'
-        }`}
-        style={{ backgroundColor: '#16213e' }}
-      >
-        <div className="flex items-start justify-between mb-3">
+      <div className={`pixel-window ${boss.is_defeated ? 'defeated' : ''}`}>
+        <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">{boss.emoji}</span>
+            <span className="text-2xl">{boss.emoji}</span>
             <div>
-              <h3 className="font-bold text-base" style={{ color: '#e0e0e0' }}>
+              <h3 className="font-bold text-sm" style={{ color: '#ffffff' }}>
                 {boss.name}
               </h3>
-              <p className="text-xs" style={{ color: '#8888aa' }}>
+              <p className="text-[10px]" style={{ color: '#9090c0' }}>
                 {boss.subtitle}
               </p>
             </div>
           </div>
           {boss.is_defeated && (
             <span
-              className="text-xs font-bold px-2 py-1 rounded"
-              style={{ backgroundColor: '#44ff4420', color: '#44ff44' }}
+              className="text-[10px] font-bold px-2 py-0.5"
+              style={{
+                backgroundColor: '#30f84830',
+                color: '#30f848',
+                border: '1px solid #30f848',
+              }}
             >
-              DEFEATED
+              撃破
             </span>
           )}
         </div>
 
         <HpBar percentage={hpPercentage} size="sm" />
 
-        <div className="flex justify-between items-center mt-2 text-xs" style={{ color: '#8888aa' }}>
+        <div className="flex justify-between items-center mt-1 text-[10px]" style={{ color: '#9090c0' }}>
           <span>
             {formatCurrency(boss.current_hp)} / {formatCurrency(boss.original_hp)}
           </span>

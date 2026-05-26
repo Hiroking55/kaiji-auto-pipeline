@@ -14,10 +14,10 @@ interface DebtEntry {
 }
 
 const DEBT_TYPES = [
-  { value: 'consumer_finance', label: 'サラ金（消費者金融）' },
-  { value: 'credit_card', label: 'クレジットカード（リボ払い）' },
-  { value: 'loan', label: 'ローン（銀行等）' },
-  { value: 'student_loan', label: '奨学金' },
+  { value: 'consumer_finance', label: 'サラきん（しょうひしゃきんゆう）' },
+  { value: 'credit_card', label: 'クレジットカード（リボばらい）' },
+  { value: 'loan', label: 'ローン（ぎんこうとう）' },
+  { value: 'student_loan', label: 'しょうがくきん' },
 ] as const;
 
 const EMPTY_DEBT: DebtEntry = {
@@ -60,7 +60,7 @@ export default function SetupPage() {
     setIsSubmitting(true);
     try {
       setupGame({
-        playerName: playerName.trim() || '勇者',
+        playerName: playerName.trim() || 'ゆうしゃ',
         monthlyIncome: Number(monthlyIncome) || 0,
         fixedExpenses: Number(fixedExpenses) || 0,
         debts: debts
@@ -83,12 +83,12 @@ export default function SetupPage() {
   };
 
   const handleReset = () => {
-    if (!confirm('全てのデータをリセットしますか？この操作は取り消せません。')) return;
+    if (!confirm('ぜんてのデータをリセットしますか？このそうさはとりけせません。')) return;
     setIsResetting(true);
     try {
       resetAllData();
       setupGame({
-        playerName: playerName.trim() || '勇者',
+        playerName: playerName.trim() || 'ゆうしゃ',
         monthlyIncome: Number(monthlyIncome) || 0,
         fixedExpenses: Number(fixedExpenses) || 0,
         debts: debts
@@ -110,131 +110,120 @@ export default function SetupPage() {
     }
   };
 
-  const inputStyle: React.CSSProperties = {
-    backgroundColor: '#1a1a2e',
-    color: '#e0e0e0',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  };
-
-  const labelStyle: React.CSSProperties = {
-    color: '#8888aa',
-  };
-
   return (
-    <div className="px-4 pt-6 pb-8">
+    <div className="px-3 pt-5 pb-8">
       {/* Header */}
-      <div className="text-center mb-8">
-        <p className="text-5xl mb-3">&#x2694;&#xFE0F;</p>
-        <h1 className="text-2xl font-bold" style={{ color: '#ffd700' }}>
-          借金キラー
+      <div className="pixel-window text-center mb-5">
+        <p className="text-4xl mb-2">⚔️</p>
+        <h1 className="text-xl font-bold text-glow-gold" style={{ color: '#f8d830' }}>
+          しゃっきんキラー
         </h1>
-        <p className="text-sm mt-1" style={{ color: '#8888aa' }}>
-          借金返済RPG - 冒険の準備をしよう
+        <p className="text-xs mt-1" style={{ color: '#9090c0' }}>
+          しゃっきんへんさいRPG - ぼうけんのじゅんび
         </p>
       </div>
 
       <form onSubmit={handleSubmit}>
         {/* Player Info */}
-        <div
-          className="rounded-xl p-5 border border-white/10 mb-5"
-          style={{ backgroundColor: '#16213e' }}
-        >
-          <h2 className="text-base font-bold mb-4" style={{ color: '#e0e0e0' }}>
-            プレイヤー情報
-          </h2>
+        <div className="pixel-window mb-4">
+          <div className="flex items-center gap-2 mb-3">
+            <span style={{ color: '#f8d830' }}>▶</span>
+            <h2 className="text-sm font-bold" style={{ color: '#ffffff' }}>
+              プレイヤーじょうほう
+            </h2>
+          </div>
 
-          <div className="mb-4">
-            <label className="block text-xs font-medium mb-1" style={labelStyle}>
-              名前
+          <div className="mb-3">
+            <label className="block text-[10px] font-bold mb-1" style={{ color: '#9090c0' }}>
+              なまえ
             </label>
             <input
               type="text"
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
-              placeholder="勇者"
-              className="w-full rounded-lg px-3 py-2 text-sm border focus:outline-none focus:border-blue-500"
-              style={inputStyle}
+              placeholder="ゆうしゃ"
+              className="w-full pixel-input text-sm"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-xs font-medium mb-1" style={labelStyle}>
-                月収（手取り）
+              <label className="block text-[10px] font-bold mb-1" style={{ color: '#9090c0' }}>
+                げっしゅう（てどり）
               </label>
               <input
                 type="number"
                 value={monthlyIncome}
                 onChange={(e) => setMonthlyIncome(e.target.value)}
                 placeholder="250000"
-                className="w-full rounded-lg px-3 py-2 text-sm border focus:outline-none focus:border-blue-500"
-                style={inputStyle}
+                className="w-full pixel-input text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1" style={labelStyle}>
-                固定費（家賃等）
+              <label className="block text-[10px] font-bold mb-1" style={{ color: '#9090c0' }}>
+                こていひ（やちんとう）
               </label>
               <input
                 type="number"
                 value={fixedExpenses}
                 onChange={(e) => setFixedExpenses(e.target.value)}
                 placeholder="80000"
-                className="w-full rounded-lg px-3 py-2 text-sm border focus:outline-none focus:border-blue-500"
-                style={inputStyle}
+                className="w-full pixel-input text-sm"
               />
             </div>
           </div>
         </div>
 
         {/* Debt List */}
-        <div className="mb-5">
+        <div className="mb-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-bold" style={{ color: '#e0e0e0' }}>
-              借金（ボス）一覧
-            </h2>
+            <div className="flex items-center gap-2">
+              <span style={{ color: '#f8d830' }}>▶</span>
+              <h2 className="text-sm font-bold" style={{ color: '#ffffff' }}>
+                しゃっきん（ボス）いちらん
+              </h2>
+            </div>
             <button
               type="button"
               onClick={addDebt}
-              className="text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
-              style={{ backgroundColor: '#4488ff30', color: '#4488ff' }}
+              className="pixel-btn text-[10px] !py-1 !px-2"
+              style={{ outlineWidth: '2px', borderWidth: '2px' }}
             >
-              + ボス追加
+              + ついか
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {debts.map((debt, index) => (
-              <div
-                key={index}
-                className="rounded-xl p-4 border border-white/10"
-                style={{ backgroundColor: '#16213e' }}
-              >
+              <div key={index} className="pixel-window">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-bold" style={{ color: '#ffd700' }}>
-                    ボス #{index + 1}
+                  <span className="text-xs font-bold" style={{ color: '#f8d830' }}>
+                    ★ ボス #{index + 1}
                   </span>
                   {debts.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeDebt(index)}
-                      className="text-xs px-2 py-1 rounded transition-colors"
-                      style={{ backgroundColor: '#ff444430', color: '#ff4444' }}
+                      className="text-[10px] px-2 py-0.5 font-bold"
+                      style={{
+                        backgroundColor: '#f8303020',
+                        color: '#f83030',
+                        border: '1px solid #f83030',
+                      }}
                     >
-                      削除
+                      さくじょ
                     </button>
                   )}
                 </div>
 
-                <div className="mb-3">
-                  <label className="block text-xs font-medium mb-1" style={labelStyle}>
-                    借金の種類
+                <div className="mb-2">
+                  <label className="block text-[10px] font-bold mb-1" style={{ color: '#9090c0' }}>
+                    しゃっきんのしゅるい
                   </label>
                   <select
                     value={debt.debtType}
                     onChange={(e) => updateDebt(index, 'debtType', e.target.value)}
-                    className="w-full rounded-lg px-3 py-2 text-sm border focus:outline-none focus:border-blue-500"
-                    style={inputStyle}
+                    className="w-full pixel-select text-sm"
                   >
                     {DEBT_TYPES.map((type) => (
                       <option key={type.value} value={type.value}>
@@ -244,37 +233,35 @@ export default function SetupPage() {
                   </select>
                 </div>
 
-                <div className="mb-3">
-                  <label className="block text-xs font-medium mb-1" style={labelStyle}>
-                    ボス名（任意）
+                <div className="mb-2">
+                  <label className="block text-[10px] font-bold mb-1" style={{ color: '#9090c0' }}>
+                    ボスめい（にんい）
                   </label>
                   <input
                     type="text"
                     value={debt.customName}
                     onChange={(e) => updateDebt(index, 'customName', e.target.value)}
-                    placeholder="例: 楽天カードの悪魔"
-                    className="w-full rounded-lg px-3 py-2 text-sm border focus:outline-none focus:border-blue-500"
-                    style={inputStyle}
+                    placeholder="れい: らくてんカードのあくま"
+                    className="w-full pixel-input text-sm"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 mb-3">
+                <div className="grid grid-cols-2 gap-2 mb-2">
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={labelStyle}>
-                      借金額（円）
+                    <label className="block text-[10px] font-bold mb-1" style={{ color: '#9090c0' }}>
+                      しゃっきんがく（えん）
                     </label>
                     <input
                       type="number"
                       value={debt.amount}
                       onChange={(e) => updateDebt(index, 'amount', e.target.value)}
                       placeholder="500000"
-                      className="w-full rounded-lg px-3 py-2 text-sm border focus:outline-none focus:border-blue-500"
-                      style={inputStyle}
+                      className="w-full pixel-input text-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={labelStyle}>
-                      年利（%）
+                    <label className="block text-[10px] font-bold mb-1" style={{ color: '#9090c0' }}>
+                      ねんり（%）
                     </label>
                     <input
                       type="number"
@@ -282,29 +269,27 @@ export default function SetupPage() {
                       value={debt.interestRate}
                       onChange={(e) => updateDebt(index, 'interestRate', e.target.value)}
                       placeholder="15.0"
-                      className="w-full rounded-lg px-3 py-2 text-sm border focus:outline-none focus:border-blue-500"
-                      style={inputStyle}
+                      className="w-full pixel-input text-sm"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={labelStyle}>
-                      毎月返済額（円）
+                    <label className="block text-[10px] font-bold mb-1" style={{ color: '#9090c0' }}>
+                      まいつきへんさい（えん）
                     </label>
                     <input
                       type="number"
                       value={debt.minMonthly}
                       onChange={(e) => updateDebt(index, 'minMonthly', e.target.value)}
                       placeholder="15000"
-                      className="w-full rounded-lg px-3 py-2 text-sm border focus:outline-none focus:border-blue-500"
-                      style={inputStyle}
+                      className="w-full pixel-input text-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={labelStyle}>
-                      支払日
+                    <label className="block text-[10px] font-bold mb-1" style={{ color: '#9090c0' }}>
+                      しはらいび
                     </label>
                     <input
                       type="number"
@@ -313,8 +298,7 @@ export default function SetupPage() {
                       value={debt.paymentDay}
                       onChange={(e) => updateDebt(index, 'paymentDay', e.target.value)}
                       placeholder="27"
-                      className="w-full rounded-lg px-3 py-2 text-sm border focus:outline-none focus:border-blue-500"
-                      style={inputStyle}
+                      className="w-full pixel-input text-sm"
                     />
                   </div>
                 </div>
@@ -327,40 +311,32 @@ export default function SetupPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-4 rounded-xl font-bold text-lg transition-all active:scale-[0.97] disabled:opacity-50"
-          style={{
-            backgroundColor: '#ffd700',
-            color: '#0f0f23',
-            boxShadow: '0 0 20px rgba(255, 215, 0, 0.3)',
-          }}
+          className="w-full pixel-btn pixel-btn-gold text-base disabled:opacity-40"
         >
-          {isSubmitting ? '準備中...' : '冒険を始める！'}
+          {isSubmitting ? 'じゅんびちゅう...' : '▶ ぼうけんをはじめる！'}
         </button>
       </form>
 
       {/* Reset Section */}
-      <div
-        className="mt-8 rounded-xl p-5 border border-white/5"
-        style={{ backgroundColor: '#1a1a2e' }}
-      >
-        <h3 className="text-sm font-bold mb-2" style={{ color: '#ff4444' }}>
-          データリセット
+      <div className="mt-6 pixel-window-dark">
+        <h3 className="text-xs font-bold mb-2" style={{ color: '#f83030' }}>
+          ⚠ データリセット
         </h3>
-        <p className="text-xs mb-3" style={{ color: '#8888aa' }}>
-          全てのデータを削除して、最初からやり直します。上のフォームに新しい情報を入力してからリセットしてください。
+        <p className="text-[10px] mb-2" style={{ color: '#9090c0' }}>
+          ぜんてのデータをさくじょして、さいしょからやりなおします。
         </p>
         <button
           type="button"
           onClick={handleReset}
           disabled={isResetting}
-          className="w-full py-2.5 rounded-lg text-sm font-bold transition-all active:scale-[0.97] disabled:opacity-50"
+          className="w-full py-2 text-xs font-bold disabled:opacity-40"
           style={{
-            backgroundColor: '#ff444430',
-            color: '#ff4444',
-            border: '1px solid rgba(255, 68, 68, 0.3)',
+            backgroundColor: '#f8303020',
+            color: '#f83030',
+            border: '2px solid #f83030',
           }}
         >
-          {isResetting ? 'リセット中...' : 'データをリセットして再設定'}
+          {isResetting ? 'リセットちゅう...' : 'データをリセット'}
         </button>
       </div>
     </div>
