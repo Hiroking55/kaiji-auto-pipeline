@@ -43,8 +43,12 @@ export default function Page() {
       <div className="glass-accent p-5">
         <div className="flex items-center gap-4 mb-4">
           <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shrink-0"
-            style={{ background: 'linear-gradient(135deg, rgba(232,184,73,0.15), rgba(155,110,232,0.1))' }}
+            className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shrink-0 animate-float"
+            style={{
+              background: 'linear-gradient(135deg, rgba(212,168,50,0.12), rgba(136,96,216,0.08))',
+              boxShadow: '0 0 24px rgba(212,168,50,0.1), inset 0 0 12px rgba(212,168,50,0.05)',
+              border: '1px solid rgba(212,168,50,0.1)',
+            }}
           >
             ⚔️
           </div>

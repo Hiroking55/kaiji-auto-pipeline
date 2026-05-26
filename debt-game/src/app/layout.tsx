@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className={font.className}>
-      <body>
+      <body className="vignette">
         <div className="max-w-md mx-auto pb-24 px-4">
           {children}
         </div>
