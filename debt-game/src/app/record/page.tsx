@@ -21,7 +21,6 @@ interface PaymentResult {
 
 function RecordForm() {
   const searchParams = useSearchParams();
-
   const [bosses, setBosses] = useState<Boss[]>([]);
   const [recentPayments, setRecentPayments] = useState<(Payment & { boss_name: string; boss_emoji: string })[]>([]);
   const [selectedBossId, setSelectedBossId] = useState('');
@@ -39,16 +38,13 @@ function RecordForm() {
       const activeBosses = data.bosses.filter((b) => !b.is_defeated);
       setBosses(activeBosses);
       setRecentPayments(data.recentPayments);
-
       const preselectedBoss = searchParams.get('boss');
       const preselectedType = searchParams.get('type');
-
       if (preselectedBoss && activeBosses.some((b) => b.id === preselectedBoss)) {
         setSelectedBossId(preselectedBoss);
       } else if (activeBosses.length > 0) {
         setSelectedBossId(activeBosses[0].id);
       }
-
       if (preselectedType === 'normal' || preselectedType === 'extra') {
         setType(preselectedType);
       }
@@ -59,10 +55,8 @@ function RecordForm() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!selectedBossId || !amount || submitting) return;
-
     const parsedAmount = parseInt(amount, 10);
     if (isNaN(parsedAmount) || parsedAmount <= 0) return;
-
     const boss = bosses.find((b) => b.id === selectedBossId);
     if (!boss) return;
 
@@ -75,74 +69,58 @@ function RecordForm() {
         paidAt,
         memo: memo || undefined,
       });
-
-      setResult({
-        ...res,
-        bossName: boss.name,
-        bossEmoji: boss.emoji,
-        amount: parsedAmount,
-        type,
-      });
-
+      setResult({ ...res, bossName: boss.name, bossEmoji: boss.emoji, amount: parsedAmount, type });
       const data = getDashboardData();
       if (data) {
         setBosses(data.bosses.filter((b) => !b.is_defeated));
         setRecentPayments(data.recentPayments);
       }
-
       setAmount('');
       setMemo('');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'きろくにしっぱいしました');
+      alert(err instanceof Error ? err.message : '記録に失敗しました');
     } finally {
       setSubmitting(false);
     }
-  }
-
-  function dismissResult() {
-    setResult(null);
   }
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-3xl mb-3 animate-bounce-pixel">⚔️</div>
-          <p className="animate-blink" style={{ color: '#9090c0' }}>Now Loading...</p>
+          <p className="text-3xl mb-3 animate-pulse-glow">⚔️</p>
+          <p className="text-sm" style={{ color: '#a09078' }}>Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: '#0a0a1a' }}>
+    <div className="min-h-screen pb-24" style={{ backgroundColor: '#12100e' }}>
       {/* Header */}
-      <div className="px-3 pt-5 pb-3">
-        <h1 className="text-xl font-bold text-center text-glow-gold" style={{ color: '#f8d830' }}>
-          ⚔️ たたかう
+      <div className="px-3 pt-4 pb-3">
+        <h1 className="text-xl font-black text-center" style={{ color: '#ffc830' }}>
+          クエスト出発
         </h1>
-        <p className="text-center text-xs mt-1" style={{ color: '#9090c0' }}>
-          へんさいをきろくしてこうげきしよう
+        <p className="text-center text-[11px] mt-1" style={{ color: '#a09078' }}>
+          返済を記録して討伐ダメージを与えよう
         </p>
       </div>
 
-      {/* Form Card */}
-      <div className="mx-3 pixel-window">
+      {/* Form */}
+      <div className="mx-3 mh-panel p-4">
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Boss Selector */}
           <div>
-            <label className="block text-xs font-bold mb-1" style={{ color: '#f8d830' }}>
-              ▶ こうげきたいしょう
+            <label className="block text-xs font-bold mb-1.5" style={{ color: '#ffc830' }}>
+              討伐対象
             </label>
             {bosses.length === 0 ? (
-              <p className="text-xs" style={{ color: '#9090c0' }}>
-                たおせるボスがいません
-              </p>
+              <p className="text-sm" style={{ color: '#a09078' }}>討伐可能なモンスターがいません</p>
             ) : (
               <select
                 value={selectedBossId}
                 onChange={(e) => setSelectedBossId(e.target.value)}
-                className="w-full pixel-select text-sm"
+                className="mh-select"
               >
                 {bosses.map((boss) => (
                   <option key={boss.id} value={boss.id}>
@@ -153,18 +131,12 @@ function RecordForm() {
             )}
           </div>
 
-          {/* Amount Input */}
           <div>
-            <label className="block text-xs font-bold mb-1" style={{ color: '#f8d830' }}>
-              ▶ こうげきりょく（きんがく）
+            <label className="block text-xs font-bold mb-1.5" style={{ color: '#ffc830' }}>
+              攻撃力（返済額）
             </label>
             <div className="relative">
-              <span
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold"
-                style={{ color: '#f8d830' }}
-              >
-                ¥
-              </span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold" style={{ color: '#ffc830' }}>¥</span>
               <input
                 type="number"
                 inputMode="numeric"
@@ -173,133 +145,112 @@ function RecordForm() {
                 placeholder="0"
                 min="1"
                 required
-                className="w-full pixel-input text-sm pl-8"
+                className="mh-input pl-8"
               />
             </div>
           </div>
 
-          {/* Date Input */}
           <div>
-            <label className="block text-xs font-bold mb-1" style={{ color: '#f8d830' }}>
-              ▶ こうげきび
+            <label className="block text-xs font-bold mb-1.5" style={{ color: '#ffc830' }}>
+              出撃日
             </label>
             <input
               type="date"
               value={paidAt}
               onChange={(e) => setPaidAt(e.target.value)}
               required
-              className="w-full pixel-input text-sm"
+              className="mh-input"
               style={{ colorScheme: 'dark' }}
             />
           </div>
 
-          {/* Type Toggle */}
           <div>
-            <label className="block text-xs font-bold mb-1" style={{ color: '#f8d830' }}>
-              ▶ こうげきタイプ
+            <label className="block text-xs font-bold mb-1.5" style={{ color: '#ffc830' }}>
+              攻撃タイプ
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setType('normal')}
-                className="py-2 px-3 text-xs font-bold text-center"
+                className="py-2.5 px-3 text-xs font-bold text-center rounded"
                 style={{
-                  backgroundColor: type === 'normal' ? '#f8783030' : '#0e0e2a',
-                  border: `2px solid ${type === 'normal' ? '#f87830' : '#404070'}`,
-                  color: type === 'normal' ? '#f87830' : '#9090c0',
+                  backgroundColor: type === 'normal' ? 'rgba(255,136,32,0.2)' : '#18140e',
+                  border: `2px solid ${type === 'normal' ? '#ff8820' : '#3a3020'}`,
+                  color: type === 'normal' ? '#ff8820' : '#706050',
                 }}
               >
-                ⚔️ つうじょう
+                ⚔️ 通常攻撃
               </button>
               <button
                 type="button"
                 onClick={() => setType('extra')}
-                className="py-2 px-3 text-xs font-bold text-center"
+                className="py-2.5 px-3 text-xs font-bold text-center rounded"
                 style={{
-                  backgroundColor: type === 'extra' ? '#f8d83030' : '#0e0e2a',
-                  border: `2px solid ${type === 'extra' ? '#f8d830' : '#404070'}`,
-                  color: type === 'extra' ? '#f8d830' : '#9090c0',
+                  backgroundColor: type === 'extra' ? 'rgba(255,200,48,0.2)' : '#18140e',
+                  border: `2px solid ${type === 'extra' ? '#ffc830' : '#3a3020'}`,
+                  color: type === 'extra' ? '#ffc830' : '#706050',
                 }}
               >
-                💥 ひっさつ
+                💥 必殺技
               </button>
             </div>
           </div>
 
-          {/* Memo Input */}
           <div>
-            <label className="block text-xs font-bold mb-1" style={{ color: '#f8d830' }}>
-              ▶ メモ（にんい）
+            <label className="block text-xs font-bold mb-1.5" style={{ color: '#ffc830' }}>
+              メモ（任意）
             </label>
             <input
               type="text"
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
-              placeholder="れい: ボーナスからへんさい"
-              className="w-full pixel-input text-sm"
+              placeholder="例: ボーナスから返済"
+              className="mh-input"
             />
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={submitting || bosses.length === 0 || !amount}
-            className="w-full pixel-btn pixel-btn-attack text-base disabled:opacity-40"
+            className="w-full mh-btn mh-btn-primary text-base disabled:opacity-40"
           >
-            {submitting ? 'こうげきちゅう...' : '⚔️ こうげき！'}
+            {submitting ? '攻撃中...' : '⚔️ 出撃！'}
           </button>
         </form>
       </div>
 
-      {/* Recent Payments */}
+      {/* Recent Hunts */}
       <div className="mx-3 mt-4">
-        <div className="flex items-center gap-2 mb-3">
-          <span style={{ color: '#f8d830' }}>▶</span>
-          <h2 className="text-sm font-bold" style={{ color: '#ffffff' }}>
-            さいきんのこうげき
-          </h2>
+        <div className="mh-section-header">
+          <h2>最近の狩猟記録</h2>
         </div>
         {recentPayments.length === 0 ? (
-          <div className="pixel-window text-center">
+          <div className="mh-panel p-6 text-center">
             <p className="text-2xl mb-2">🗡️</p>
-            <p className="text-xs" style={{ color: '#9090c0' }}>
-              まだこうげききろくがありません
-            </p>
+            <p className="text-xs" style={{ color: '#a09078' }}>まだ狩猟記録がありません</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {recentPayments.map((payment) => (
-              <div key={payment.id} className="pixel-window-dark">
+              <div key={payment.id} className="mh-panel-dark p-2.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-lg">{payment.boss_emoji}</span>
                     <div>
-                      <p className="text-xs font-bold" style={{ color: '#ffffff' }}>
-                        {payment.boss_name}
-                      </p>
-                      <p className="text-[10px]" style={{ color: '#9090c0' }}>
+                      <p className="text-xs font-bold" style={{ color: '#f0e8d8' }}>{payment.boss_name}</p>
+                      <p className="text-[10px]" style={{ color: '#a09078' }}>
                         {payment.paid_at}
-                        {payment.type === 'extra' && (
-                          <span className="ml-1" style={{ color: '#f8d830' }}>
-                            ★ ひっさつ
-                          </span>
-                        )}
+                        {payment.type === 'extra' && <span className="ml-1" style={{ color: '#ffc830' }}>💥 必殺技</span>}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs font-bold" style={{ color: '#f87830' }}>
-                      -{formatCurrency(payment.amount)}
-                    </p>
-                    <p className="text-[10px]" style={{ color: '#f8d830' }}>
-                      +{payment.xp_earned} EXP
-                    </p>
+                    <p className="text-xs font-black" style={{ color: '#ff8820' }}>-{formatCurrency(payment.amount)}</p>
+                    <p className="text-[10px] font-bold" style={{ color: '#ffc830' }}>+{payment.xp_earned} EXP</p>
                   </div>
                 </div>
                 {payment.memo && (
-                  <p className="text-[10px] mt-1 pl-8" style={{ color: '#9090c0' }}>
-                    {payment.memo}
-                  </p>
+                  <p className="text-[10px] mt-1 pl-8" style={{ color: '#706050' }}>{payment.memo}</p>
                 )}
               </div>
             ))}
@@ -310,83 +261,55 @@ function RecordForm() {
       {/* Result Modal */}
       {result && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
-          <div className="w-full max-w-sm pixel-window animate-slide-up">
-            {/* Damage display */}
+          <div className="w-full max-w-sm mh-panel-accent p-5 animate-slide-up">
             <div className="text-center mb-3">
-              <div className="text-4xl mb-2">
+              <p className="text-4xl mb-2">
                 {result.bossDefeated ? '💀' : result.type === 'extra' ? '💥' : '⚔️'}
-              </div>
-              <p className="text-sm font-bold" style={{ color: '#ffffff' }}>
+              </p>
+              <p className="text-sm font-bold" style={{ color: '#f0e8d8' }}>
                 {result.bossEmoji} {result.bossName} に
               </p>
-              <p className="text-xl font-bold mt-1 text-glow-red" style={{ color: '#f87830' }}>
+              <p className="text-xl font-black mt-1" style={{ color: '#ff8820' }}>
                 {formatCurrency(result.amount)} ダメージ！
               </p>
             </div>
 
-            {/* XP earned */}
             <div className="text-center my-3">
-              <p className="text-lg font-bold animate-xp" style={{ color: '#f8d830' }}>
+              <p className="text-lg font-black animate-xp" style={{ color: '#ffc830' }}>
                 +{result.xpEarned} EXP
               </p>
             </div>
 
-            {/* Level up */}
             {result.levelUp && (
-              <div
-                className="text-center py-2 px-3 mb-2"
-                style={{
-                  backgroundColor: '#f8d83020',
-                  border: '2px solid #f8d830',
-                }}
-              >
-                <p className="text-sm font-bold text-glow-gold" style={{ color: '#f8d830' }}>
-                  ★ レベルアップ！ Lv.{result.newLevel} ★
+              <div className="mh-panel-dark p-3 text-center mb-2" style={{ borderColor: '#ffc830' }}>
+                <p className="text-sm font-black" style={{ color: '#ffc830' }}>
+                  🎉 ハンターランクUP！ HR {result.newLevel}
                 </p>
               </div>
             )}
 
-            {/* Boss defeated */}
             {result.bossDefeated && (
-              <div
-                className="text-center py-2 px-3 mb-2"
-                style={{
-                  backgroundColor: '#30f84820',
-                  border: '2px solid #30f848',
-                }}
-              >
-                <p className="text-sm font-bold text-glow-green" style={{ color: '#30f848' }}>
-                  ★ ボスをたおした！ ★
+              <div className="mh-panel-dark p-3 text-center mb-2" style={{ borderColor: '#40c850' }}>
+                <p className="text-sm font-black quest-clear-stamp">
+                  QUEST CLEAR!
                 </p>
               </div>
             )}
 
-            {/* Achievements */}
             {result.achievementsEarned.length > 0 && (
-              <div
-                className="py-2 px-3 mb-2"
-                style={{
-                  backgroundColor: '#f8d83010',
-                  border: '2px solid #f8d830',
-                }}
-              >
-                <p className="text-xs font-bold mb-1" style={{ color: '#f8d830' }}>
-                  🏆 じっせきかいじょ！
-                </p>
+              <div className="mh-panel-dark p-3 mb-2" style={{ borderColor: '#ffc830' }}>
+                <p className="text-xs font-bold mb-1" style={{ color: '#ffc830' }}>🏆 勲章獲得！</p>
                 {result.achievementsEarned.map((name, i) => (
-                  <p key={i} className="text-xs" style={{ color: '#ffffff' }}>
-                    {name}
-                  </p>
+                  <p key={i} className="text-xs" style={{ color: '#f0e8d8' }}>{name}</p>
                 ))}
               </div>
             )}
 
-            {/* Dismiss button */}
             <button
-              onClick={dismissResult}
-              className="w-full mt-3 pixel-btn text-sm"
+              onClick={() => setResult(null)}
+              className="w-full mt-3 mh-btn text-sm"
             >
-              ▶ つぎへ
+              OK
             </button>
           </div>
         </div>
@@ -399,16 +322,11 @@ function RecordForm() {
 
 export default function RecordPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-3xl mb-3 animate-bounce-pixel">⚔️</div>
-            <p className="animate-blink" style={{ color: '#9090c0' }}>Now Loading...</p>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-3xl animate-pulse-glow">⚔️</p>
+      </div>
+    }>
       <RecordForm />
     </Suspense>
   );

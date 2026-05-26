@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const navItems = [
-  { href: '/', label: 'ホーム', icon: '🏠' },
-  { href: '/record', label: 'たたかう', icon: '⚔️' },
-  { href: '/status', label: 'つよさ', icon: '📊' },
-  { href: '/setup', label: 'せってい', icon: '⚙️' },
+  { href: '/', label: '拠点', icon: '🏠' },
+  { href: '/record', label: '出発', icon: '⚔️' },
+  { href: '/status', label: 'カード', icon: '📋' },
+  { href: '/setup', label: '設定', icon: '⚙️' },
 ];
 
 export default function NavBar() {
@@ -17,12 +17,11 @@ export default function NavBar() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-50"
       style={{
-        backgroundColor: '#1a1040',
-        borderTop: '3px solid #ffffff',
-        boxShadow: '0 -3px 0 #6060a0',
+        backgroundColor: '#1e1a14',
+        borderTop: '2px solid #4a3c28',
       }}
     >
-      <div className="flex justify-around items-center h-16 max-w-lg mx-auto px-2 pb-[env(safe-area-inset-bottom)]">
+      <div className="flex justify-around items-center h-14 max-w-lg mx-auto px-2 pb-[env(safe-area-inset-bottom)]">
         {navItems.map((item) => {
           const isActive =
             item.href === '/'
@@ -37,19 +36,13 @@ export default function NavBar() {
             >
               <span className="text-lg">{item.icon}</span>
               <span
-                className="text-[10px]"
+                className="text-[10px] font-bold"
                 style={{
-                  color: isActive ? '#f8d830' : '#9090c0',
-                  textShadow: isActive ? '0 0 6px #f8d830' : 'none',
+                  color: isActive ? '#ffc830' : '#706050',
                 }}
               >
                 {item.label}
               </span>
-              {isActive && (
-                <span className="animate-blink" style={{ color: '#f8d830', fontSize: '6px', marginTop: '-2px' }}>
-                  ▶
-                </span>
-              )}
             </Link>
           );
         })}

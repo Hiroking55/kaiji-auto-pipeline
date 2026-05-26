@@ -7,20 +7,18 @@ interface StatCardProps {
 
 export default function StatCard({ label, value, subValue, variant = 'default' }: StatCardProps) {
   const valueColor =
-    variant === 'positive' ? '#30f848' : variant === 'negative' ? '#f83030' : '#ffffff';
-  const subValueColor =
-    variant === 'positive' ? '#30f848' : variant === 'negative' ? '#f83030' : '#9090c0';
+    variant === 'positive' ? '#40c850' : variant === 'negative' ? '#e84040' : '#f0e8d8';
 
   return (
-    <div className="pixel-window-dark">
-      <p className="text-[10px] mb-1" style={{ color: '#9090c0' }}>
+    <div className="mh-panel-dark p-3">
+      <p className="text-[10px] font-bold mb-1" style={{ color: '#a09078' }}>
         {label}
       </p>
-      <p className="text-base font-bold" style={{ color: valueColor }}>
+      <p className="text-base font-black" style={{ color: valueColor }}>
         {value}
       </p>
       {subValue && (
-        <p className="text-[10px] mt-1" style={{ color: subValueColor }}>
+        <p className="text-[10px] mt-0.5" style={{ color: '#a09078' }}>
           {subValue}
         </p>
       )}

@@ -28,6 +28,9 @@ export function getDashboardData(): DashboardData | null {
 
   const monthlyPayments = getMonthlyPayments(year, month);
   const monthlyPaid = monthlyPayments.reduce((sum, p) => sum + p.amount, 0);
+  const monthlyPaymentCount = monthlyPayments.length;
+  const monthlyXpEarned = monthlyPayments.reduce((sum, p) => sum + p.xp_earned, 0);
+  const largestHitThisMonth = monthlyPayments.length > 0 ? Math.max(...monthlyPayments.map(p => p.amount)) : 0;
   const monthlyDebtPayments = bosses.filter(b => !b.is_defeated).reduce((sum, b) => sum + b.min_monthly, 0);
 
   const dailyBudget = calculateDailyBudget(
@@ -63,6 +66,9 @@ export function getDashboardData(): DashboardData | null {
     originalTotalDebt,
     previousDayDebt,
     monthlyPaid,
+    monthlyPaymentCount,
+    monthlyXpEarned,
+    largestHitThisMonth,
     dailyBudget,
     monthlyBudget,
     estimatedPayoff,
