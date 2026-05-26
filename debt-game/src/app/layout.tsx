@@ -3,9 +3,9 @@ import { Noto_Sans_JP } from 'next/font/google';
 import NavBar from '@/components/NavBar';
 import './globals.css';
 
-const notoSansJP = Noto_Sans_JP({
+const font = Noto_Sans_JP({
   subsets: ['latin'],
-  weight: ['400', '700', '900'],
+  weight: ['400', '500', '700', '800'],
   display: 'swap',
 });
 
@@ -20,9 +20,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" className={notoSansJP.className}>
-      <body style={{ backgroundColor: '#12100e' }}>
-        <div className="max-w-md mx-auto pb-20">
+    <html lang="ja" className={font.className}>
+      <body>
+        <div className="max-w-md mx-auto pb-24 px-4">
           {children}
         </div>
         <NavBar />

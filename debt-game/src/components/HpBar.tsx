@@ -3,26 +3,30 @@
 interface HpBarProps {
   percentage: number;
   showLabel?: boolean;
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export default function HpBar({ percentage, showLabel = false, size = 'md' }: HpBarProps) {
   const clamped = Math.max(0, Math.min(100, percentage));
-  const barColor = clamped > 60 ? '#e84040' : clamped > 30 ? '#e8a020' : '#40c850';
-  const trackClass = size === 'sm' ? 'mh-hp-track mh-hp-track-sm' : 'mh-hp-track';
+  const color = clamped > 60 ? '#e85d5d' : clamped > 30 ? '#e8b849' : '#4cce7b';
+  const sizeClass = size === 'sm' ? 'hp-track hp-track-sm' : size === 'lg' ? 'hp-track hp-track-lg' : 'hp-track';
 
   return (
     <div className="w-full">
       {showLabel && (
-        <div className="flex justify-between text-xs mb-1">
-          <span style={{ color: '#a09078' }}>HP</span>
-          <span style={{ color: '#f0e8d8' }}>{clamped}%</span>
+        <div className="flex justify-between text-[11px] mb-1.5 font-medium">
+          <span style={{ color: '#8890b0' }}>HP</span>
+          <span style={{ color: '#eef0f6' }}>{clamped}%</span>
         </div>
       )}
-      <div className={trackClass}>
+      <div className={sizeClass}>
         <div
-          className="mh-hp-fill"
-          style={{ width: `${clamped}%`, backgroundColor: barColor }}
+          className="hp-fill"
+          style={{
+            width: `${clamped}%`,
+            background: `linear-gradient(90deg, ${color}, ${color}dd)`,
+            boxShadow: `0 0 12px ${color}40`,
+          }}
         />
       </div>
     </div>

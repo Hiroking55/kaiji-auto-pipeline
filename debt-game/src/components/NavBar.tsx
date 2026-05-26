@@ -17,11 +17,13 @@ export default function NavBar() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-50"
       style={{
-        backgroundColor: '#1e1a14',
-        borderTop: '2px solid #4a3c28',
+        background: 'rgba(8, 11, 22, 0.85)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.06)',
       }}
     >
-      <div className="flex justify-around items-center h-14 max-w-lg mx-auto px-2 pb-[env(safe-area-inset-bottom)]">
+      <div className="flex justify-around items-center h-16 max-w-lg mx-auto px-4 pb-[env(safe-area-inset-bottom)]">
         {navItems.map((item) => {
           const isActive =
             item.href === '/'
@@ -32,13 +34,19 @@ export default function NavBar() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1"
+              className="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition-all duration-200"
             >
-              <span className="text-lg">{item.icon}</span>
               <span
-                className="text-[10px] font-bold"
+                className="text-xl transition-transform duration-200"
+                style={{ transform: isActive ? 'scale(1.15)' : 'scale(1)' }}
+              >
+                {item.icon}
+              </span>
+              <span
+                className="text-[10px] font-bold tracking-wide"
                 style={{
-                  color: isActive ? '#ffc830' : '#706050',
+                  color: isActive ? '#e8b849' : '#505878',
+                  textShadow: isActive ? '0 0 12px rgba(232,184,73,0.4)' : 'none',
                 }}
               >
                 {item.label}
