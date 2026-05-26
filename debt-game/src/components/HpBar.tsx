@@ -8,15 +8,15 @@ interface HpBarProps {
 
 export default function HpBar({ percentage, showLabel = false, size = 'md' }: HpBarProps) {
   const clamped = Math.max(0, Math.min(100, percentage));
-  const color = clamped > 60 ? '#d84848' : clamped > 30 ? '#d4a832' : '#38c070';
+  const color = clamped > 60 ? '#c04040' : clamped > 30 ? '#b89450' : '#40a060';
   const sizeClass = size === 'sm' ? 'hp-track hp-track-sm' : size === 'lg' ? 'hp-track hp-track-lg' : 'hp-track';
 
   return (
     <div className="w-full">
       {showLabel && (
         <div className="flex justify-between text-[11px] mb-1.5 font-medium">
-          <span style={{ color: '#8890b0' }}>HP</span>
-          <span style={{ color: '#eef0f6' }}>{clamped}%</span>
+          <span style={{ color: '#7c7870' }}>HP</span>
+          <span style={{ color: '#e8e6e2' }}>{clamped}%</span>
         </div>
       )}
       <div className={sizeClass}>

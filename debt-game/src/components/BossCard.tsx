@@ -38,7 +38,7 @@ export default function BossCard({ boss }: BossCardProps) {
               {boss.emoji}
             </div>
             <div>
-              <h3 className="font-extrabold text-[15px]" style={{ color: '#eef0f6' }}>
+              <h3 className="font-extrabold text-[15px]" style={{ color: '#e8e6e2' }}>
                 {boss.name}
               </h3>
               <StarRating difficulty={diff} />
@@ -48,7 +48,7 @@ export default function BossCard({ boss }: BossCardProps) {
             {boss.is_defeated ? (
               <span className="tag tag-clear">CLEAR</span>
             ) : days !== null ? (
-              <span className="timer-badge" style={{ color: days < 90 ? '#e85d5d' : '#8890b0' }}>
+              <span className="timer-badge" style={{ color: days < 90 ? '#c04040' : '#7c7870' }}>
                 残{days}日
               </span>
             ) : null}
@@ -57,9 +57,9 @@ export default function BossCard({ boss }: BossCardProps) {
 
         <HpBar percentage={hp} size="sm" />
 
-        <div className="flex justify-between mt-2 text-[10px] font-medium" style={{ color: '#8890b0' }}>
+        <div className="flex justify-between mt-2 text-[10px] font-medium" style={{ color: '#7c7870' }}>
           <span>{formatCurrency(boss.current_hp)} / {formatCurrency(boss.original_hp)}</span>
-          <span style={{ color: hp > 50 ? '#e85d5d' : hp > 20 ? '#e8b849' : '#4cce7b' }}>
+          <span style={{ color: hp > 50 ? '#c04040' : hp > 20 ? '#b89450' : '#40a060' }}>
             残り{hp}%
           </span>
         </div>
