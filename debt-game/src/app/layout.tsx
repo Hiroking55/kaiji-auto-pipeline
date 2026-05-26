@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Noto_Sans_JP } from 'next/font/google';
 import NavBar from '@/components/NavBar';
+import WorldBackground from '@/components/WorldBackground';
 import './globals.css';
 
 const font = Noto_Sans_JP({
@@ -21,8 +22,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className={font.className}>
-      <body className="vignette">
-        <div className="max-w-md mx-auto pb-24 px-4">
+      <body>
+        <WorldBackground />
+        <div className="relative z-10 max-w-md mx-auto pb-24 px-4">
           {children}
         </div>
         <NavBar />
