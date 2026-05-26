@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { getDashboardData, recordPayment } from '@/lib/actions';
+import { getDashboardData, recordPayment } from '@/lib/client-actions';
 import { formatCurrency } from '@/lib/game-engine';
 import type { Boss, Payment } from '@/lib/types';
 import NavBar from '@/components/NavBar';
@@ -34,35 +34,29 @@ function RecordForm() {
   const [result, setResult] = useState<PaymentResult | null>(null);
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const data = await getDashboardData();
-        if (data) {
-          const activeBosses = data.bosses.filter((b) => !b.is_defeated);
-          setBosses(activeBosses);
-          setRecentPayments(data.recentPayments);
+    const data = getDashboardData();
+    if (data) {
+      const activeBosses = data.bosses.filter((b) => !b.is_defeated);
+      setBosses(activeBosses);
+      setRecentPayments(data.recentPayments);
 
-          const preselectedBoss = searchParams.get('boss');
-          const preselectedType = searchParams.get('type');
+      const preselectedBoss = searchParams.get('boss');
+      const preselectedType = searchParams.get('type');
 
-          if (preselectedBoss && activeBosses.some((b) => b.id === preselectedBoss)) {
-            setSelectedBossId(preselectedBoss);
-          } else if (activeBosses.length > 0) {
-            setSelectedBossId(activeBosses[0].id);
-          }
+      if (preselectedBoss && activeBosses.some((b) => b.id === preselectedBoss)) {
+        setSelectedBossId(preselectedBoss);
+      } else if (activeBosses.length > 0) {
+        setSelectedBossId(activeBosses[0].id);
+      }
 
-          if (preselectedType === 'normal' || preselectedType === 'extra') {
-            setType(preselectedType);
-          }
-        }
-      } finally {
-        setLoading(false);
+      if (preselectedType === 'normal' || preselectedType === 'extra') {
+        setType(preselectedType);
       }
     }
-    loadData();
+    setLoading(false);
   }, [searchParams]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!selectedBossId || !amount || submitting) return;
 
@@ -74,7 +68,7 @@ function RecordForm() {
 
     setSubmitting(true);
     try {
-      const res = await recordPayment({
+      const res = recordPayment({
         bossId: selectedBossId,
         amount: parsedAmount,
         type,
@@ -90,14 +84,12 @@ function RecordForm() {
         type,
       });
 
-      // Refresh data after payment
-      const data = await getDashboardData();
+      const data = getDashboardData();
       if (data) {
         setBosses(data.bosses.filter((b) => !b.is_defeated));
         setRecentPayments(data.recentPayments);
       }
 
-      // Reset form
       setAmount('');
       setMemo('');
     } catch (err) {

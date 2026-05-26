@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { setupGame } from '@/lib/actions';
+import { setupGame, resetAllData } from '@/lib/client-actions';
 
 interface DebtEntry {
   debtType: string;
@@ -51,13 +51,13 @@ export default function SetupPage() {
     setDebts(updated);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
 
     setIsSubmitting(true);
     try {
-      await setupGame({
+      setupGame({
         playerName: playerName.trim() || '勇者',
         monthlyIncome: Number(monthlyIncome) || 0,
         fixedExpenses: Number(fixedExpenses) || 0,
@@ -79,11 +79,12 @@ export default function SetupPage() {
     }
   };
 
-  const handleReset = async () => {
+  const handleReset = () => {
     if (!confirm('全てのデータをリセットしますか？この操作は取り消せません。')) return;
     setIsResetting(true);
     try {
-      await setupGame({
+      resetAllData();
+      setupGame({
         playerName: playerName.trim() || '勇者',
         monthlyIncome: Number(monthlyIncome) || 0,
         fixedExpenses: Number(fixedExpenses) || 0,

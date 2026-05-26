@@ -1,14 +1,12 @@
-'use server';
-
 import { v4 as uuidv4 } from 'uuid';
 import {
   getPlayer, createPlayer, updatePlayer,
   getBosses, getBoss, createBoss, updateBoss,
-  getPayments, getMonthlyPayments, createPayment,
-  getLatestSnapshot, createSnapshot,
+  getPayments, getMonthlyPayments, createPayment, getPaymentsByBoss,
   getAchievements, getEarnedAchievements, earnAchievement,
-  resetAllData, getPaymentsByBoss,
-} from './db';
+  getLatestSnapshot, createSnapshot,
+  resetAllData as resetStore,
+} from './client-store';
 import {
   calculatePaymentXp, calculateLevel, getTitle,
   calculateDailyBudget, calculateMonthlyBudget,
@@ -17,7 +15,7 @@ import {
 } from './game-engine';
 import { DashboardData, Boss } from './types';
 
-export async function getDashboardData(): Promise<DashboardData | null> {
+export function getDashboardData(): DashboardData | null {
   const player = getPlayer();
   if (!player) return null;
 
@@ -75,7 +73,7 @@ export async function getDashboardData(): Promise<DashboardData | null> {
   };
 }
 
-export async function setupGame(data: {
+export function setupGame(data: {
   playerName: string;
   monthlyIncome: number;
   fixedExpenses: number;
@@ -87,8 +85,8 @@ export async function setupGame(data: {
     paymentDay: number;
     customName?: string;
   }>;
-}): Promise<void> {
-  resetAllData();
+}): void {
+  resetStore();
 
   createPlayer({
     name: data.playerName,
@@ -115,13 +113,13 @@ export async function setupGame(data: {
   }
 }
 
-export async function recordPayment(data: {
+export function recordPayment(data: {
   bossId: string;
   amount: number;
   type: 'normal' | 'extra';
   paidAt: string;
   memo?: string;
-}): Promise<{ xpEarned: number; levelUp: boolean; newLevel: number; bossDefeated: boolean; achievementsEarned: string[] }> {
+}): { xpEarned: number; levelUp: boolean; newLevel: number; bossDefeated: boolean; achievementsEarned: string[] } {
   const boss = getBoss(data.bossId);
   if (!boss) throw new Error('ボスが見つかりません');
   if (boss.is_defeated) throw new Error('このボスは既に撃破済みです');
@@ -137,15 +135,16 @@ export async function recordPayment(data: {
     amount: data.amount,
     type: data.type,
     xp_earned: xpEarned,
-    memo: data.memo,
+    memo: data.memo || null,
     paid_at: data.paidAt,
+    created_at: new Date().toISOString(),
   });
 
   updateBoss(data.bossId, {
     current_hp: newHp,
     is_defeated: bossDefeated,
-    defeated_at: bossDefeated ? new Date().toISOString() : undefined,
-  } as Partial<Boss>);
+    defeated_at: bossDefeated ? new Date().toISOString() : null,
+  });
 
   const player = getPlayer()!;
   const oldLevel = calculateLevel(player.xp);
@@ -174,7 +173,7 @@ function checkAndAwardAchievements(): string[] {
   const newAchievements: string[] = [];
   const player = getPlayer()!;
   const bosses = getBosses();
-  const payments = getPayments(1000);
+  const payments = getPayments(10000);
 
   const checks: Record<string, () => boolean> = {
     first_payment: () => payments.length > 0,
@@ -198,8 +197,8 @@ function checkAndAwardAchievements(): string[] {
     const check = checks[achievement.id];
     if (check && check()) {
       earnAchievement(achievement.id);
-      const player = getPlayer()!;
-      updatePlayer({ xp: player.xp + achievement.xp_reward });
+      const p = getPlayer()!;
+      updatePlayer({ xp: p.xp + achievement.xp_reward });
       newAchievements.push(achievement.name);
     }
   }
@@ -207,7 +206,7 @@ function checkAndAwardAchievements(): string[] {
   return newAchievements;
 }
 
-export async function processLogin(): Promise<void> {
+export function processLogin(): void {
   const player = getPlayer();
   if (!player) return;
 
@@ -230,12 +229,13 @@ export async function processLogin(): Promise<void> {
   checkAndAwardAchievements();
 }
 
-export async function getBossDetail(bossId: string) {
+export function getBossDetail(bossId: string) {
   const boss = getBoss(bossId);
   if (!boss) return null;
 
   const payments = getPaymentsByBoss(bossId, 20);
-  const totalPaid = getPaymentsByBoss(bossId, 10000).reduce((s, p) => s + p.amount, 0);
+  const allBossPayments = getPaymentsByBoss(bossId, 10000);
+  const totalPaid = allBossPayments.reduce((s, p) => s + p.amount, 0);
 
   const monthlyPayment = boss.min_monthly;
   const monthlyInterest = boss.current_hp * (boss.interest_rate / 100 / 12);
@@ -262,47 +262,6 @@ export async function getBossDetail(bossId: string) {
   };
 }
 
-export async function processInterest(): Promise<number> {
-  const bosses = getBosses().filter(b => !b.is_defeated);
-  let totalInterest = 0;
-  for (const boss of bosses) {
-    const interest = calculateDailyInterest(boss);
-    if (interest > 0) {
-      updateBoss(boss.id, { current_hp: boss.current_hp + interest });
-      totalInterest += interest;
-    }
-  }
-  return totalInterest;
-}
-
-export async function deleteBoss(bossId: string): Promise<void> {
-  const db = (await import('./db')).getDb();
-  db.prepare('DELETE FROM payments WHERE boss_id = ?').run(bossId);
-  db.prepare('DELETE FROM bosses WHERE id = ?').run(bossId);
-}
-
-export async function addBoss(data: {
-  debtType: string;
-  amount: number;
-  interestRate: number;
-  minMonthly: number;
-  paymentDay: number;
-  customName?: string;
-}): Promise<void> {
-  const bosses = getBosses();
-  const nextId = `boss_${bosses.length + 1}_${Date.now()}`;
-  const defaults = getBossDefaults(data.debtType);
-  createBoss({
-    id: nextId,
-    name: data.customName || defaults.name,
-    debt_type: data.debtType as Boss['debt_type'],
-    emoji: defaults.emoji,
-    subtitle: defaults.subtitle,
-    original_hp: data.amount,
-    current_hp: data.amount,
-    interest_rate: data.interestRate,
-    min_monthly: data.minMonthly,
-    payment_day: data.paymentDay,
-    sort_order: defaults.sort_order,
-  });
+export function resetAllData(): void {
+  resetStore();
 }

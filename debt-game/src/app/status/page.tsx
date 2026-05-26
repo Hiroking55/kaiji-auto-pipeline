@@ -1,6 +1,10 @@
-import { redirect } from 'next/navigation';
-import { getDashboardData } from '@/lib/actions';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { getDashboardData } from '@/lib/client-actions';
 import { formatCurrency, calculateLevel } from '@/lib/game-engine';
+import { DashboardData } from '@/lib/types';
 
 const TITLES: Record<number, string> = {
   1: '借金奴隷',
@@ -11,11 +15,30 @@ const TITLES: Record<number, string> = {
   50: '完済王',
 };
 
-export default async function StatusPage() {
-  const data = await getDashboardData();
+export default function StatusPage() {
+  const router = useRouter();
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!data) {
-    redirect('/setup');
+  useEffect(() => {
+    const result = getDashboardData();
+    if (!result) {
+      router.push('/setup');
+      return;
+    }
+    setData(result);
+    setLoading(false);
+  }, [router]);
+
+  if (loading || !data) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-4xl mb-3 animate-pulse">&#x1F4CA;</p>
+          <p className="text-sm" style={{ color: '#8888aa' }}>読み込み中...</p>
+        </div>
+      </div>
+    );
   }
 
   const { player, bosses, totalDebt, originalTotalDebt, monthlyPaid, achievements, earnedAchievements } = data;

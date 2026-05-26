@@ -1,16 +1,39 @@
-import { redirect } from 'next/navigation';
-import { getDashboardData, processLogin } from '@/lib/actions';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { getDashboardData, processLogin } from '@/lib/client-actions';
 import { formatCurrency, getHpPercentage, calculateLevel } from '@/lib/game-engine';
 import XpBar from '@/components/XpBar';
 import StatCard from '@/components/StatCard';
 import BossCard from '@/components/BossCard';
+import { DashboardData } from '@/lib/types';
 
-export default async function Page() {
-  await processLogin();
-  const data = await getDashboardData();
+export default function Page() {
+  const router = useRouter();
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!data) {
-    redirect('/setup');
+  useEffect(() => {
+    processLogin();
+    const result = getDashboardData();
+    if (!result) {
+      router.push('/setup');
+      return;
+    }
+    setData(result);
+    setLoading(false);
+  }, [router]);
+
+  if (loading || !data) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-3xl mb-3 animate-pulse">&#x2694;&#xFE0F;</p>
+          <p className="text-sm" style={{ color: '#8888aa' }}>読み込み中...</p>
+        </div>
+      </div>
+    );
   }
 
   const { player, bosses, totalDebt, previousDayDebt, monthlyPaid, dailyBudget, monthlyBudget, estimatedPayoff, xpForNextLevel } = data;

@@ -1,23 +1,58 @@
-import { notFound } from 'next/navigation';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getBossDetail } from '@/lib/actions';
-import { formatCurrency, getHpPercentage } from '@/lib/game-engine';
+import { getBossDetail } from '@/lib/client-actions';
+import { formatCurrency } from '@/lib/game-engine';
+import type { Boss, Payment } from '@/lib/types';
 import HpBar from '@/components/HpBar';
 
-export default async function BattlePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const detail = await getBossDetail(id);
+interface BossDetailData {
+  boss: Boss;
+  payments: Payment[];
+  totalPaid: number;
+  monthlyInterest: number;
+  dailyInterest: number;
+  monthsToDefeat: number | null;
+}
 
-  if (!detail) {
-    notFound();
+function hpPercent(boss: Boss): number {
+  if (boss.original_hp === 0) return 0;
+  return Math.max(0, Math.min(100, Math.round((boss.current_hp / boss.original_hp) * 100)));
+}
+
+export default function BattlePage() {
+  const router = useRouter();
+  const params = useParams();
+  const id = params.id as string;
+  const [detail, setDetail] = useState<BossDetailData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+    const result = getBossDetail(id);
+    if (!result) {
+      router.push('/');
+      return;
+    }
+    setDetail(result as BossDetailData);
+    setLoading(false);
+  }, [id, router]);
+
+  if (loading || !detail) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-4xl mb-3 animate-pulse">&#x2694;&#xFE0F;</p>
+          <p className="text-sm" style={{ color: '#8888aa' }}>読み込み中...</p>
+        </div>
+      </div>
+    );
   }
 
   const { boss, payments, totalPaid, monthlyInterest, dailyInterest, monthsToDefeat } = detail;
-  const hpPercentage = getHpPercentage(boss);
+  const hpPercentage = hpPercent(boss);
 
   return (
     <div className="px-4 pt-6">
