@@ -33,10 +33,7 @@ function BattleContent() {
   useEffect(() => {
     if (!id) return;
     const result = getBossDetail(id);
-    if (!result) {
-      router.push('/');
-      return;
-    }
+    if (!result) { router.push('/'); return; }
     setDetail(result as BossDetailData);
     setLoading(false);
   }, [id, router]);
@@ -44,138 +41,121 @@ function BattleContent() {
   if (loading || !detail) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-3xl mb-3 animate-pulse-glow">⚔️</p>
-          <p className="text-sm" style={{ color: '#a09078' }}>Loading...</p>
-        </div>
+        <p className="text-4xl animate-soft-pulse">⚔️</p>
       </div>
     );
   }
 
   const { boss, payments, totalPaid, monthlyInterest, dailyInterest, monthsToDefeat } = detail;
-  const hpPercentage = hpPercent(boss);
-  const difficulty = getQuestDifficulty(boss);
-  const daysRemaining = getQuestDaysRemaining(boss);
+  const hp = hpPercent(boss);
+  const diff = getQuestDifficulty(boss);
+  const days = getQuestDaysRemaining(boss);
 
   return (
-    <div className="px-3 pt-4">
-      {/* Quest Header */}
-      <div className="mh-panel-accent p-4 mb-3">
+    <div className="pt-6 space-y-4">
+      {/* Monster Header */}
+      <div className="glass-accent p-5">
         <div className="flex items-center justify-between mb-1">
-          <StarRating difficulty={difficulty} size="md" />
-          {boss.is_defeated ? (
-            <span className="mh-tag mh-tag-clear">QUEST CLEAR</span>
-          ) : (
-            <span className="mh-tag mh-tag-active">受注中</span>
-          )}
+          <StarRating difficulty={diff} size="md" />
+          {boss.is_defeated
+            ? <span className="tag tag-clear">QUEST CLEAR</span>
+            : <span className="tag tag-active">受注中</span>
+          }
         </div>
-
-        <div className="flex items-center gap-3 mb-3">
-          <span className="text-4xl">{boss.emoji}</span>
+        <div className="flex items-center gap-4 my-4">
+          <div
+            className="w-16 h-16 rounded-2xl flex items-center justify-center text-4xl shrink-0"
+            style={{ background: 'rgba(10, 14, 28, 0.6)' }}
+          >
+            {boss.emoji}
+          </div>
           <div>
-            <h1 className="text-xl font-black" style={{ color: '#f0e8d8' }}>
-              {boss.name}
-            </h1>
-            <p className="text-[11px]" style={{ color: '#a09078' }}>
-              {boss.subtitle}
-            </p>
+            <h1 className="text-2xl font-extrabold" style={{ color: '#eef0f6' }}>{boss.name}</h1>
+            <p className="text-xs font-medium" style={{ color: '#8890b0' }}>{boss.subtitle}</p>
           </div>
         </div>
 
-        {/* HP Section */}
-        <div className="mb-1">
-          <div className="flex justify-between text-xs mb-1">
-            <span className="font-bold" style={{ color: '#e84040' }}>HP</span>
-            <span style={{ color: '#f0e8d8' }}>
-              {formatCurrency(boss.current_hp)} / {formatCurrency(boss.original_hp)}
+        <div className="flex justify-between text-[11px] font-bold mb-1.5">
+          <span style={{ color: '#e85d5d' }}>HP</span>
+          <span style={{ color: '#eef0f6' }}>
+            {formatCurrency(boss.current_hp)} / {formatCurrency(boss.original_hp)}
+          </span>
+        </div>
+        <HpBar percentage={hp} size="lg" />
+        <div className="flex justify-between mt-2 text-[10px] font-medium">
+          <span style={{ color: '#8890b0' }}>残り {hp}%</span>
+          {!boss.is_defeated && days !== null && (
+            <span className="timer-badge" style={{ color: days < 90 ? '#e85d5d' : '#8890b0' }}>
+              討伐まで約{days}日
             </span>
-          </div>
-          <HpBar percentage={hpPercentage} size="md" />
-          <div className="flex justify-between mt-1">
-            <span className="text-[10px]" style={{ color: '#a09078' }}>
-              残り {hpPercentage}%
-            </span>
-            {!boss.is_defeated && daysRemaining !== null && (
-              <span className="mh-timer" style={{ color: daysRemaining < 90 ? '#e84040' : '#a09078' }}>
-                ⏱ 討伐まで約{daysRemaining}日
-              </span>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Quest Info Grid */}
-      <div className="grid grid-cols-2 gap-2 mb-3">
-        <div className="mh-panel-dark p-3">
-          <p className="text-[10px] font-bold" style={{ color: '#a09078' }}>月間利息ダメージ</p>
-          <p className="text-sm font-black" style={{ color: '#e84040' }}>
-            {formatCurrency(monthlyInterest)}
-          </p>
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="glass-inner p-3.5">
+          <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#8890b0' }}>月間利息</p>
+          <p className="text-base font-extrabold glow-red" style={{ color: '#e85d5d' }}>{formatCurrency(monthlyInterest)}</p>
         </div>
-        <div className="mh-panel-dark p-3">
-          <p className="text-[10px] font-bold" style={{ color: '#a09078' }}>日割り利息</p>
-          <p className="text-sm font-black" style={{ color: '#ff8820' }}>
-            {formatCurrency(dailyInterest)}
-          </p>
+        <div className="glass-inner p-3.5">
+          <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#8890b0' }}>日割り利息</p>
+          <p className="text-base font-extrabold" style={{ color: '#e89040' }}>{formatCurrency(dailyInterest)}</p>
         </div>
-        <div className="mh-panel-dark p-3">
-          <p className="text-[10px] font-bold" style={{ color: '#a09078' }}>討伐予想</p>
-          <p className="text-sm font-black" style={{ color: '#4890d0' }}>
+        <div className="glass-inner p-3.5">
+          <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#8890b0' }}>討伐予想</p>
+          <p className="text-base font-extrabold glow-blue" style={{ color: '#5b9ee8' }}>
             {monthsToDefeat !== null ? `${monthsToDefeat}ヶ月` : '---'}
           </p>
         </div>
-        <div className="mh-panel-dark p-3">
-          <p className="text-[10px] font-bold" style={{ color: '#a09078' }}>累計ダメージ</p>
-          <p className="text-sm font-black" style={{ color: '#40c850' }}>
-            {formatCurrency(totalPaid)}
-          </p>
+        <div className="glass-inner p-3.5">
+          <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#8890b0' }}>累計ダメージ</p>
+          <p className="text-base font-extrabold glow-green" style={{ color: '#4cce7b' }}>{formatCurrency(totalPaid)}</p>
         </div>
       </div>
 
       {/* Action Buttons */}
       {!boss.is_defeated && (
-        <div className="flex gap-2 mb-3">
-          <Link href={`/record?boss=${id}&type=normal`} className="flex-1 mh-btn mh-btn-primary text-center text-sm">
+        <div className="flex gap-3">
+          <Link href={`/record?boss=${id}&type=normal`} className="flex-1 btn-primary text-center">
             ⚔️ 通常攻撃
           </Link>
-          <Link href={`/record?boss=${id}&type=extra`} className="flex-1 mh-btn mh-btn-gold text-center text-sm">
+          <Link href={`/record?boss=${id}&type=extra`} className="flex-1 btn-gold text-center">
             💥 必殺技
           </Link>
         </div>
       )}
 
       {/* Hunt Log */}
-      <div className="mb-6">
-        <div className="mh-section-header">
-          <h2>狩猟記録</h2>
+      <div>
+        <div className="section-bar">
+          <h2 className="text-[15px] font-extrabold" style={{ color: '#eef0f6' }}>狩猟記録</h2>
         </div>
         {payments.length > 0 ? (
-          <div className="space-y-1.5">
-            {payments.map((payment) => (
-              <div key={payment.id} className="mh-panel-dark p-2.5 flex items-center justify-between">
+          <div className="space-y-2">
+            {payments.map((p) => (
+              <div key={p.id} className="glass-inner p-3 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold" style={{ color: '#f0e8d8' }}>
-                    {payment.type === 'extra' ? '💥 必殺技' : '⚔️ 通常攻撃'}
+                  <p className="text-xs font-bold" style={{ color: '#eef0f6' }}>
+                    {p.type === 'extra' ? '💥 必殺技' : '⚔️ 通常攻撃'}
                   </p>
-                  <p className="text-[10px]" style={{ color: '#a09078' }}>
-                    {new Date(payment.paid_at).toLocaleDateString('ja-JP')}
-                    {payment.memo && ` — ${payment.memo}`}
+                  <p className="text-[10px] font-medium" style={{ color: '#8890b0' }}>
+                    {new Date(p.paid_at).toLocaleDateString('ja-JP')}
+                    {p.memo && ` — ${p.memo}`}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-black" style={{ color: payment.type === 'extra' ? '#ffc830' : '#40c850' }}>
-                    -{formatCurrency(payment.amount)}
+                  <p className="text-xs font-extrabold" style={{ color: p.type === 'extra' ? '#e8b849' : '#4cce7b' }}>
+                    -{formatCurrency(p.amount)}
                   </p>
-                  <p className="text-[10px] font-bold" style={{ color: '#4890d0' }}>
-                    +{payment.xp_earned} EXP
-                  </p>
+                  <p className="text-[10px] font-bold" style={{ color: '#9b6ee8' }}>+{p.xp_earned} EXP</p>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="mh-panel p-6 text-center">
-            <p style={{ color: '#a09078' }}>まだ狩猟記録がありません</p>
+          <div className="glass p-8 text-center">
+            <p className="text-sm" style={{ color: '#505878' }}>まだ狩猟記録がありません</p>
           </div>
         )}
       </div>
@@ -187,10 +167,7 @@ export default function BattlePage() {
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-3xl mb-3 animate-pulse-glow">⚔️</p>
-          <p className="text-sm" style={{ color: '#a09078' }}>Loading...</p>
-        </div>
+        <p className="text-4xl animate-soft-pulse">⚔️</p>
       </div>
     }>
       <BattleContent />

@@ -7,7 +7,7 @@ import { formatCurrency, calculateLevel, getHunterRankTitle } from '@/lib/game-e
 import { DashboardData } from '@/lib/types';
 import XpBar from '@/components/XpBar';
 
-const HR_TITLES: { level: number; title: string }[] = [
+const HR_TITLES = [
   { level: 1, title: '新米ハンター' },
   { level: 5, title: '駆け出しハンター' },
   { level: 10, title: '一人前ハンター' },
@@ -29,129 +29,92 @@ export default function StatusPage() {
   }, [router]);
 
   if (loading || !data) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-3xl animate-pulse-glow">📋</p>
-      </div>
-    );
+    return <div className="flex items-center justify-center min-h-screen"><p className="text-4xl animate-soft-pulse">📋</p></div>;
   }
 
   const { player, bosses, totalDebt, originalTotalDebt, achievements, earnedAchievements, xpForNextLevel } = data;
   const totalPaid = originalTotalDebt - totalDebt;
-  const bossesDefeated = bosses.filter((b) => b.is_defeated).length;
+  const defeated = bosses.filter(b => b.is_defeated).length;
   const levelInfo = calculateLevel(player.xp);
 
   return (
-    <div className="px-3 pt-4">
+    <div className="pt-6 space-y-4">
       {/* Hunter Card */}
-      <div className="mh-panel-accent p-4 mb-3">
-        <div className="text-center mb-3">
-          <p className="text-[10px] font-bold mb-1" style={{ color: '#a09078' }}>HUNTER CARD</p>
-          <div
-            className="w-16 h-16 rounded mx-auto mb-2 flex items-center justify-center text-3xl"
-            style={{ backgroundColor: '#1e1a14', border: '2px solid #4a3c28' }}
-          >
-            ⚔️
-          </div>
-          <h1 className="text-xl font-black" style={{ color: '#f0e8d8' }}>
-            {player.name}
-          </h1>
-          <p className="text-xs font-bold" style={{ color: '#ffc830' }}>
-            {getHunterRankTitle(player.level)}
-          </p>
-        </div>
-        <XpBar current={levelInfo.currentLevelXp} max={xpForNextLevel} level={player.level} />
-      </div>
-
-      {/* Stats Grid */}
-      <div className="mb-3">
-        <div className="mh-section-header">
-          <h2>狩猟実績</h2>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="mh-panel-dark p-3">
-            <p className="text-[10px] font-bold" style={{ color: '#a09078' }}>総返済額</p>
-            <p className="text-base font-black" style={{ color: '#40c850' }}>{formatCurrency(totalPaid)}</p>
-          </div>
-          <div className="mh-panel-dark p-3">
-            <p className="text-[10px] font-bold" style={{ color: '#a09078' }}>討伐数</p>
-            <p className="text-base font-black" style={{ color: '#ffc830' }}>{bossesDefeated} / {bosses.length}</p>
-          </div>
-          <div className="mh-panel-dark p-3">
-            <p className="text-[10px] font-bold" style={{ color: '#a09078' }}>連続ログイン</p>
-            <p className="text-base font-black" style={{ color: '#4890d0' }}>{player.login_streak}日</p>
-          </div>
-          <div className="mh-panel-dark p-3">
-            <p className="text-[10px] font-bold" style={{ color: '#a09078' }}>最大連続記録</p>
-            <p className="text-base font-black" style={{ color: '#ff8820' }}>{player.max_streak}日</p>
-          </div>
+      <div className="glass-accent p-5 text-center">
+        <p className="text-[9px] font-bold uppercase tracking-widest mb-3" style={{ color: '#8890b0' }}>HUNTER CARD</p>
+        <div
+          className="w-20 h-20 rounded-2xl mx-auto mb-3 flex items-center justify-center text-4xl"
+          style={{ background: 'linear-gradient(135deg, rgba(232,184,73,0.12), rgba(155,110,232,0.08))' }}
+        >⚔️</div>
+        <h1 className="text-2xl font-extrabold" style={{ color: '#eef0f6' }}>{player.name}</h1>
+        <p className="text-sm font-bold mt-1 glow-gold" style={{ color: '#e8b849' }}>{getHunterRankTitle(player.level)}</p>
+        <div className="mt-4">
+          <XpBar current={levelInfo.currentLevelXp} max={xpForNextLevel} level={player.level} />
         </div>
       </div>
 
-      {/* HR Progression */}
-      <div className="mb-3">
-        <div className="mh-section-header">
-          <h2>ハンターランク</h2>
+      {/* Stats */}
+      <div>
+        <div className="section-bar">
+          <h2 className="text-[15px] font-extrabold" style={{ color: '#eef0f6' }}>狩猟実績</h2>
         </div>
-        <div className="space-y-1.5">
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { l: '総返済額', v: formatCurrency(totalPaid), c: '#4cce7b', g: 'glow-green' },
+            { l: '討伐数', v: `${defeated} / ${bosses.length}`, c: '#e8b849', g: 'glow-gold' },
+            { l: '連続ログイン', v: `${player.login_streak}日`, c: '#5b9ee8', g: 'glow-blue' },
+            { l: '最大連続', v: `${player.max_streak}日`, c: '#e89040', g: '' },
+          ].map(({ l, v, c, g }) => (
+            <div key={l} className="glass-inner p-3.5">
+              <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#8890b0' }}>{l}</p>
+              <p className={`text-lg font-extrabold ${g}`} style={{ color: c }}>{v}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* HR Titles */}
+      <div>
+        <div className="section-bar">
+          <h2 className="text-[15px] font-extrabold" style={{ color: '#eef0f6' }}>ハンターランク</h2>
+        </div>
+        <div className="space-y-2">
           {HR_TITLES.map(({ level, title }) => {
-            const isCurrent = title === getHunterRankTitle(player.level);
-            const isUnlocked = player.level >= level;
+            const cur = title === getHunterRankTitle(player.level);
+            const unlocked = player.level >= level;
             return (
-              <div
-                key={level}
-                className="mh-panel-dark p-2.5 flex items-center justify-between"
-                style={{
-                  opacity: isUnlocked ? 1 : 0.35,
-                  borderColor: isCurrent ? '#c89830' : undefined,
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-base">{isUnlocked ? '👑' : '🔒'}</span>
+              <div key={level} className="glass-inner p-3 flex items-center justify-between" style={{ opacity: unlocked ? 1 : 0.3, borderColor: cur ? 'rgba(232,184,73,0.3)' : undefined, boxShadow: cur ? '0 0 16px rgba(232,184,73,0.1)' : undefined }}>
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">{unlocked ? '👑' : '🔒'}</span>
                   <div>
-                    <p className="text-xs font-bold" style={{ color: isCurrent ? '#ffc830' : '#f0e8d8' }}>
-                      {title}
-                    </p>
-                    <p className="text-[10px]" style={{ color: '#706050' }}>HR {level} で解放</p>
+                    <p className="text-sm font-bold" style={{ color: cur ? '#e8b849' : '#eef0f6' }}>{title}</p>
+                    <p className="text-[10px] font-medium" style={{ color: '#505878' }}>HR {level} で解放</p>
                   </div>
                 </div>
-                {isCurrent && <span className="mh-tag mh-tag-active">現在</span>}
+                {cur && <span className="tag tag-active">現在</span>}
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Achievements / Medals */}
-      <div className="mb-6">
-        <div className="mh-section-header">
-          <h2>勲章</h2>
+      {/* Achievements */}
+      <div>
+        <div className="section-bar">
+          <h2 className="text-[15px] font-extrabold" style={{ color: '#eef0f6' }}>勲章</h2>
         </div>
-        <div className="space-y-1.5">
-          {achievements.map((achievement) => {
-            const isEarned = earnedAchievements.includes(achievement.id);
+        <div className="space-y-2">
+          {achievements.map((a) => {
+            const earned = earnedAchievements.includes(a.id);
             return (
-              <div
-                key={achievement.id}
-                className="mh-panel-dark p-2.5 flex items-center gap-2"
-                style={{ opacity: isEarned ? 1 : 0.35 }}
-              >
-                <span className="text-xl">{isEarned ? achievement.icon : '🔒'}</span>
+              <div key={a.id} className="glass-inner p-3 flex items-center gap-3" style={{ opacity: earned ? 1 : 0.3 }}>
+                <span className="text-2xl">{earned ? a.icon : '🔒'}</span>
                 <div className="flex-1">
-                  <p className="text-xs font-bold" style={{ color: isEarned ? '#f0e8d8' : '#706050' }}>
-                    {achievement.name}
-                  </p>
-                  <p className="text-[10px]" style={{ color: '#706050' }}>{achievement.description}</p>
+                  <p className="text-xs font-bold" style={{ color: earned ? '#eef0f6' : '#505878' }}>{a.name}</p>
+                  <p className="text-[10px]" style={{ color: '#505878' }}>{a.description}</p>
                 </div>
-                <span
-                  className="mh-tag"
-                  style={{
-                    backgroundColor: isEarned ? 'rgba(64,200,80,0.15)' : 'rgba(112,96,80,0.15)',
-                    color: isEarned ? '#40c850' : '#706050',
-                    borderColor: isEarned ? '#40c850' : '#3a3020',
-                  }}
-                >
-                  {isEarned ? '達成' : `+${achievement.xp_reward}EXP`}
+                <span className={`tag ${earned ? 'tag-clear' : ''}`} style={earned ? {} : { background: 'rgba(80,88,120,0.1)', color: '#505878', border: '1px solid rgba(80,88,120,0.2)' }}>
+                  {earned ? '達成' : `+${a.xp_reward}EXP`}
                 </span>
               </div>
             );
