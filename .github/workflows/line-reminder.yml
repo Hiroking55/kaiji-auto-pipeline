@@ -1,0 +1,50 @@
+name: LINE Daily Reminder
+
+on:
+  schedule:
+    # 毎朝8時（日本時間）= UTC 23:00（前日）
+    - cron: '0 23 * * *'
+  workflow_dispatch:
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send LINE message
+        env:
+          LINE_CHANNEL_TOKEN: ${{ secrets.LINE_CHANNEL_TOKEN }}
+          LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
+        run: |
+          if [ -z "$LINE_CHANNEL_TOKEN" ] || [ -z "$LINE_USER_ID" ]; then
+            echo "LINE credentials not configured. Skipping."
+            exit 0
+          fi
+
+          # Day of week messages
+          DAY=$(date -u +%u)
+          case $DAY in
+            1) MSG="週の始まり！今週も借金討伐クエスト頑張ろう⚔️";;
+            2) MSG="火曜日。コツコツ返済がHRアップの近道💪";;
+            3) MSG="水曜日、週の折り返し。返済記録をチェック📊";;
+            4) MSG="木曜日。今月のコンボ数は？返済するとXPボーナス🔥";;
+            5) MSG="金曜日！週末の出費に気をつけて🛡️";;
+            6) MSG="土曜日。繰上返済チャンス！必殺技で大ダメージ💥";;
+            0) MSG="日曜日。今週の狩猟成果を振り返ろう📋";;
+          esac
+
+          FULL_MSG="🏕️ Debt Hunter デイリーリマインド
+
+          $MSG
+
+          👉 https://hiroking55.github.io/kaiji-auto-pipeline/"
+
+          curl -s -X POST https://api.line.me/v2/bot/message/push \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $LINE_CHANNEL_TOKEN" \
+            -d "{
+              \"to\": \"$LINE_USER_ID\",
+              \"messages\": [{
+                \"type\": \"text\",
+                \"text\": \"$FULL_MSG\"
+              }]
+            }"
