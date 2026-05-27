@@ -12,27 +12,25 @@ export default function BossCard({ boss }: { boss: Boss }) {
   const days = getQuestDaysRemaining(boss);
 
   return (
-    <Link href={`/battle?id=${boss.id}`} className="block">
-      <div className={`rpg-panel p-3 active:scale-[0.98] transition-transform ${boss.is_defeated ? 'quest-defeated' : ''}`}>
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex items-center gap-2.5">
+    <Link href={`/battle?id=${boss.id}`}>
+      <div className={`card p-4 active:scale-[0.98] transition-transform ${boss.is_defeated ? 'quest-defeated' : ''}`}>
+        <div className="flex items-center justify-between mb-2.5">
+          <div className="flex items-center gap-3">
             <span className="text-2xl">{boss.emoji}</span>
             <div>
-              <h3 className="font-bold text-sm" style={{ color: '#2b3a67' }}>{boss.name}</h3>
+              <p className="text-sm font-bold" style={{ color: '#1a1a2e' }}>{boss.name}</p>
               <StarRating difficulty={diff} />
             </div>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            {boss.is_defeated
-              ? <span className="tag-rpg tag-clear">討伐済</span>
-              : days !== null
-                ? <span className="timer-badge" style={{ color: days < 90 ? '#d9534f' : '#5a6a8a' }}>残{days}日</span>
-                : null
-            }
-          </div>
+          {boss.is_defeated
+            ? <span className="tag tag-clear">討伐済</span>
+            : days !== null
+              ? <span className="text-[10px] font-semibold" style={{ color: days < 90 ? '#ef4444' : '#9ca3af' }}>残{days}日</span>
+              : null
+          }
         </div>
         <HpBar percentage={hp} size="sm" />
-        <div className="flex justify-between mt-1.5 text-[10px]" style={{ color: '#5a6a8a' }}>
+        <div className="flex justify-between mt-1.5 text-[10px]" style={{ color: '#6b7280' }}>
           <span>{formatCurrency(boss.current_hp)} / {formatCurrency(boss.original_hp)}</span>
           <span>{hp}%</span>
         </div>

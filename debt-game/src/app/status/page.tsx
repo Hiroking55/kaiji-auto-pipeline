@@ -40,14 +40,14 @@ export default function StatusPage() {
   return (
     <div className="pt-6 space-y-4">
       {/* Hunter Card */}
-      <div className="rpg-panel-accent p-5 text-center">
-        <p className="text-[9px] font-bold uppercase tracking-widest mb-3" style={{ color: '#5a6a8a' }}>HUNTER CARD</p>
+      <div className="card-accent p-5 text-center">
+        <p className="text-[9px] font-bold uppercase tracking-widest mb-3" style={{ color: '#6b7280' }}>HUNTER CARD</p>
         <div
           className="w-20 h-20 rounded-2xl mx-auto mb-3 flex items-center justify-center text-4xl"
           style={{ background: 'linear-gradient(135deg, rgba(232,184,73,0.12), rgba(155,110,232,0.08))' }}
         >⚔️</div>
-        <h1 className="text-2xl font-extrabold" style={{ color: '#2b3a67' }}>{player.name}</h1>
-        <p className="text-sm font-bold mt-1" style={{ color: '#b08810' }}>{getHunterRankTitle(player.level)}</p>
+        <h1 className="text-2xl font-extrabold" style={{ color: '#1a1a2e' }}>{player.name}</h1>
+        <p className="text-sm font-bold mt-1" style={{ color: '#d4a020' }}>{getHunterRankTitle(player.level)}</p>
         <div className="mt-4">
           <XpBar current={levelInfo.currentLevelXp} max={xpForNextLevel} level={player.level} />
         </div>
@@ -55,18 +55,18 @@ export default function StatusPage() {
 
       {/* Stats */}
       <div>
-        <div className="section-bar">
-          <h2 className="text-[15px] font-extrabold" style={{ color: '#2b3a67' }}>狩猟実績</h2>
+        <div className="section-label">
+          <h2 className="text-[15px] font-extrabold" style={{ color: '#1a1a2e' }}>狩猟実績</h2>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {[
-            { l: '総返済額', v: formatCurrency(totalPaid), c: '#2d8a4e', g: 'glow-green' },
-            { l: '討伐数', v: `${defeated} / ${bosses.length}`, c: '#b08810', g: 'glow-gold' },
-            { l: '連続ログイン', v: `${player.login_streak}日`, c: '#5aa8e0', g: 'glow-blue' },
-            { l: '最大連続', v: `${player.max_streak}日`, c: '#d9534f', g: '' },
+            { l: '総返済額', v: formatCurrency(totalPaid), c: '#10b981', g: 'glow-green' },
+            { l: '討伐数', v: `${defeated} / ${bosses.length}`, c: '#d4a020', g: 'glow-gold' },
+            { l: '連続ログイン', v: `${player.login_streak}日`, c: '#3b82f6', g: 'glow-blue' },
+            { l: '最大連続', v: `${player.max_streak}日`, c: '#ef4444', g: '' },
           ].map(({ l, v, c, g }) => (
-            <div key={l} className="rpg-panel-inner p-3.5">
-              <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#5a6a8a' }}>{l}</p>
+            <div key={l} className="card-inner p-3.5">
+              <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#6b7280' }}>{l}</p>
               <p className={`text-lg font-extrabold ${g}`} style={{ color: c }}>{v}</p>
             </div>
           ))}
@@ -75,20 +75,20 @@ export default function StatusPage() {
 
       {/* HR Titles */}
       <div>
-        <div className="section-bar">
-          <h2 className="text-[15px] font-extrabold" style={{ color: '#2b3a67' }}>ハンターランク</h2>
+        <div className="section-label">
+          <h2 className="text-[15px] font-extrabold" style={{ color: '#1a1a2e' }}>ハンターランク</h2>
         </div>
         <div className="space-y-2">
           {HR_TITLES.map(({ level, title }) => {
             const cur = title === getHunterRankTitle(player.level);
             const unlocked = player.level >= level;
             return (
-              <div key={level} className="rpg-panel-inner p-3 flex items-center justify-between" style={{ opacity: unlocked ? 1 : 0.3, borderColor: cur ? 'rgba(232,184,73,0.3)' : undefined, boxShadow: cur ? '0 0 16px rgba(232,184,73,0.1)' : undefined }}>
+              <div key={level} className="card-inner p-3 flex items-center justify-between" style={{ opacity: unlocked ? 1 : 0.3, borderColor: cur ? 'rgba(232,184,73,0.3)' : undefined, boxShadow: cur ? '0 0 16px rgba(232,184,73,0.1)' : undefined }}>
                 <div className="flex items-center gap-3">
                   <span className="text-lg">{unlocked ? '👑' : '🔒'}</span>
                   <div>
-                    <p className="text-sm font-bold" style={{ color: cur ? '#b08810' : '#2b3a67' }}>{title}</p>
-                    <p className="text-[10px] font-medium" style={{ color: '#8a96b0' }}>HR {level} で解放</p>
+                    <p className="text-sm font-bold" style={{ color: cur ? '#d4a020' : '#1a1a2e' }}>{title}</p>
+                    <p className="text-[10px] font-medium" style={{ color: '#9ca3af' }}>HR {level} で解放</p>
                   </div>
                 </div>
                 {cur && <span className="tag tag-active">現在</span>}
@@ -100,20 +100,20 @@ export default function StatusPage() {
 
       {/* Achievements */}
       <div>
-        <div className="section-bar">
-          <h2 className="text-[15px] font-extrabold" style={{ color: '#2b3a67' }}>勲章</h2>
+        <div className="section-label">
+          <h2 className="text-[15px] font-extrabold" style={{ color: '#1a1a2e' }}>勲章</h2>
         </div>
         <div className="space-y-2">
           {achievements.map((a) => {
             const earned = earnedAchievements.includes(a.id);
             return (
-              <div key={a.id} className="rpg-panel-inner p-3 flex items-center gap-3" style={{ opacity: earned ? 1 : 0.3 }}>
+              <div key={a.id} className="card-inner p-3 flex items-center gap-3" style={{ opacity: earned ? 1 : 0.3 }}>
                 <span className="text-2xl">{earned ? a.icon : '🔒'}</span>
                 <div className="flex-1">
-                  <p className="text-xs font-bold" style={{ color: earned ? '#2b3a67' : '#8a96b0' }}>{a.name}</p>
-                  <p className="text-[10px]" style={{ color: '#8a96b0' }}>{a.description}</p>
+                  <p className="text-xs font-bold" style={{ color: earned ? '#1a1a2e' : '#9ca3af' }}>{a.name}</p>
+                  <p className="text-[10px]" style={{ color: '#9ca3af' }}>{a.description}</p>
                 </div>
-                <span className={`tag ${earned ? 'tag-clear' : ''}`} style={earned ? {} : { background: 'rgba(80,88,120,0.1)', color: '#8a96b0', border: '1px solid rgba(80,88,120,0.2)' }}>
+                <span className={`tag ${earned ? 'tag-clear' : ''}`} style={earned ? {} : { background: 'rgba(80,88,120,0.1)', color: '#9ca3af', border: '1px solid rgba(80,88,120,0.2)' }}>
                   {earned ? '達成' : `+${a.xp_reward}EXP`}
                 </span>
               </div>

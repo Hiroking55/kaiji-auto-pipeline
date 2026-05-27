@@ -362,25 +362,25 @@ export default function ImportPage() {
   return (
     <div className="pt-6 space-y-4 pb-8">
       {/* Header */}
-      <div className="rpg-panel-accent p-6 text-center">
+      <div className="card-accent p-6 text-center">
         <p className="text-4xl mb-3">📥</p>
-        <h1 className="text-2xl font-extrabold" style={{ color: '#b08810' }}>
+        <h1 className="text-2xl font-extrabold" style={{ color: '#d4a020' }}>
           マネーフォワード取込
         </h1>
-        <p className="text-xs mt-1.5 font-medium" style={{ color: '#5a6a8a' }}>
+        <p className="text-xs mt-1.5 font-medium" style={{ color: '#6b7280' }}>
           CSVから返済データを一括インポート
         </p>
       </div>
 
       {noBosses && (
-        <div className="rpg-panel p-5 text-center">
-          <p className="text-sm font-bold mb-2" style={{ color: '#d9534f' }}>
+        <div className="card p-5 text-center">
+          <p className="text-sm font-bold mb-2" style={{ color: '#ef4444' }}>
             討伐対象のモンスターがいません
           </p>
-          <p className="text-xs mb-4" style={{ color: '#5a6a8a' }}>
+          <p className="text-xs mb-4" style={{ color: '#6b7280' }}>
             先に設定画面でクエストを登録してください。
           </p>
-          <Link href="/setup" className="btn-rpg inline-block !px-6">
+          <Link href="/setup" className="btn-main inline-block !px-6">
             設定へ
           </Link>
         </div>
@@ -388,13 +388,13 @@ export default function ImportPage() {
 
       {/* ==================== STEP 1: Upload ==================== */}
       {step === 'upload' && !noBosses && (
-        <div className="rpg-panel p-5 space-y-4">
-          <div className="section-bar" style={{ marginBottom: '2px' }}>
-            <h2 className="text-[15px] font-extrabold" style={{ color: '#2b3a67' }}>
+        <div className="card p-5 space-y-4">
+          <div className="section-label" style={{ marginBottom: '2px' }}>
+            <h2 className="text-[15px] font-extrabold" style={{ color: '#1a1a2e' }}>
               CSVファイルを選択
             </h2>
           </div>
-          <p className="text-xs font-medium" style={{ color: '#5a6a8a' }}>
+          <p className="text-xs font-medium" style={{ color: '#6b7280' }}>
             マネーフォワードの「入出金明細」画面からCSVをダウンロードしてアップロードしてください。
             Shift-JIS / UTF-8 どちらにも対応しています。
           </p>
@@ -419,26 +419,26 @@ export default function ImportPage() {
                 className="hidden"
               />
               <p className="text-3xl mb-2">📄</p>
-              <p className="text-sm font-bold" style={{ color: '#b08810' }}>
+              <p className="text-sm font-bold" style={{ color: '#d4a020' }}>
                 {fileName || 'タップしてCSVを選択'}
               </p>
-              <p className="text-[10px] mt-1" style={{ color: '#5a6a8a' }}>
+              <p className="text-[10px] mt-1" style={{ color: '#6b7280' }}>
                 .csv ファイル対応
               </p>
             </label>
           </div>
 
           {parseError && (
-            <div className="rpg-panel-inner p-4">
-              <p className="text-xs font-bold" style={{ color: '#d9534f' }}>
+            <div className="card-inner p-4">
+              <p className="text-xs font-bold" style={{ color: '#ef4444' }}>
                 {parseError}
               </p>
             </div>
           )}
 
           {/* Instructions */}
-          <div className="rpg-panel-inner p-4 space-y-2">
-            <p className="text-[11px] font-bold" style={{ color: '#b08810' }}>
+          <div className="card-inner p-4 space-y-2">
+            <p className="text-[11px] font-bold" style={{ color: '#d4a020' }}>
               検出キーワード
             </p>
             <div className="flex flex-wrap gap-1.5">
@@ -448,7 +448,7 @@ export default function ImportPage() {
                 </span>
               ))}
             </div>
-            <p className="text-[10px] mt-1" style={{ color: '#5a6a8a' }}>
+            <p className="text-[10px] mt-1" style={{ color: '#6b7280' }}>
               上記キーワードを含む行を自動抽出します。
             </p>
           </div>
@@ -459,15 +459,15 @@ export default function ImportPage() {
       {step === 'preview' && (
         <div className="space-y-4">
           {/* Summary bar */}
-          <div className="rpg-panel p-4">
+          <div className="card p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold" style={{ color: '#2b3a67' }}>
+                <p className="text-xs font-bold" style={{ color: '#1a1a2e' }}>
                   {allCsvRows.length}行中{paymentRows.length}件を検出
                 </p>
-                <p className="text-[10px] mt-0.5" style={{ color: '#5a6a8a' }}>
+                <p className="text-[10px] mt-0.5" style={{ color: '#6b7280' }}>
                   {selectedCount}件選択中 / 合計{' '}
-                  <span style={{ color: '#b08810', fontWeight: 800 }}>
+                  <span style={{ color: '#d4a020', fontWeight: 800 }}>
                     {formatCurrency(selectedTotal)}
                   </span>
                 </p>
@@ -480,12 +480,12 @@ export default function ImportPage() {
 
           {/* Batch boss assignment */}
           {bosses.length > 1 && (
-            <div className="rpg-panel-inner p-3">
-              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#5a6a8a' }}>
+            <div className="card-inner p-3">
+              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#6b7280' }}>
                 一括で討伐対象を設定
               </label>
               <select
-                className="select-rpg"
+                className="select-clean"
                 onChange={(e) => {
                   if (e.target.value) assignAllBoss(e.target.value);
                 }}
@@ -510,7 +510,7 @@ export default function ImportPage() {
               return (
                 <div
                   key={row.id}
-                  className="rpg-panel p-4"
+                  className="card p-4"
                   style={{
                     opacity: row.selected ? 1 : 0.45,
                     borderColor: row.selected ? 'rgba(184, 148, 80, 0.2)' : undefined,
@@ -522,12 +522,12 @@ export default function ImportPage() {
                       onClick={() => toggleRow(row.id)}
                       className="mt-0.5 flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-all"
                       style={{
-                        borderColor: row.selected ? '#b08810' : 'rgba(255,255,255,0.1)',
+                        borderColor: row.selected ? '#d4a020' : 'rgba(255,255,255,0.1)',
                         background: row.selected ? 'rgba(184,148,80,0.2)' : 'transparent',
                       }}
                     >
                       {row.selected && (
-                        <span className="text-xs" style={{ color: '#b08810' }}>
+                        <span className="text-xs" style={{ color: '#d4a020' }}>
                           ✓
                         </span>
                       )}
@@ -536,18 +536,18 @@ export default function ImportPage() {
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <p className="text-xs font-bold truncate" style={{ color: '#2b3a67' }}>
+                        <p className="text-xs font-bold truncate" style={{ color: '#1a1a2e' }}>
                           {row.description}
                         </p>
                         <p
                           className="text-sm font-extrabold flex-shrink-0 ml-2"
-                          style={{ color: '#d9534f' }}
+                          style={{ color: '#ef4444' }}
                         >
                           {formatCurrency(row.amount)}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px]" style={{ color: '#5a6a8a' }}>
+                        <span className="text-[10px]" style={{ color: '#6b7280' }}>
                           {row.date}
                         </span>
                         <span className="tag tag-active" style={{ fontSize: '9px', padding: '1px 6px' }}>
@@ -561,7 +561,7 @@ export default function ImportPage() {
                           <select
                             value={row.bossId}
                             onChange={(e) => assignBoss(row.id, e.target.value)}
-                            className="select-rpg !text-[11px] !py-1.5"
+                            className="select-clean !text-[11px] !py-1.5"
                           >
                             {bosses.map((b) => (
                               <option key={b.id} value={b.id}>
@@ -597,32 +597,32 @@ export default function ImportPage() {
       {/* ==================== STEP 3: Done ==================== */}
       {step === 'done' && (
         <div className="space-y-4">
-          <div className="rpg-panel-accent p-6 text-center">
+          <div className="card-accent p-6 text-center">
             <p className="text-5xl mb-3">🎉</p>
-            <p className="text-lg font-extrabold" style={{ color: '#2b3a67' }}>
+            <p className="text-lg font-extrabold" style={{ color: '#1a1a2e' }}>
               取込完了！
             </p>
-            <p className="text-xs mt-1" style={{ color: '#5a6a8a' }}>
+            <p className="text-xs mt-1" style={{ color: '#6b7280' }}>
               {importResults.filter((r) => r.success).length}件の攻撃を記録しました
             </p>
           </div>
 
           {/* Result summary */}
-          <div className="rpg-panel p-4">
+          <div className="card p-4">
             <div className="grid grid-cols-2 gap-3 text-center">
               <div>
-                <p className="text-[10px] font-bold uppercase" style={{ color: '#5a6a8a' }}>
+                <p className="text-[10px] font-bold uppercase" style={{ color: '#6b7280' }}>
                   成功
                 </p>
-                <p className="text-xl font-extrabold" style={{ color: '#2d8a4e' }}>
+                <p className="text-xl font-extrabold" style={{ color: '#10b981' }}>
                   {importResults.filter((r) => r.success).length}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase" style={{ color: '#5a6a8a' }}>
+                <p className="text-[10px] font-bold uppercase" style={{ color: '#6b7280' }}>
                   獲得EXP
                 </p>
-                <p className="text-xl font-extrabold" style={{ color: '#b08810' }}>
+                <p className="text-xl font-extrabold" style={{ color: '#d4a020' }}>
                   +{importResults.filter((r) => r.success).reduce((s, r) => s + r.xpEarned, 0)}
                 </p>
               </div>
@@ -632,27 +632,27 @@ export default function ImportPage() {
           {/* Individual results */}
           <div className="space-y-2">
             {importResults.map((r, i) => (
-              <div key={i} className="rpg-panel-inner p-3">
+              <div key={i} className="card-inner p-3">
                 <div className="flex items-center justify-between">
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold truncate" style={{ color: '#2b3a67' }}>
+                    <p className="text-xs font-bold truncate" style={{ color: '#1a1a2e' }}>
                       {r.success ? '✓' : '✗'} {r.description}
                     </p>
-                    <p className="text-[10px]" style={{ color: '#5a6a8a' }}>
+                    <p className="text-[10px]" style={{ color: '#6b7280' }}>
                       → {r.bossName}
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0 ml-2">
-                    <p className="text-xs font-extrabold" style={{ color: r.success ? '#d9534f' : '#d9534f' }}>
+                    <p className="text-xs font-extrabold" style={{ color: r.success ? '#ef4444' : '#ef4444' }}>
                       {r.success ? `-${formatCurrency(r.amount)}` : 'エラー'}
                     </p>
                     {r.success && (
-                      <p className="text-[10px] font-bold" style={{ color: '#7a4a8a' }}>
+                      <p className="text-[10px] font-bold" style={{ color: '#8b5cf6' }}>
                         +{r.xpEarned} EXP
                       </p>
                     )}
                     {r.error && (
-                      <p className="text-[10px]" style={{ color: '#d9534f' }}>
+                      <p className="text-[10px]" style={{ color: '#ef4444' }}>
                         {r.error}
                       </p>
                     )}
@@ -679,7 +679,7 @@ export default function ImportPage() {
         <Link
           href="/setup"
           className="text-xs font-bold"
-          style={{ color: '#5a6a8a', textDecoration: 'underline', textUnderlineOffset: '3px' }}
+          style={{ color: '#6b7280', textDecoration: 'underline', textUnderlineOffset: '3px' }}
         >
           設定に戻る
         </Link>

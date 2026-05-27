@@ -76,21 +76,21 @@ function GrowthChart({ dataPoints }: { dataPoints: number[] }) {
       ))}
       {/* Y-axis labels */}
       {yTicks.map((t, i) => (
-        <text key={`yl-${i}`} x={PAD_X - 6} y={t.y + 4} textAnchor="end" fill="#5a6a8a" fontSize={10} fontWeight={600}>
+        <text key={`yl-${i}`} x={PAD_X - 6} y={t.y + 4} textAnchor="end" fill="#6b7280" fontSize={10} fontWeight={600}>
           {formatShort(t.val)}
         </text>
       ))}
       {/* X-axis labels */}
       {xTicks.map((t, i) => (
-        <text key={`xl-${i}`} x={t.x} y={H - 8} textAnchor="middle" fill="#5a6a8a" fontSize={10} fontWeight={600}>
+        <text key={`xl-${i}`} x={t.x} y={H - 8} textAnchor="middle" fill="#6b7280" fontSize={10} fontWeight={600}>
           {t.month}m
         </text>
       ))}
       {/* Gradient fill under the line */}
       <defs>
         <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#b08810" stopOpacity={0.2} />
-          <stop offset="100%" stopColor="#b08810" stopOpacity={0} />
+          <stop offset="0%" stopColor="#d4a020" stopOpacity={0.2} />
+          <stop offset="100%" stopColor="#d4a020" stopOpacity={0} />
         </linearGradient>
       </defs>
       <polygon
@@ -98,9 +98,9 @@ function GrowthChart({ dataPoints }: { dataPoints: number[] }) {
         fill="url(#chartFill)"
       />
       {/* Line */}
-      <polyline points={points.join(' ')} fill="none" stroke="#b08810" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points={points.join(' ')} fill="none" stroke="#d4a020" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
       {/* End dot */}
-      <circle cx={Number(points[points.length - 1].split(',')[0])} cy={Number(points[points.length - 1].split(',')[1])} r={4} fill="#b08810" />
+      <circle cx={Number(points[points.length - 1].split(',')[0])} cy={Number(points[points.length - 1].split(',')[1])} r={4} fill="#d4a020" />
     </svg>
   );
 }
@@ -199,31 +199,31 @@ export default function ExpeditionPage() {
   return (
     <div className="pt-6 space-y-4">
       {/* Header */}
-      <div className="rpg-panel-accent p-5 text-center">
-        <p className="text-[9px] font-bold uppercase tracking-widest mb-1" style={{ color: '#5a6a8a' }}>EXPEDITION QUEST</p>
-        <h1 className="text-2xl font-extrabold" style={{ color: '#b08810' }}>遠征クエスト</h1>
-        <p className="text-xs font-bold mt-1" style={{ color: '#5a6a8a' }}>投資で自動狩り</p>
+      <div className="card-accent p-5 text-center">
+        <p className="text-[9px] font-bold uppercase tracking-widest mb-1" style={{ color: '#6b7280' }}>EXPEDITION QUEST</p>
+        <h1 className="text-2xl font-extrabold" style={{ color: '#d4a020' }}>遠征クエスト</h1>
+        <p className="text-xs font-bold mt-1" style={{ color: '#6b7280' }}>投資で自動狩り</p>
       </div>
 
       {/* Summary Panel */}
       <div>
-        <div className="section-bar">
-          <h2 className="text-[15px] font-extrabold" style={{ color: '#2b3a67' }}>遠征サマリー</h2>
+        <div className="section-label">
+          <h2 className="text-[15px] font-extrabold" style={{ color: '#1a1a2e' }}>遠征サマリー</h2>
         </div>
         <div className="grid grid-cols-3 gap-3">
-          <div className="rpg-panel-inner p-3.5 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#5a6a8a' }}>総資産</p>
-            <p className="text-base font-extrabold" style={{ color: '#b08810' }}>{formatCurrency(totalInvestmentValue)}</p>
+          <div className="card-inner p-3.5 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#6b7280' }}>総資産</p>
+            <p className="text-base font-extrabold" style={{ color: '#d4a020' }}>{formatCurrency(totalInvestmentValue)}</p>
           </div>
-          <div className="rpg-panel-inner p-3.5 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#5a6a8a' }}>総損益</p>
-            <p className={`text-base font-extrabold ${totalInvestmentReturn >= 0 ? 'glow-green' : 'glow-red'}`} style={{ color: totalInvestmentReturn >= 0 ? '#2d8a4e' : '#d9534f' }}>
+          <div className="card-inner p-3.5 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#6b7280' }}>総損益</p>
+            <p className={`text-base font-extrabold ${totalInvestmentReturn >= 0 ? 'glow-green' : 'glow-red'}`} style={{ color: totalInvestmentReturn >= 0 ? '#10b981' : '#ef4444' }}>
               {totalInvestmentReturn >= 0 ? '+' : ''}{formatCurrency(totalInvestmentReturn)}
             </p>
           </div>
-          <div className="rpg-panel-inner p-3.5 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#5a6a8a' }}>利回り</p>
-            <p className={`text-base font-extrabold ${totalReturnRate >= 0 ? 'glow-green' : 'glow-red'}`} style={{ color: totalReturnRate >= 0 ? '#2d8a4e' : '#d9534f' }}>
+          <div className="card-inner p-3.5 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#6b7280' }}>利回り</p>
+            <p className={`text-base font-extrabold ${totalReturnRate >= 0 ? 'glow-green' : 'glow-red'}`} style={{ color: totalReturnRate >= 0 ? '#10b981' : '#ef4444' }}>
               {totalReturnRate >= 0 ? '+' : ''}{totalReturnRate}%
             </p>
           </div>
@@ -232,16 +232,16 @@ export default function ExpeditionPage() {
 
       {/* Investment List */}
       <div>
-        <div className="section-bar">
-          <h2 className="text-[15px] font-extrabold" style={{ color: '#2b3a67' }}>遠征モンスター</h2>
+        <div className="section-label">
+          <h2 className="text-[15px] font-extrabold" style={{ color: '#1a1a2e' }}>遠征モンスター</h2>
           <span className="tag tag-active">{investments.length}体</span>
         </div>
 
         {investments.length === 0 && (
-          <div className="rpg-panel-inner p-6 text-center">
+          <div className="card-inner p-6 text-center">
             <p className="text-3xl mb-2">🗺️</p>
-            <p className="text-sm font-bold" style={{ color: '#5a6a8a' }}>遠征先がありません</p>
-            <p className="text-xs mt-1" style={{ color: '#8a96b0' }}>モンスターを派遣して自動で狩りを始めよう</p>
+            <p className="text-sm font-bold" style={{ color: '#6b7280' }}>遠征先がありません</p>
+            <p className="text-xs mt-1" style={{ color: '#9ca3af' }}>モンスターを派遣して自動で狩りを始めよう</p>
           </div>
         )}
 
@@ -254,7 +254,7 @@ export default function ExpeditionPage() {
             const justUpdated = updateResult?.id === inv.id;
 
             return (
-              <div key={inv.id} className="rpg-panel p-4 space-y-3">
+              <div key={inv.id} className="card p-4 space-y-3">
                 <div className="flex items-start gap-3">
                   {/* Emoji */}
                   <div
@@ -267,27 +267,27 @@ export default function ExpeditionPage() {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-extrabold truncate" style={{ color: '#2b3a67' }}>{inv.name}</h3>
+                      <h3 className="text-sm font-extrabold truncate" style={{ color: '#1a1a2e' }}>{inv.name}</h3>
                       <span className="tag tag-active shrink-0">{TYPE_LABELS[inv.type]}</span>
                     </div>
                     <div className="flex items-baseline gap-3 mt-1.5">
                       <div>
-                        <p className="text-[10px] font-bold" style={{ color: '#8a96b0' }}>元本</p>
-                        <p className="text-xs font-bold" style={{ color: '#5a6a8a' }}>{formatCurrency(inv.principal)}</p>
+                        <p className="text-[10px] font-bold" style={{ color: '#9ca3af' }}>元本</p>
+                        <p className="text-xs font-bold" style={{ color: '#6b7280' }}>{formatCurrency(inv.principal)}</p>
                       </div>
                       <div>
-                        <p className="text-[10px] font-bold" style={{ color: '#8a96b0' }}>現在</p>
-                        <p className="text-sm font-extrabold" style={{ color: '#2b3a67' }}>{formatCurrency(inv.current_value)}</p>
+                        <p className="text-[10px] font-bold" style={{ color: '#9ca3af' }}>現在</p>
+                        <p className="text-sm font-extrabold" style={{ color: '#1a1a2e' }}>{formatCurrency(inv.current_value)}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Return badge */}
                   <div className="text-right shrink-0">
-                    <p className={`text-lg font-extrabold ${isPositive ? 'glow-green' : 'glow-red'}`} style={{ color: isPositive ? '#2d8a4e' : '#d9534f' }}>
+                    <p className={`text-lg font-extrabold ${isPositive ? 'glow-green' : 'glow-red'}`} style={{ color: isPositive ? '#10b981' : '#ef4444' }}>
                       {isPositive ? '+' : ''}{returnRate}%
                     </p>
-                    <p className="text-[10px] font-bold" style={{ color: isPositive ? '#2d8a4e' : '#d9534f' }}>
+                    <p className="text-[10px] font-bold" style={{ color: isPositive ? '#10b981' : '#ef4444' }}>
                       {isPositive ? '+' : ''}{formatCurrency(returnAmt)}
                     </p>
                   </div>
@@ -295,12 +295,12 @@ export default function ExpeditionPage() {
 
                 {/* Update value inline form */}
                 {isEditing ? (
-                  <div className="rpg-panel-inner p-3 space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#5a6a8a' }}>現在の評価額を入力</p>
+                  <div className="card-inner p-3 space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#6b7280' }}>現在の評価額を入力</p>
                     <div className="flex gap-2">
                       <input
                         type="number"
-                        className="input-rpg flex-1"
+                        className="input-clean flex-1"
                         placeholder="例: 110000"
                         value={updateValue}
                         onChange={(e) => setUpdateValue(e.target.value)}
@@ -321,8 +321,8 @@ export default function ExpeditionPage() {
 
                 {/* XP notification */}
                 {justUpdated && (
-                  <div className="rpg-panel-inner p-2 text-center animate-slide-up">
-                    <p className="text-xs font-bold" style={{ color: '#b08810' }}>+{updateResult.xp} EXP 獲得!</p>
+                  <div className="card-inner p-2 text-center animate-slide-up">
+                    <p className="text-xs font-bold" style={{ color: '#d4a020' }}>+{updateResult.xp} EXP 獲得!</p>
                   </div>
                 )}
               </div>
@@ -333,26 +333,26 @@ export default function ExpeditionPage() {
 
       {/* Compound Interest Simulator */}
       <div>
-        <div className="section-bar">
-          <h2 className="text-[15px] font-extrabold" style={{ color: '#2b3a67' }}>複利シミュレーター</h2>
+        <div className="section-label">
+          <h2 className="text-[15px] font-extrabold" style={{ color: '#1a1a2e' }}>複利シミュレーター</h2>
         </div>
-        <div className="rpg-panel p-4 space-y-4">
+        <div className="card p-4 space-y-4">
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#5a6a8a' }}>元本 (円)</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#6b7280' }}>元本 (円)</label>
               <input
                 type="number"
-                className="input-rpg"
+                className="input-clean"
                 value={simPrincipal}
                 onChange={(e) => setSimPrincipal(e.target.value)}
                 placeholder="100000"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#5a6a8a' }}>年利 (%)</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#6b7280' }}>年利 (%)</label>
               <input
                 type="number"
-                className="input-rpg"
+                className="input-clean"
                 value={simRate}
                 onChange={(e) => setSimRate(e.target.value)}
                 placeholder="5"
@@ -360,10 +360,10 @@ export default function ExpeditionPage() {
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#5a6a8a' }}>期間 (月)</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#6b7280' }}>期間 (月)</label>
               <input
                 type="number"
-                className="input-rpg"
+                className="input-clean"
                 value={simMonths}
                 onChange={(e) => setSimMonths(e.target.value)}
                 placeholder="12"
@@ -373,22 +373,22 @@ export default function ExpeditionPage() {
 
           {simData && (
             <>
-              <div className="rpg-panel-inner p-2 rounded-xl overflow-hidden">
+              <div className="card-inner p-2 rounded-xl overflow-hidden">
                 <GrowthChart dataPoints={simData.points} />
               </div>
               <div className="flex items-center justify-between px-1">
                 <div>
-                  <p className="text-[10px] font-bold" style={{ color: '#8a96b0' }}>元本</p>
-                  <p className="text-sm font-bold" style={{ color: '#5a6a8a' }}>{formatCurrency(Number(simPrincipal) || 0)}</p>
+                  <p className="text-[10px] font-bold" style={{ color: '#9ca3af' }}>元本</p>
+                  <p className="text-sm font-bold" style={{ color: '#6b7280' }}>{formatCurrency(Number(simPrincipal) || 0)}</p>
                 </div>
-                <div className="text-lg" style={{ color: '#8a96b0' }}>→</div>
+                <div className="text-lg" style={{ color: '#9ca3af' }}>→</div>
                 <div className="text-right">
-                  <p className="text-[10px] font-bold" style={{ color: '#8a96b0' }}>{simMonths}ヶ月後</p>
-                  <p className="text-lg font-extrabold" style={{ color: '#b08810' }}>{formatCurrency(simData.finalValue)}</p>
+                  <p className="text-[10px] font-bold" style={{ color: '#9ca3af' }}>{simMonths}ヶ月後</p>
+                  <p className="text-lg font-extrabold" style={{ color: '#d4a020' }}>{formatCurrency(simData.finalValue)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] font-bold" style={{ color: '#8a96b0' }}>増加額</p>
-                  <p className="text-sm font-extrabold" style={{ color: '#2d8a4e' }}>
+                  <p className="text-[10px] font-bold" style={{ color: '#9ca3af' }}>増加額</p>
+                  <p className="text-sm font-extrabold" style={{ color: '#10b981' }}>
                     +{formatCurrency(simData.finalValue - (Number(simPrincipal) || 0))}
                   </p>
                 </div>
@@ -400,21 +400,21 @@ export default function ExpeditionPage() {
 
       {/* Add Investment Form */}
       <div>
-        <div className="section-bar">
-          <h2 className="text-[15px] font-extrabold" style={{ color: '#2b3a67' }}>新しい遠征</h2>
+        <div className="section-label">
+          <h2 className="text-[15px] font-extrabold" style={{ color: '#1a1a2e' }}>新しい遠征</h2>
         </div>
 
         {!showAddForm ? (
-          <button className="btn-rpg w-full" onClick={() => setShowAddForm(true)}>
+          <button className="btn-main w-full" onClick={() => setShowAddForm(true)}>
             + モンスターを遠征に派遣する
           </button>
         ) : (
-          <form className="rpg-panel p-4 space-y-3" onSubmit={handleAddInvestment}>
+          <form className="card p-4 space-y-3" onSubmit={handleAddInvestment}>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#5a6a8a' }}>投資名</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#6b7280' }}>投資名</label>
               <input
                 type="text"
-                className="input-rpg"
+                className="input-clean"
                 placeholder="例: S&P500インデックス"
                 value={addName}
                 onChange={(e) => setAddName(e.target.value)}
@@ -423,8 +423,8 @@ export default function ExpeditionPage() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#5a6a8a' }}>種類</label>
-              <select className="select-rpg" value={addType} onChange={(e) => setAddType(e.target.value as Investment['type'])}>
+              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#6b7280' }}>種類</label>
+              <select className="select-clean" value={addType} onChange={(e) => setAddType(e.target.value as Investment['type'])}>
                 <option value="stock">📈 個別株</option>
                 <option value="fund">🏛️ 投資信託</option>
                 <option value="crypto">⛓️ 暗号資産</option>
@@ -434,10 +434,10 @@ export default function ExpeditionPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#5a6a8a' }}>元本 (円)</label>
+                <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#6b7280' }}>元本 (円)</label>
                 <input
                   type="number"
-                  className="input-rpg"
+                  className="input-clean"
                   placeholder="100000"
                   value={addPrincipal}
                   onChange={(e) => setAddPrincipal(e.target.value)}
@@ -445,10 +445,10 @@ export default function ExpeditionPage() {
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#5a6a8a' }}>現在の評価額 (円)</label>
+                <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#6b7280' }}>現在の評価額 (円)</label>
                 <input
                   type="number"
-                  className="input-rpg"
+                  className="input-clean"
                   placeholder="元本と同額"
                   value={addCurrentValue}
                   onChange={(e) => setAddCurrentValue(e.target.value)}
@@ -458,10 +458,10 @@ export default function ExpeditionPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#5a6a8a' }}>想定年利 (%)</label>
+                <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#6b7280' }}>想定年利 (%)</label>
                 <input
                   type="number"
-                  className="input-rpg"
+                  className="input-clean"
                   placeholder="5"
                   step="0.1"
                   value={addRate}
@@ -469,10 +469,10 @@ export default function ExpeditionPage() {
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#5a6a8a' }}>開始日</label>
+                <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#6b7280' }}>開始日</label>
                 <input
                   type="date"
-                  className="input-rpg"
+                  className="input-clean"
                   value={addStartDate}
                   onChange={(e) => setAddStartDate(e.target.value)}
                 />
