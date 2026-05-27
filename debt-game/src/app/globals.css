@@ -19,11 +19,22 @@
 }
 
 html, body {
-  background: #1a2040;
+  background: var(--ui-cream);
   color: var(--text-dark);
   min-height: 100dvh;
   overflow-x: hidden;
   -webkit-font-smoothing: none;
+}
+
+/* Town hero image */
+.town-hero {
+  width: 100%;
+  aspect-ratio: 9 / 11;
+  object-fit: cover;
+  object-position: center 25%;
+  display: block;
+  border-radius: 0 0 16px 16px;
+  image-rendering: pixelated;
 }
 
 /* Pixel rendering for sprites */
@@ -31,9 +42,7 @@ html, body {
 
 /* RPG Window Panel */
 .rpg-panel {
-  background: rgba(255, 248, 232, 0.92);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: var(--ui-cream);
   border: 3px solid var(--ui-border);
   border-radius: 8px;
   box-shadow: 0 2px 0 var(--ui-border), inset 0 0 0 2px rgba(255,255,255,0.6);
@@ -41,9 +50,7 @@ html, body {
 }
 
 .rpg-panel-accent {
-  background: rgba(255, 248, 232, 0.92);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: var(--ui-cream);
   border: 3px solid var(--accent-gold-dark);
   border-radius: 8px;
   box-shadow: 0 2px 0 var(--accent-gold-dark), inset 0 0 0 2px rgba(255,210,63,0.3);
