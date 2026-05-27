@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { DotGothic16 } from 'next/font/google';
 import NavBar from '@/components/NavBar';
+import WorldBackground from '@/components/WorldBackground';
 import './globals.css';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
@@ -47,7 +48,8 @@ export default function RootLayout({
   return (
     <html lang="ja" className={font.className}>
       <body>
-        <div className="max-w-md mx-auto pb-20 px-3">
+        <WorldBackground />
+        <div className="relative z-10 max-w-md mx-auto pb-20 px-3">
           {children}
         </div>
         <NavBar />
