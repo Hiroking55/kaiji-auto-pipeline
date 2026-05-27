@@ -9,9 +9,9 @@ export default function WorldBackground() {
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage: `url("${basePath}/bg-world.jpg"), url("https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1200&q=80")`,
+          backgroundImage: `url("${basePath}/bg-world.png")`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center 20%',
+          backgroundPosition: 'center top',
           backgroundRepeat: 'no-repeat',
         }}
       />
@@ -20,7 +20,7 @@ export default function WorldBackground() {
       <div
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(180deg, rgba(20,16,10,0.1) 0%, rgba(20,16,10,0.2) 30%, rgba(16,14,10,0.5) 55%, rgba(16,14,10,0.85) 75%, #100e0a 90%)',
+          background: 'linear-gradient(180deg, transparent 0%, rgba(16,14,10,0.1) 30%, rgba(16,14,10,0.3) 50%, rgba(16,14,10,0.7) 70%, #100e0a 88%)',
         }}
       />
 
