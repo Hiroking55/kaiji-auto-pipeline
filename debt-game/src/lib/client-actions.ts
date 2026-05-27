@@ -17,6 +17,7 @@ import {
   estimatePayoffDate, calculateDailyInterest,
   getBossDefaults, calculateSavingsXp, getCompanionEmoji,
   calculateReturnRate, calculateInvestmentXp,
+  getTownVitality,
 } from './game-engine';
 import { DashboardData, Boss } from './types';
 
@@ -86,6 +87,11 @@ export function getDashboardData(): DashboardData | null {
     investments: getInvestments(),
     totalInvestmentValue: getInvestments().reduce((s, i) => s + i.current_value, 0),
     totalInvestmentReturn: getInvestments().reduce((s, i) => s + (i.current_value - i.principal), 0),
+    netWorth: getSavingsGoals().reduce((s, g) => s + g.current_amount, 0)
+      + getInvestments().reduce((s, i) => s + i.current_value, 0)
+      - bosses.reduce((sum, b) => sum + (b.is_defeated ? 0 : b.current_hp), 0),
+    townVitality: getTownVitality(monthlyPaid, monthlyDebtPayments),
+    monthlyTarget: monthlyDebtPayments,
   };
 }
 

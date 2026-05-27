@@ -155,4 +155,7 @@ export interface DashboardData {
   investments: Investment[];
   totalInvestmentValue: number;
   totalInvestmentReturn: number;
+  netWorth: number;
+  townVitality: number;
+  monthlyTarget: number;
 }

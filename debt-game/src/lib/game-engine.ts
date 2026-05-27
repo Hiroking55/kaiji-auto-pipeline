@@ -1,5 +1,25 @@
 import { Boss, Player, SavingsGoal, Investment } from './types';
 
+// === Town Evolution ===
+export function getTownStage(netWorth: number): { level: number; name: string; description: string } {
+  if (netWorth >= 2000000) return { level: 7, name: '黄金の王都', description: '壮大な黄金の城と賑わう街' };
+  if (netWorth >= 800000) return { level: 5, name: '栄える街', description: '城と市場と噴水のある活気ある街' };
+  if (netWorth >= 0) return { level: 3, name: '城下町', description: '小さな城と数軒の家がある町' };
+  return { level: 1, name: '開拓の村', description: '小屋がひとつふたつの開拓地' };
+}
+
+export function getTownVitality(monthlyPaid: number, monthlyTarget: number): number {
+  if (monthlyTarget <= 0) return 100;
+  return Math.max(0, Math.min(100, Math.round((monthlyPaid / monthlyTarget) * 100)));
+}
+
+export function getVitalityLabel(vitality: number): { text: string; color: string } {
+  if (vitality >= 80) return { text: '栄えています！', color: '#2d8a4e' };
+  if (vitality >= 50) return { text: '持ちこたえている', color: '#b89450' };
+  if (vitality >= 20) return { text: '荒れてきている…', color: '#d9534f' };
+  return { text: '荒れ果てています…', color: '#d9534f' };
+}
+
 const TITLES: Record<number, string> = {
   1: '借金奴隷',
   5: '見習い戦士',

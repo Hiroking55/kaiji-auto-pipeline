@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getDashboardData, processLogin } from '@/lib/client-actions';
 import Link from 'next/link';
-import { formatCurrency, calculateLevel, getHunterRankTitle, estimateGoalMonths, calculateReturnRate } from '@/lib/game-engine';
+import { getDashboardData, processLogin } from '@/lib/client-actions';
+import { formatCurrency, calculateLevel, getHunterRankTitle, getTownStage, estimateGoalMonths, calculateReturnRate } from '@/lib/game-engine';
 import XpBar from '@/components/XpBar';
 import StatCard from '@/components/StatCard';
 import BossCard from '@/components/BossCard';
+import TownScene from '@/components/TownScene';
 import { DashboardData } from '@/lib/types';
 
 export default function Page() {
@@ -20,7 +21,7 @@ export default function Page() {
     const { streakBonus, isNewDay } = processLogin();
     if (isNewDay && streakBonus > 0) {
       setLoginBonus({ bonus: streakBonus, show: true });
-      setTimeout(() => setLoginBonus(prev => ({ ...prev, show: false })), 3000);
+      setTimeout(() => setLoginBonus(p => ({ ...p, show: false })), 3000);
     }
     const result = getDashboardData();
     if (!result) { router.push('/setup'); return; }
@@ -31,12 +32,12 @@ export default function Page() {
   if (loading || !data) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-4xl animate-soft-pulse">⚔️</p>
+        <p className="text-3xl animate-bounce">🏰</p>
       </div>
     );
   }
 
-  const { player, bosses, totalDebt, originalTotalDebt, previousDayDebt, monthlyPaid, monthlyPaymentCount, monthlyXpEarned, largestHitThisMonth, dailyBudget, estimatedPayoff, xpForNextLevel, savingsGoals, totalSavings, investments, totalInvestmentValue, totalInvestmentReturn } = data;
+  const { player, bosses, totalDebt, originalTotalDebt, previousDayDebt, monthlyPaid, monthlyPaymentCount, monthlyXpEarned, largestHitThisMonth, dailyBudget, estimatedPayoff, xpForNextLevel, savingsGoals, totalSavings, investments, totalInvestmentValue, totalInvestmentReturn, netWorth, townVitality } = data;
   const levelInfo = calculateLevel(player.xp);
   const debtDiff = previousDayDebt !== null ? totalDebt - previousDayDebt : null;
   const active = bosses.filter(b => !b.is_defeated);
@@ -44,220 +45,130 @@ export default function Page() {
   const progress = originalTotalDebt > 0 ? Math.round(((originalTotalDebt - totalDebt) / originalTotalDebt) * 100) : 0;
 
   return (
-    <div className="pt-6 space-y-4">
+    <div className="pt-4 space-y-3">
       {/* Login Bonus Toast */}
       {loginBonus.show && (
-        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-50 animate-slide-up">
-          <div className="glass-accent px-6 py-3 text-center">
-            <p className="text-xs font-bold" style={{ color: '#7c7870' }}>ログインボーナス</p>
-            <p className="text-lg font-extrabold animate-glow" style={{ color: '#b89450' }}>
-              +{loginBonus.bonus} EXP
-            </p>
-            <p className="text-[10px]" style={{ color: '#7c7870' }}>
-              {player.login_streak}日連続ログイン
-            </p>
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 animate-slide-up">
+          <div className="rpg-panel-accent px-5 py-2 text-center">
+            <p className="text-[10px] font-bold" style={{ color: '#5a6a8a' }}>ログインボーナス</p>
+            <p className="text-lg font-bold" style={{ color: '#b08810' }}>+{loginBonus.bonus} EXP ✨</p>
+            <p className="text-[10px]" style={{ color: '#5a6a8a' }}>{player.login_streak}日連続</p>
           </div>
         </div>
       )}
 
+      {/* Town Scene */}
+      <TownScene netWorth={netWorth} vitality={townVitality} />
+
       {/* Hunter Profile */}
-      <div className="glass-accent p-5">
-        <div className="flex items-center gap-4 mb-4">
-          <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shrink-0"
-            style={{
-              background: 'rgba(14, 15, 20, 0.6)',
-              border: '1px solid rgba(255,255,255,0.04)',
-            }}
-          >
+      <div className="rpg-panel p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-11 h-11 rounded-lg flex items-center justify-center text-2xl" style={{ background: 'rgba(43,58,103,0.06)', border: '2px solid rgba(43,58,103,0.15)' }}>
             ⚔️
           </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-extrabold truncate" style={{ color: '#e8e6e2' }}>
-              {player.name}
-            </h1>
-            <p className="text-xs font-bold" style={{ color: '#b89450' }}>
-              {getHunterRankTitle(player.level)}
-            </p>
+          <div className="flex-1">
+            <h1 className="text-base font-bold" style={{ color: '#2b3a67' }}>{player.name}</h1>
+            <p className="text-[10px] font-bold" style={{ color: '#b08810' }}>{getHunterRankTitle(player.level)}</p>
           </div>
-          <div className="text-right shrink-0">
-            <p className="text-2xl font-extrabold" style={{ color: '#c07838' }}>
-              {player.login_streak}
-            </p>
-            <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#7c7870' }}>
-              連続日
-            </p>
+          <div className="text-right">
+            <p className="text-lg font-bold" style={{ color: '#d9534f' }}>{player.login_streak}</p>
+            <p className="text-[8px] font-bold" style={{ color: '#5a6a8a' }}>連続日</p>
           </div>
         </div>
         <XpBar current={levelInfo.currentLevelXp} max={xpForNextLevel} level={player.level} />
       </div>
 
-      {/* Debt Overview */}
-      <div className="glass p-5">
-        <div className="flex items-end justify-between mb-3">
+      {/* Net Worth & Debt */}
+      <div className="rpg-panel p-4">
+        <div className="flex justify-between items-start mb-2">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#7c7870' }}>
-              総借金残高
-            </p>
-            <p className="text-3xl font-extrabold glow-red" style={{ color: '#c04040' }}>
-              {formatCurrency(totalDebt)}
+            <p className="text-[10px] font-bold" style={{ color: '#5a6a8a' }}>純資産</p>
+            <p className="text-xl font-bold" style={{ color: netWorth >= 0 ? '#2d8a4e' : '#d9534f' }}>
+              {formatCurrency(netWorth)}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-3xl font-extrabold glow-gold" style={{ color: '#b89450' }}>
-              {progress}
-              <span className="text-base">%</span>
-            </p>
-            <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#7c7870' }}>討伐進捗</p>
+            <p className="text-[10px] font-bold" style={{ color: '#5a6a8a' }}>借金残高</p>
+            <p className="text-base font-bold" style={{ color: '#d9534f' }}>{formatCurrency(totalDebt)}</p>
           </div>
         </div>
-        <div className="hp-track hp-track-sm">
-          <div
-            className="hp-fill"
-            style={{
-              width: `${progress}%`,
-              background: 'linear-gradient(90deg, #b89450, #40a060)',
-              boxShadow: '0 0 12px rgba(76,206,123,0.3)',
-            }}
-          />
-        </div>
-        {debtDiff !== null && (
-          <p className="text-[11px] font-bold mt-2" style={{ color: debtDiff <= 0 ? '#40a060' : '#c04040' }}>
-            前日比 {debtDiff <= 0 ? '↓' : '↑'} {formatCurrency(Math.abs(debtDiff))}
-          </p>
+        {originalTotalDebt > 0 && (
+          <>
+            <div className="bar-track bar-track-sm">
+              <div className="bar-fill" style={{ width: `${progress}%`, backgroundColor: '#2d8a4e' }} />
+            </div>
+            <div className="flex justify-between mt-1 text-[10px]">
+              <span style={{ color: '#2d8a4e' }}>討伐進捗 {progress}%</span>
+              {debtDiff !== null && (
+                <span style={{ color: debtDiff <= 0 ? '#2d8a4e' : '#d9534f' }}>
+                  前日比 {debtDiff <= 0 ? '↓' : '↑'}{formatCurrency(Math.abs(debtDiff))}
+                </span>
+              )}
+            </div>
+          </>
         )}
       </div>
 
-      {/* Monthly Activity */}
-      <div className="glass p-4">
-        <p className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: '#7c7870' }}>
-          今月の狩猟成果
-        </p>
-        <div className="grid grid-cols-4 gap-2">
+      {/* Monthly Summary */}
+      <div className="rpg-panel p-3">
+        <p className="text-[10px] font-bold mb-2" style={{ color: '#5a6a8a' }}>📊 今月の討伐成果</p>
+        <div className="grid grid-cols-4 gap-1 text-center">
           {[
-            { v: String(monthlyPaymentCount), l: '出撃', c: '#c07838' },
-            { v: formatCurrency(monthlyPaid).replace('¥', ''), l: 'ダメージ', c: '#40a060' },
-            { v: String(monthlyXpEarned), l: 'EXP', c: '#7858a0' },
-            { v: formatCurrency(largestHitThisMonth).replace('¥', ''), l: '最大火力', c: '#4878b0' },
+            { v: String(monthlyPaymentCount), l: '出撃', c: '#2b3a67' },
+            { v: formatCurrency(monthlyPaid).replace('¥', ''), l: 'ダメージ', c: '#2d8a4e' },
+            { v: String(monthlyXpEarned), l: 'EXP', c: '#b08810' },
+            { v: formatCurrency(largestHitThisMonth).replace('¥', ''), l: '最大火力', c: '#5aa8e0' },
           ].map(({ v, l, c }) => (
-            <div key={l} className="text-center">
-              <p className="text-lg font-extrabold" style={{ color: c }}>{v}</p>
-              <p className="text-[8px] font-bold uppercase tracking-wider mt-0.5" style={{ color: '#4a4640' }}>{l}</p>
+            <div key={l}>
+              <p className="text-base font-bold" style={{ color: c }}>{v}</p>
+              <p className="text-[8px] font-bold" style={{ color: '#8a96b0' }}>{l}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         <StatCard label="今日使える額" value={formatCurrency(dailyBudget)} variant={dailyBudget > 0 ? 'positive' : 'negative'} />
         <StatCard label="完済予定" value={estimatedPayoff ? new Date(estimatedPayoff).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short' }) : '---'} />
       </div>
 
-      {/* Quest Board */}
+      {/* Monster Quest Board */}
       <div>
         <div className="section-bar">
-          <h2 className="text-[15px] font-extrabold" style={{ color: '#e8e6e2' }}>クエストボード</h2>
-          <span className="text-[11px] font-bold" style={{ color: '#7c7870' }}>
-            {active.length}件受注中
-          </span>
+          <h2 className="text-sm font-bold" style={{ color: '#2b3a67' }}>討伐クエスト</h2>
+          <span className="text-[10px] font-bold" style={{ color: '#5a6a8a' }}>{active.length}体</span>
         </div>
-        <div className="space-y-3">
+        <div className="space-y-2">
           {active.sort((a, b) => a.sort_order - b.sort_order).map(b => <BossCard key={b.id} boss={b} />)}
         </div>
         {defeated.length > 0 && (
           <>
-            <p className="text-[10px] font-bold uppercase tracking-wider mt-5 mb-3" style={{ color: '#4a4640' }}>
-              討伐済み
-            </p>
-            <div className="space-y-3">
+            <p className="text-[10px] font-bold mt-4 mb-2" style={{ color: '#8a96b0' }}>── 討伐済み ──</p>
+            <div className="space-y-2">
               {defeated.map(b => <BossCard key={b.id} boss={b} />)}
             </div>
           </>
         )}
       </div>
 
-      {/* Defense Quests (Savings) */}
-      {savingsGoals.length > 0 && (
-        <div>
-          <Link href="/savings" className="section-bar">
-            <h2 className="text-[15px] font-extrabold" style={{ color: '#e8e6e2' }}>防衛クエスト</h2>
-            <span className="text-[11px] font-bold" style={{ color: '#7c7870' }}>
-              貯金 {formatCurrency(totalSavings)}
-            </span>
-          </Link>
-          <div className="space-y-2">
-            {savingsGoals.slice(0, 3).map(g => {
-              const pct = g.target_amount > 0 ? Math.min(100, Math.round((g.current_amount / g.target_amount) * 100)) : 0;
-              const months = estimateGoalMonths(g);
-              return (
-                <Link href="/savings" key={g.id} className="glass-inner p-3 flex items-center gap-3 block">
-                  <span className="text-2xl">{g.is_hatched ? g.companion_emoji : '🥚'}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold truncate" style={{ color: '#e8e6e2' }}>{g.name}</p>
-                    <div className="hp-track hp-track-sm mt-1">
-                      <div className="hp-fill" style={{ width: `${pct}%`, background: g.is_hatched ? '#40a060' : 'linear-gradient(90deg, #b89450, #c07838)' }} />
-                    </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    {g.is_hatched
-                      ? <span className="tag tag-clear">HATCHED</span>
-                      : <span className="text-[10px] font-bold" style={{ color: '#7c7870' }}>{months !== null ? `残${months}ヶ月` : '---'}</span>
-                    }
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Expedition Quests (Investments) */}
-      {investments.length > 0 && (
-        <div>
-          <Link href="/expedition" className="section-bar">
-            <h2 className="text-[15px] font-extrabold" style={{ color: '#e8e6e2' }}>遠征クエスト</h2>
-            <span className="text-[11px] font-bold" style={{ color: totalInvestmentReturn >= 0 ? '#40a060' : '#c04040' }}>
+      {/* Savings & Investments quick links */}
+      <div className="grid grid-cols-2 gap-2">
+        <Link href="/savings" className="rpg-panel p-3 text-center active:scale-[0.97] transition-transform">
+          <p className="text-xl mb-1">🥚</p>
+          <p className="text-xs font-bold" style={{ color: '#2b3a67' }}>貯金クエスト</p>
+          {totalSavings > 0 && <p className="text-[10px]" style={{ color: '#2d8a4e' }}>{formatCurrency(totalSavings)}</p>}
+        </Link>
+        <Link href="/expedition" className="rpg-panel p-3 text-center active:scale-[0.97] transition-transform">
+          <p className="text-xl mb-1">🗺️</p>
+          <p className="text-xs font-bold" style={{ color: '#2b3a67' }}>投資クエスト</p>
+          {totalInvestmentValue > 0 && (
+            <p className="text-[10px]" style={{ color: totalInvestmentReturn >= 0 ? '#2d8a4e' : '#d9534f' }}>
               {totalInvestmentReturn >= 0 ? '+' : ''}{formatCurrency(totalInvestmentReturn)}
-            </span>
-          </Link>
-          <div className="space-y-2">
-            {investments.slice(0, 3).map(inv => {
-              const rate = calculateReturnRate(inv.principal, inv.current_value);
-              return (
-                <Link href="/expedition" key={inv.id} className="glass-inner p-3 flex items-center justify-between block">
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-xl">{inv.emoji}</span>
-                    <div>
-                      <p className="text-xs font-bold" style={{ color: '#e8e6e2' }}>{inv.name}</p>
-                      <p className="text-[10px]" style={{ color: '#7c7870' }}>{formatCurrency(inv.current_value)}</p>
-                    </div>
-                  </div>
-                  <span className="text-sm font-extrabold" style={{ color: rate >= 0 ? '#40a060' : '#c04040' }}>
-                    {rate >= 0 ? '+' : ''}{rate}%
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Quick links if no savings/investments yet */}
-      {savingsGoals.length === 0 && investments.length === 0 && (
-        <div className="grid grid-cols-2 gap-3">
-          <Link href="/savings" className="glass-inner p-4 text-center">
-            <p className="text-2xl mb-1">🥚</p>
-            <p className="text-xs font-bold" style={{ color: '#b89450' }}>防衛クエスト</p>
-            <p className="text-[10px]" style={{ color: '#7c7870' }}>貯金目標を設定</p>
-          </Link>
-          <Link href="/expedition" className="glass-inner p-4 text-center">
-            <p className="text-2xl mb-1">🗺️</p>
-            <p className="text-xs font-bold" style={{ color: '#b89450' }}>遠征クエスト</p>
-            <p className="text-[10px]" style={{ color: '#7c7870' }}>投資を記録</p>
-          </Link>
-        </div>
-      )}
+            </p>
+          )}
+        </Link>
+      </div>
     </div>
   );
 }

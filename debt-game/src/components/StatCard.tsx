@@ -1,29 +1,12 @@
-interface StatCardProps {
-  label: string;
-  value: string;
-  subValue?: string;
-  variant?: 'default' | 'positive' | 'negative';
-}
+interface StatCardProps { label: string; value: string; subValue?: string; variant?: 'default' | 'positive' | 'negative'; }
 
 export default function StatCard({ label, value, subValue, variant = 'default' }: StatCardProps) {
-  const valueColor =
-    variant === 'positive' ? '#40a060' : variant === 'negative' ? '#c04040' : '#e8e6e2';
-  const glowClass =
-    variant === 'positive' ? 'glow-green' : variant === 'negative' ? 'glow-red' : '';
-
+  const vc = variant === 'positive' ? '#2d8a4e' : variant === 'negative' ? '#d9534f' : '#2b3a67';
   return (
-    <div className="glass-inner p-3.5">
-      <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#7c7870' }}>
-        {label}
-      </p>
-      <p className={`text-lg font-extrabold ${glowClass}`} style={{ color: valueColor }}>
-        {value}
-      </p>
-      {subValue && (
-        <p className="text-[10px] mt-1 font-medium" style={{ color: '#7c7870' }}>
-          {subValue}
-        </p>
-      )}
+    <div className="rpg-panel-inner p-3">
+      <p className="text-[10px] font-bold mb-1" style={{ color: '#5a6a8a' }}>{label}</p>
+      <p className="text-base font-bold" style={{ color: vc }}>{value}</p>
+      {subValue && <p className="text-[10px] mt-0.5" style={{ color: '#8a96b0' }}>{subValue}</p>}
     </div>
   );
 }
