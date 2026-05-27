@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { setupGame, resetAllData } from '@/lib/client-actions';
 
 interface DebtEntry {
@@ -168,6 +169,20 @@ export default function SetupPage() {
           {isSubmitting ? '準備中...' : '⚔️ 狩猟開始！'}
         </button>
       </form>
+
+      {/* MoneyForward Import Link */}
+      <div className="glass p-5">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">📥</span>
+          <div className="flex-1">
+            <p className="text-sm font-extrabold" style={{ color: '#e8e6e2' }}>マネーフォワード取込</p>
+            <p className="text-[10px] font-medium" style={{ color: '#7c7870' }}>CSVから返済データを一括インポート</p>
+          </div>
+          <Link href="/import" className="btn-gold !py-2 !px-4 !text-xs">
+            取込へ
+          </Link>
+        </div>
+      </div>
 
       {/* Reset */}
       <div className="glass-inner p-5">
