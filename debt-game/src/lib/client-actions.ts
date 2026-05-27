@@ -125,7 +125,7 @@ export function recordPayment(data: {
   type: 'normal' | 'extra';
   paidAt: string;
   memo?: string;
-}): { xpEarned: number; levelUp: boolean; newLevel: number; bossDefeated: boolean; achievementsEarned: string[] } {
+}): { xpEarned: number; comboCount: number; comboMultiplier: number; levelUp: boolean; newLevel: number; bossDefeated: boolean; achievementsEarned: string[] } {
   const boss = getBoss(data.bossId);
   if (!boss) throw new Error('ボスが見つかりません');
   if (boss.is_defeated) throw new Error('このボスは既に撃破済みです');
@@ -133,7 +133,14 @@ export function recordPayment(data: {
   const newHp = Math.max(0, boss.current_hp - data.amount);
   const bossDefeated = newHp <= 0;
 
-  const xpEarned = calculatePaymentXp(data.amount, data.type, bossDefeated);
+  // Combo bonus: more payments this month = higher XP multiplier
+  const now = new Date();
+  const monthPayments = getMonthlyPayments(now.getFullYear(), now.getMonth() + 1);
+  const comboCount = monthPayments.length; // current month payments before this one
+  const comboMultiplier = 1 + Math.min(0.5, comboCount * 0.1); // max 1.5x at 5+ payments
+
+  const baseXp = calculatePaymentXp(data.amount, data.type, bossDefeated);
+  const xpEarned = Math.floor(baseXp * comboMultiplier);
 
   createPayment({
     id: uuidv4(),
@@ -167,6 +174,8 @@ export function recordPayment(data: {
 
   return {
     xpEarned,
+    comboCount: comboCount + 1,
+    comboMultiplier,
     levelUp: newLevelInfo.level > oldLevel.level,
     newLevel: newLevelInfo.level,
     bossDefeated,
@@ -212,12 +221,12 @@ function checkAndAwardAchievements(): string[] {
   return newAchievements;
 }
 
-export function processLogin(): void {
+export function processLogin(): { streakBonus: number; isNewDay: boolean } {
   const player = getPlayer();
-  if (!player) return;
+  if (!player) return { streakBonus: 0, isNewDay: false };
 
   const today = new Date().toISOString().split('T')[0];
-  if (player.last_login === today) return;
+  if (player.last_login === today) return { streakBonus: 0, isNewDay: false };
 
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
   const isConsecutive = player.last_login === yesterday;
@@ -225,14 +234,18 @@ export function processLogin(): void {
   const newStreak = isConsecutive ? player.login_streak + 1 : 1;
   const newMaxStreak = Math.max(player.max_streak, newStreak);
 
+  // Streak bonus: base 10 + streak multiplier (max 100 at 30 days)
+  const streakBonus = Math.min(100, 10 + Math.floor(newStreak * 3));
+
   updatePlayer({
     last_login: today,
     login_streak: newStreak,
     max_streak: newMaxStreak,
-    xp: player.xp + 10,
+    xp: player.xp + streakBonus,
   });
 
   checkAndAwardAchievements();
+  return { streakBonus, isNewDay: true };
 }
 
 export function getBossDetail(bossId: string) {

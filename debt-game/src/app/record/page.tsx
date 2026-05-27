@@ -9,6 +9,8 @@ import NavBar from '@/components/NavBar';
 
 interface PaymentResult {
   xpEarned: number;
+  comboCount: number;
+  comboMultiplier: number;
   levelUp: boolean;
   newLevel: number;
   bossDefeated: boolean;
@@ -180,6 +182,13 @@ function RecordForm() {
               </p>
             </div>
             <p className="text-xl font-extrabold text-center animate-glow my-4" style={{ color: '#b89450' }}>+{result.xpEarned} EXP</p>
+            {result.comboMultiplier > 1 && (
+              <div className="glass-inner p-2 text-center mb-3">
+                <p className="text-xs font-bold" style={{ color: '#c07838' }}>
+                  🔥 {result.comboCount}コンボ！ ×{result.comboMultiplier.toFixed(1)} ボーナス
+                </p>
+              </div>
+            )}
             {result.levelUp && (
               <div className="glass-inner p-3 text-center mb-3" style={{ borderColor: 'rgba(232,184,73,0.3)' }}>
                 <p className="text-sm font-extrabold glow-gold" style={{ color: '#b89450' }}>🎉 HR UP! → HR {result.newLevel}</p>
