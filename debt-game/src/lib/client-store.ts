@@ -1,4 +1,4 @@
-import { Player, Boss, Payment, Achievement, PlayerAchievement, DailySnapshot } from './types';
+import { Player, Boss, Payment, Achievement, PlayerAchievement, DailySnapshot, SavingsGoal, SavingsDeposit, Investment, InvestmentUpdate } from './types';
 
 const STORAGE_KEY = 'debt-game-data';
 
@@ -9,6 +9,10 @@ interface GameData {
   snapshots: DailySnapshot[];
   achievements: Achievement[];
   earnedAchievements: PlayerAchievement[];
+  savingsGoals: SavingsGoal[];
+  savingsDeposits: SavingsDeposit[];
+  investments: Investment[];
+  investmentUpdates: InvestmentUpdate[];
 }
 
 const DEFAULT_ACHIEVEMENTS: Achievement[] = [
@@ -32,6 +36,10 @@ function getDefaultData(): GameData {
     snapshots: [],
     achievements: DEFAULT_ACHIEVEMENTS,
     earnedAchievements: [],
+    savingsGoals: [],
+    savingsDeposits: [],
+    investments: [],
+    investmentUpdates: [],
   };
 }
 
@@ -44,6 +52,10 @@ export function loadData(): GameData {
     if (!parsed.achievements || parsed.achievements.length === 0) {
       parsed.achievements = DEFAULT_ACHIEVEMENTS;
     }
+    if (!parsed.savingsGoals) parsed.savingsGoals = [];
+    if (!parsed.savingsDeposits) parsed.savingsDeposits = [];
+    if (!parsed.investments) parsed.investments = [];
+    if (!parsed.investmentUpdates) parsed.investmentUpdates = [];
     return parsed;
   } catch {
     return getDefaultData();
@@ -175,6 +187,88 @@ export function createSnapshot(s: DailySnapshot): void {
   if (idx >= 0) data.snapshots[idx] = s;
   else data.snapshots.push(s);
   saveData(data);
+}
+
+// === Savings Goals ===
+export function getSavingsGoals(): SavingsGoal[] {
+  return loadData().savingsGoals;
+}
+
+export function getSavingsGoal(id: string): SavingsGoal | null {
+  return loadData().savingsGoals.find(g => g.id === id) || null;
+}
+
+export function createSavingsGoal(g: Omit<SavingsGoal, 'created_at' | 'updated_at' | 'is_hatched' | 'hatched_at' | 'companion_name' | 'companion_emoji'>): SavingsGoal {
+  const data = loadData();
+  const now = new Date().toISOString();
+  const goal: SavingsGoal = { ...g, is_hatched: false, hatched_at: null, companion_name: null, companion_emoji: null, created_at: now, updated_at: now };
+  data.savingsGoals.push(goal);
+  saveData(data);
+  return goal;
+}
+
+export function updateSavingsGoal(id: string, updates: Partial<SavingsGoal>): SavingsGoal {
+  const data = loadData();
+  const idx = data.savingsGoals.findIndex(g => g.id === id);
+  if (idx === -1) throw new Error('Goal not found');
+  data.savingsGoals[idx] = { ...data.savingsGoals[idx], ...updates, updated_at: new Date().toISOString() };
+  saveData(data);
+  return data.savingsGoals[idx];
+}
+
+export function getSavingsDeposits(goalId: string, limit = 20): SavingsDeposit[] {
+  return loadData().savingsDeposits
+    .filter(d => d.goal_id === goalId)
+    .sort((a, b) => b.deposited_at.localeCompare(a.deposited_at))
+    .slice(0, limit);
+}
+
+export function createSavingsDeposit(d: SavingsDeposit): SavingsDeposit {
+  const data = loadData();
+  data.savingsDeposits.push(d);
+  saveData(data);
+  return d;
+}
+
+// === Investments ===
+export function getInvestments(): Investment[] {
+  return loadData().investments;
+}
+
+export function getInvestment(id: string): Investment | null {
+  return loadData().investments.find(i => i.id === id) || null;
+}
+
+export function createInvestment(i: Omit<Investment, 'created_at' | 'updated_at'>): Investment {
+  const data = loadData();
+  const now = new Date().toISOString();
+  const inv: Investment = { ...i, created_at: now, updated_at: now };
+  data.investments.push(inv);
+  saveData(data);
+  return inv;
+}
+
+export function updateInvestment(id: string, updates: Partial<Investment>): Investment {
+  const data = loadData();
+  const idx = data.investments.findIndex(i => i.id === id);
+  if (idx === -1) throw new Error('Investment not found');
+  data.investments[idx] = { ...data.investments[idx], ...updates, updated_at: new Date().toISOString() };
+  saveData(data);
+  return data.investments[idx];
+}
+
+export function getInvestmentUpdates(investmentId: string, limit = 20): InvestmentUpdate[] {
+  return loadData().investmentUpdates
+    .filter(u => u.investment_id === investmentId)
+    .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+    .slice(0, limit);
+}
+
+export function createInvestmentUpdate(u: InvestmentUpdate): InvestmentUpdate {
+  const data = loadData();
+  data.investmentUpdates.push(u);
+  saveData(data);
+  return u;
 }
 
 export function resetAllData(): void {

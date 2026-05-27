@@ -75,6 +75,64 @@ export interface PlayerAchievement {
   earned_at: string;
 }
 
+export interface SavingsGoal {
+  id: string;
+  name: string;
+  emoji: string;
+  category: 'travel' | 'emergency' | 'education' | 'other';
+  target_amount: number;
+  current_amount: number;
+  monthly_target: number;
+  is_hatched: boolean;
+  hatched_at: string | null;
+  companion_name: string | null;
+  companion_emoji: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SavingsDeposit {
+  id: string;
+  goal_id: string;
+  amount: number;
+  xp_earned: number;
+  deposited_at: string;
+  created_at: string;
+}
+
+export interface Investment {
+  id: string;
+  name: string;
+  emoji: string;
+  type: 'stock' | 'fund' | 'crypto' | 'other';
+  principal: number;
+  current_value: number;
+  annual_rate: number;
+  started_at: string;
+  last_updated: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InvestmentUpdate {
+  id: string;
+  investment_id: string;
+  previous_value: number;
+  new_value: number;
+  updated_at: string;
+}
+
+export interface BestiaryEntry {
+  id: string;
+  name: string;
+  emoji: string;
+  category: 'boss' | 'companion' | 'expedition';
+  subtitle: string;
+  unlocked: boolean;
+  unlocked_at: string | null;
+  stats: Record<string, string>;
+}
+
 export interface DashboardData {
   player: Player;
   bosses: Boss[];
@@ -92,4 +150,9 @@ export interface DashboardData {
   achievements: Achievement[];
   earnedAchievements: string[];
   xpForNextLevel: number;
+  savingsGoals: SavingsGoal[];
+  totalSavings: number;
+  investments: Investment[];
+  totalInvestmentValue: number;
+  totalInvestmentReturn: number;
 }

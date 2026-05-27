@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getDashboardData, processLogin } from '@/lib/client-actions';
-import { formatCurrency, calculateLevel, getHunterRankTitle } from '@/lib/game-engine';
+import Link from 'next/link';
+import { formatCurrency, calculateLevel, getHunterRankTitle, estimateGoalMonths, calculateReturnRate } from '@/lib/game-engine';
 import XpBar from '@/components/XpBar';
 import StatCard from '@/components/StatCard';
 import BossCard from '@/components/BossCard';
@@ -35,7 +36,7 @@ export default function Page() {
     );
   }
 
-  const { player, bosses, totalDebt, originalTotalDebt, previousDayDebt, monthlyPaid, monthlyPaymentCount, monthlyXpEarned, largestHitThisMonth, dailyBudget, estimatedPayoff, xpForNextLevel } = data;
+  const { player, bosses, totalDebt, originalTotalDebt, previousDayDebt, monthlyPaid, monthlyPaymentCount, monthlyXpEarned, largestHitThisMonth, dailyBudget, estimatedPayoff, xpForNextLevel, savingsGoals, totalSavings, investments, totalInvestmentValue, totalInvestmentReturn } = data;
   const levelInfo = calculateLevel(player.xp);
   const debtDiff = previousDayDebt !== null ? totalDebt - previousDayDebt : null;
   const active = bosses.filter(b => !b.is_defeated);
@@ -175,6 +176,88 @@ export default function Page() {
           </>
         )}
       </div>
+
+      {/* Defense Quests (Savings) */}
+      {savingsGoals.length > 0 && (
+        <div>
+          <Link href="/savings" className="section-bar">
+            <h2 className="text-[15px] font-extrabold" style={{ color: '#e8e6e2' }}>防衛クエスト</h2>
+            <span className="text-[11px] font-bold" style={{ color: '#7c7870' }}>
+              貯金 {formatCurrency(totalSavings)}
+            </span>
+          </Link>
+          <div className="space-y-2">
+            {savingsGoals.slice(0, 3).map(g => {
+              const pct = g.target_amount > 0 ? Math.min(100, Math.round((g.current_amount / g.target_amount) * 100)) : 0;
+              const months = estimateGoalMonths(g);
+              return (
+                <Link href="/savings" key={g.id} className="glass-inner p-3 flex items-center gap-3 block">
+                  <span className="text-2xl">{g.is_hatched ? g.companion_emoji : '🥚'}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold truncate" style={{ color: '#e8e6e2' }}>{g.name}</p>
+                    <div className="hp-track hp-track-sm mt-1">
+                      <div className="hp-fill" style={{ width: `${pct}%`, background: g.is_hatched ? '#40a060' : 'linear-gradient(90deg, #b89450, #c07838)' }} />
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    {g.is_hatched
+                      ? <span className="tag tag-clear">HATCHED</span>
+                      : <span className="text-[10px] font-bold" style={{ color: '#7c7870' }}>{months !== null ? `残${months}ヶ月` : '---'}</span>
+                    }
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Expedition Quests (Investments) */}
+      {investments.length > 0 && (
+        <div>
+          <Link href="/expedition" className="section-bar">
+            <h2 className="text-[15px] font-extrabold" style={{ color: '#e8e6e2' }}>遠征クエスト</h2>
+            <span className="text-[11px] font-bold" style={{ color: totalInvestmentReturn >= 0 ? '#40a060' : '#c04040' }}>
+              {totalInvestmentReturn >= 0 ? '+' : ''}{formatCurrency(totalInvestmentReturn)}
+            </span>
+          </Link>
+          <div className="space-y-2">
+            {investments.slice(0, 3).map(inv => {
+              const rate = calculateReturnRate(inv.principal, inv.current_value);
+              return (
+                <Link href="/expedition" key={inv.id} className="glass-inner p-3 flex items-center justify-between block">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xl">{inv.emoji}</span>
+                    <div>
+                      <p className="text-xs font-bold" style={{ color: '#e8e6e2' }}>{inv.name}</p>
+                      <p className="text-[10px]" style={{ color: '#7c7870' }}>{formatCurrency(inv.current_value)}</p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-extrabold" style={{ color: rate >= 0 ? '#40a060' : '#c04040' }}>
+                    {rate >= 0 ? '+' : ''}{rate}%
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Quick links if no savings/investments yet */}
+      {savingsGoals.length === 0 && investments.length === 0 && (
+        <div className="grid grid-cols-2 gap-3">
+          <Link href="/savings" className="glass-inner p-4 text-center">
+            <p className="text-2xl mb-1">🥚</p>
+            <p className="text-xs font-bold" style={{ color: '#b89450' }}>防衛クエスト</p>
+            <p className="text-[10px]" style={{ color: '#7c7870' }}>貯金目標を設定</p>
+          </Link>
+          <Link href="/expedition" className="glass-inner p-4 text-center">
+            <p className="text-2xl mb-1">🗺️</p>
+            <p className="text-xs font-bold" style={{ color: '#b89450' }}>遠征クエスト</p>
+            <p className="text-[10px]" style={{ color: '#7c7870' }}>投資を記録</p>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

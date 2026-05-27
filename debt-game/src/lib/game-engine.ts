@@ -1,4 +1,4 @@
-import { Boss, Player } from './types';
+import { Boss, Player, SavingsGoal, Investment } from './types';
 
 const TITLES: Record<number, string> = {
   1: '借金奴隷',
@@ -159,6 +159,61 @@ export function getHunterRankTitle(level: number): string {
   if (level >= 10) return '一人前ハンター';
   if (level >= 5) return '駆け出しハンター';
   return '新米ハンター';
+}
+
+// === Savings ===
+export function calculateSavingsXp(amount: number, goalReached: boolean): number {
+  let xp = Math.max(50, Math.floor(amount / 5000) * 50);
+  if (goalReached) xp += 500;
+  return xp;
+}
+
+export function estimateGoalMonths(goal: SavingsGoal): number | null {
+  if (goal.is_hatched) return 0;
+  if (goal.monthly_target <= 0) return null;
+  const remaining = goal.target_amount - goal.current_amount;
+  if (remaining <= 0) return 0;
+  return Math.ceil(remaining / goal.monthly_target);
+}
+
+export function getCompanionEmoji(category: string): { name: string; emoji: string } {
+  switch (category) {
+    case 'travel': return { name: '渡り鳥のプケプケ', emoji: '🦅' };
+    case 'emergency': return { name: '鉄壁のバサルモス', emoji: '🛡️' };
+    case 'education': return { name: '賢者のフルフル', emoji: '📚' };
+    default: return { name: '宝の守り竜', emoji: '🐲' };
+  }
+}
+
+// === Investments ===
+export function calculateReturnRate(principal: number, currentValue: number): number {
+  if (principal <= 0) return 0;
+  return Math.round(((currentValue - principal) / principal) * 1000) / 10;
+}
+
+export function simulateCompoundGrowth(principal: number, annualRate: number, months: number): number[] {
+  const result: number[] = [principal];
+  const monthlyRate = annualRate / 100 / 12;
+  let value = principal;
+  for (let i = 1; i <= months; i++) {
+    value = Math.round(value * (1 + monthlyRate));
+    result.push(value);
+  }
+  return result;
+}
+
+export function getExpeditionEmoji(type: string): string {
+  switch (type) {
+    case 'stock': return '📈';
+    case 'fund': return '🏛️';
+    case 'crypto': return '⛓️';
+    default: return '🗺️';
+  }
+}
+
+export function calculateInvestmentXp(gain: number): number {
+  if (gain <= 0) return 10;
+  return Math.max(50, Math.floor(gain / 1000) * 10);
 }
 
 export function getBossDefaults(debtType: string): { name: string; emoji: string; subtitle: string; sort_order: number } {

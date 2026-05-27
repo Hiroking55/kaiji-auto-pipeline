@@ -5,13 +5,18 @@ import {
   getPayments, getMonthlyPayments, createPayment, getPaymentsByBoss,
   getAchievements, getEarnedAchievements, earnAchievement,
   getLatestSnapshot, createSnapshot,
+  getSavingsGoals, getSavingsGoal, createSavingsGoal, updateSavingsGoal,
+  getSavingsDeposits, createSavingsDeposit,
+  getInvestments, getInvestment, createInvestment, updateInvestment,
+  createInvestmentUpdate,
   resetAllData as resetStore,
 } from './client-store';
 import {
   calculatePaymentXp, calculateLevel, getTitle,
   calculateDailyBudget, calculateMonthlyBudget,
   estimatePayoffDate, calculateDailyInterest,
-  getBossDefaults,
+  getBossDefaults, calculateSavingsXp, getCompanionEmoji,
+  calculateReturnRate, calculateInvestmentXp,
 } from './game-engine';
 import { DashboardData, Boss } from './types';
 
@@ -76,6 +81,11 @@ export function getDashboardData(): DashboardData | null {
     achievements,
     earnedAchievements: earnedIds,
     xpForNextLevel: levelInfo.nextLevelXp,
+    savingsGoals: getSavingsGoals(),
+    totalSavings: getSavingsGoals().reduce((s, g) => s + g.current_amount, 0),
+    investments: getInvestments(),
+    totalInvestmentValue: getInvestments().reduce((s, i) => s + i.current_value, 0),
+    totalInvestmentReturn: getInvestments().reduce((s, i) => s + (i.current_value - i.principal), 0),
   };
 }
 
@@ -279,6 +289,99 @@ export function getBossDetail(bossId: string) {
     dailyInterest: calculateDailyInterest(boss),
     monthsToDefeat,
   };
+}
+
+// === Savings Goals ===
+export function addSavingsGoal(data: { name: string; category: 'travel' | 'emergency' | 'education' | 'other'; targetAmount: number; monthlyTarget: number }): void {
+  createSavingsGoal({
+    id: `savings_${Date.now()}`,
+    name: data.name,
+    emoji: '🥚',
+    category: data.category,
+    target_amount: data.targetAmount,
+    current_amount: 0,
+    monthly_target: data.monthlyTarget,
+  });
+}
+
+export function recordSavingsDeposit(data: { goalId: string; amount: number; depositedAt: string }): { xpEarned: number; hatched: boolean } {
+  const goal = getSavingsGoal(data.goalId);
+  if (!goal) throw new Error('目標が見つかりません');
+  if (goal.is_hatched) throw new Error('この目標は達成済みです');
+
+  const newAmount = goal.current_amount + data.amount;
+  const hatched = newAmount >= goal.target_amount;
+
+  const xpEarned = calculateSavingsXp(data.amount, hatched);
+
+  createSavingsDeposit({
+    id: uuidv4(),
+    goal_id: data.goalId,
+    amount: data.amount,
+    xp_earned: xpEarned,
+    deposited_at: data.depositedAt,
+    created_at: new Date().toISOString(),
+  });
+
+  const updates: Partial<typeof goal> = { current_amount: newAmount };
+  if (hatched) {
+    const companion = getCompanionEmoji(goal.category);
+    updates.is_hatched = true;
+    updates.hatched_at = new Date().toISOString();
+    updates.companion_name = companion.name;
+    updates.companion_emoji = companion.emoji;
+    updates.emoji = companion.emoji;
+  }
+  updateSavingsGoal(data.goalId, updates);
+
+  const player = getPlayer()!;
+  const newXp = player.xp + xpEarned;
+  const levelInfo = calculateLevel(newXp);
+  updatePlayer({ xp: newXp, level: levelInfo.level, title: getTitle(levelInfo.level) });
+
+  return { xpEarned, hatched };
+}
+
+// === Investments ===
+export function addInvestment(data: { name: string; type: 'stock' | 'fund' | 'crypto' | 'other'; principal: number; currentValue: number; annualRate: number; startedAt: string }): void {
+  const emoji = data.type === 'stock' ? '📈' : data.type === 'fund' ? '🏛️' : data.type === 'crypto' ? '⛓️' : '🗺️';
+  createInvestment({
+    id: `inv_${Date.now()}`,
+    name: data.name,
+    emoji,
+    type: data.type,
+    principal: data.principal,
+    current_value: data.currentValue,
+    annual_rate: data.annualRate,
+    started_at: data.startedAt,
+    last_updated: new Date().toISOString(),
+  });
+}
+
+export function updateInvestmentValue(investmentId: string, newValue: number): { xpEarned: number; returnRate: number } {
+  const inv = getInvestment(investmentId);
+  if (!inv) throw new Error('投資が見つかりません');
+
+  createInvestmentUpdate({
+    id: uuidv4(),
+    investment_id: investmentId,
+    previous_value: inv.current_value,
+    new_value: newValue,
+    updated_at: new Date().toISOString(),
+  });
+
+  updateInvestment(investmentId, { current_value: newValue, last_updated: new Date().toISOString() });
+
+  const gain = newValue - inv.current_value;
+  const xpEarned = calculateInvestmentXp(gain);
+  const returnRate = calculateReturnRate(inv.principal, newValue);
+
+  const player = getPlayer()!;
+  const newXp = player.xp + xpEarned;
+  const levelInfo = calculateLevel(newXp);
+  updatePlayer({ xp: newXp, level: levelInfo.level, title: getTitle(levelInfo.level) });
+
+  return { xpEarned, returnRate };
 }
 
 export function resetAllData(): void {
