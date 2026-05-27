@@ -119,7 +119,7 @@ export default function SavingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-4xl animate-soft-pulse">🥚</p>
+        <p className="text-4xl animate-sparkle">🥚</p>
       </div>
     );
   }
@@ -131,30 +131,30 @@ export default function SavingsPage() {
     <div className="pt-6 space-y-4">
       {/* Header */}
       <div className="text-center mb-2">
-        <h1 className="text-2xl font-extrabold glow-gold" style={{ color: '#b89450' }}>
+        <h1 className="text-2xl font-extrabold" style={{ color: '#b08810' }}>
           防衛クエスト
         </h1>
-        <p className="text-xs mt-1 font-medium" style={{ color: '#7c7870' }}>
+        <p className="text-xs mt-1 font-medium" style={{ color: '#5a6a8a' }}>
           貯金目標を守り育てよう
         </p>
       </div>
 
       {/* Summary */}
       {goals.length > 0 && (
-        <div className="glass p-4">
+        <div className="rpg-panel p-4">
           <div className="grid grid-cols-3 gap-2">
             {[
-              { v: String(active.length), l: '育成中', c: '#c07838' },
-              { v: String(hatched.length), l: '孵化済', c: '#40a060' },
+              { v: String(active.length), l: '育成中', c: '#d9534f' },
+              { v: String(hatched.length), l: '孵化済', c: '#2d8a4e' },
               {
                 v: formatCurrency(goals.reduce((s, g) => s + g.current_amount, 0)).replace('¥', ''),
                 l: '総貯金',
-                c: '#b89450',
+                c: '#b08810',
               },
             ].map(({ v, l, c }) => (
               <div key={l} className="text-center">
                 <p className="text-lg font-extrabold" style={{ color: c }}>{v}</p>
-                <p className="text-[8px] font-bold uppercase tracking-wider mt-0.5" style={{ color: '#4a4640' }}>{l}</p>
+                <p className="text-[8px] font-bold uppercase tracking-wider mt-0.5" style={{ color: '#8a96b0' }}>{l}</p>
               </div>
             ))}
           </div>
@@ -165,8 +165,8 @@ export default function SavingsPage() {
       {active.length > 0 && (
         <div>
           <div className="section-bar">
-            <h2 className="text-[15px] font-extrabold" style={{ color: '#e8e6e2' }}>育成中の卵</h2>
-            <span className="text-[11px] font-bold" style={{ color: '#7c7870' }}>
+            <h2 className="text-[15px] font-extrabold" style={{ color: '#2b3a67' }}>育成中の卵</h2>
+            <span className="text-[11px] font-bold" style={{ color: '#5a6a8a' }}>
               {active.length}個
             </span>
           </div>
@@ -178,7 +178,7 @@ export default function SavingsPage() {
               const months = estimateGoalMonths(goal);
 
               return (
-                <div key={goal.id} className="glass p-4">
+                <div key={goal.id} className="rpg-panel p-4">
                   <div className="flex items-center gap-3 mb-3">
                     <div
                       className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0"
@@ -191,21 +191,21 @@ export default function SavingsPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-extrabold truncate" style={{ color: '#e8e6e2' }}>
+                        <p className="text-sm font-extrabold truncate" style={{ color: '#2b3a67' }}>
                           {goal.name}
                         </p>
                         <span className="tag tag-active text-[9px] shrink-0">
                           {CATEGORY_LABELS[goal.category]}
                         </span>
                       </div>
-                      <p className="text-[10px] font-bold mt-0.5" style={{ color: '#7c7870' }}>
+                      <p className="text-[10px] font-bold mt-0.5" style={{ color: '#5a6a8a' }}>
                         {months !== null
                           ? `あと約${months}ヶ月`
                           : '計算不可'}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-lg font-extrabold" style={{ color: '#b89450' }}>
+                      <p className="text-lg font-extrabold" style={{ color: '#b08810' }}>
                         {progress}
                         <span className="text-xs">%</span>
                       </p>
@@ -219,16 +219,16 @@ export default function SavingsPage() {
                         className="hp-fill"
                         style={{
                           width: `${progress}%`,
-                          background: 'linear-gradient(90deg, #b89450, #40a060)',
+                          background: 'linear-gradient(90deg, #b08810, #2d8a4e)',
                           boxShadow: '0 0 12px rgba(76,206,123,0.3)',
                         }}
                       />
                     </div>
                     <div className="flex justify-between mt-1">
-                      <span className="text-[10px] font-bold" style={{ color: '#7c7870' }}>
+                      <span className="text-[10px] font-bold" style={{ color: '#5a6a8a' }}>
                         {formatCurrency(goal.current_amount)}
                       </span>
-                      <span className="text-[10px] font-bold" style={{ color: '#4a4640' }}>
+                      <span className="text-[10px] font-bold" style={{ color: '#8a96b0' }}>
                         {formatCurrency(goal.target_amount)}
                       </span>
                     </div>
@@ -237,13 +237,13 @@ export default function SavingsPage() {
                   {/* Deposit form (inline) */}
                   {depositGoalId === goal.id ? (
                     <form onSubmit={(e) => handleDeposit(e, goal.id)} className="mt-3">
-                      <div className="glass-inner p-3 space-y-3">
+                      <div className="rpg-panel-inner p-3 space-y-3">
                         <div>
-                          <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#b89450' }}>
+                          <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#b08810' }}>
                             入金額
                           </label>
                           <div className="relative">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-extrabold" style={{ color: '#b89450' }}>
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-extrabold" style={{ color: '#b08810' }}>
                               ¥
                             </span>
                             <input
@@ -254,7 +254,7 @@ export default function SavingsPage() {
                               placeholder="0"
                               min="1"
                               required
-                              className="input-glass pl-9"
+                              className="input-rpg pl-9"
                               autoFocus
                             />
                           </div>
@@ -266,7 +266,7 @@ export default function SavingsPage() {
                           <button
                             type="button"
                             onClick={() => { setDepositGoalId(null); setDepositAmount(''); }}
-                            className="btn-secondary px-4"
+                            className="btn-outline px-4"
                           >
                             戻る
                           </button>
@@ -276,7 +276,7 @@ export default function SavingsPage() {
                   ) : (
                     <button
                       onClick={() => setDepositGoalId(goal.id)}
-                      className="w-full btn-primary mt-2 text-sm"
+                      className="w-full btn-rpg mt-2 text-sm"
                     >
                       💰 入金する
                     </button>
@@ -292,14 +292,14 @@ export default function SavingsPage() {
       {hatched.length > 0 && (
         <div>
           <div className="section-bar">
-            <h2 className="text-[15px] font-extrabold" style={{ color: '#e8e6e2' }}>孵化した仲間</h2>
-            <span className="text-[11px] font-bold" style={{ color: '#40a060' }}>
+            <h2 className="text-[15px] font-extrabold" style={{ color: '#2b3a67' }}>孵化した仲間</h2>
+            <span className="text-[11px] font-bold" style={{ color: '#2d8a4e' }}>
               {hatched.length}体
             </span>
           </div>
           <div className="space-y-3">
             {hatched.map(goal => (
-              <div key={goal.id} className="glass-accent p-4">
+              <div key={goal.id} className="rpg-panel-accent p-4">
                 <div className="flex items-center gap-3">
                   <div
                     className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0"
@@ -312,20 +312,20 @@ export default function SavingsPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-extrabold truncate" style={{ color: '#e8e6e2' }}>
+                      <p className="text-sm font-extrabold truncate" style={{ color: '#2b3a67' }}>
                         {goal.companion_name || goal.name}
                       </p>
                       <span className="tag tag-clear text-[9px] shrink-0">HATCHED</span>
                     </div>
-                    <p className="text-[10px] font-bold mt-0.5" style={{ color: '#7c7870' }}>
+                    <p className="text-[10px] font-bold mt-0.5" style={{ color: '#5a6a8a' }}>
                       {goal.name} - {CATEGORY_LABELS[goal.category]}
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-extrabold glow-green" style={{ color: '#40a060' }}>
+                    <p className="text-sm font-extrabold" style={{ color: '#2d8a4e' }}>
                       {formatCurrency(goal.target_amount)}
                     </p>
-                    <p className="text-[9px] font-bold" style={{ color: '#4a4640' }}>達成</p>
+                    <p className="text-[9px] font-bold" style={{ color: '#8a96b0' }}>達成</p>
                   </div>
                 </div>
               </div>
@@ -336,12 +336,12 @@ export default function SavingsPage() {
 
       {/* Empty State */}
       {goals.length === 0 && !showAddForm && (
-        <div className="glass p-8 text-center">
+        <div className="rpg-panel p-8 text-center">
           <p className="text-4xl mb-3">🥚</p>
-          <p className="text-sm font-bold mb-1" style={{ color: '#e8e6e2' }}>
+          <p className="text-sm font-bold mb-1" style={{ color: '#2b3a67' }}>
             まだ卵がありません
           </p>
-          <p className="text-xs mb-4" style={{ color: '#7c7870' }}>
+          <p className="text-xs mb-4" style={{ color: '#5a6a8a' }}>
             貯金目標を設定して卵を育てよう
           </p>
         </div>
@@ -349,13 +349,13 @@ export default function SavingsPage() {
 
       {/* Add Goal Section */}
       {showAddForm ? (
-        <div className="glass p-5">
-          <p className="text-[11px] font-bold uppercase tracking-wider mb-4" style={{ color: '#b89450' }}>
+        <div className="rpg-panel p-5">
+          <p className="text-[11px] font-bold uppercase tracking-wider mb-4" style={{ color: '#b08810' }}>
             新しい卵を入手
           </p>
           <form onSubmit={handleAddGoal} className="space-y-4">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#b89450' }}>
+              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#b08810' }}>
                 目標名
               </label>
               <input
@@ -364,17 +364,17 @@ export default function SavingsPage() {
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="例: 沖縄旅行資金"
                 required
-                className="input-glass"
+                className="input-rpg"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#b89450' }}>
+              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#b08810' }}>
                 カテゴリ
               </label>
               <select
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value as SavingsGoal['category'])}
-                className="select-glass"
+                className="select-rpg"
               >
                 <option value="travel">旅行</option>
                 <option value="emergency">緊急資金</option>
@@ -383,11 +383,11 @@ export default function SavingsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#b89450' }}>
+              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#b08810' }}>
                 目標金額
               </label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-extrabold" style={{ color: '#b89450' }}>
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-extrabold" style={{ color: '#b08810' }}>
                   ¥
                 </span>
                 <input
@@ -398,16 +398,16 @@ export default function SavingsPage() {
                   placeholder="0"
                   min="1"
                   required
-                  className="input-glass pl-9"
+                  className="input-rpg pl-9"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#b89450' }}>
+              <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#b08810' }}>
                 毎月の積立目標
               </label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-extrabold" style={{ color: '#b89450' }}>
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-extrabold" style={{ color: '#b08810' }}>
                   ¥
                 </span>
                 <input
@@ -418,7 +418,7 @@ export default function SavingsPage() {
                   placeholder="0"
                   min="1"
                   required
-                  className="input-glass pl-9"
+                  className="input-rpg pl-9"
                 />
               </div>
             </div>
@@ -429,7 +429,7 @@ export default function SavingsPage() {
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="btn-secondary px-4"
+                className="btn-outline px-4"
               >
                 戻る
               </button>
@@ -447,34 +447,34 @@ export default function SavingsPage() {
 
       {/* Deposit Result Modal */}
       {depositResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-5" style={{ background: 'rgba(0,0,0,0.85)' }}>
-          <div className="w-full max-w-sm glass-accent p-6 animate-slide-up">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-5" style={{ background: 'rgba(0,0,0,0.5)' }}>
+          <div className="w-full max-w-sm rpg-panel-accent p-6 animate-slide-up">
             <div className="text-center mb-4">
               <p className="text-5xl mb-3">{depositResult.hatched ? depositResult.companionEmoji || '🐣' : '💰'}</p>
-              <p className="text-sm font-bold" style={{ color: '#e8e6e2' }}>
+              <p className="text-sm font-bold" style={{ color: '#2b3a67' }}>
                 {depositResult.goalName}
               </p>
               {depositResult.hatched ? (
-                <p className="text-lg font-extrabold mt-2 glow-green" style={{ color: '#40a060' }}>
+                <p className="text-lg font-extrabold mt-2" style={{ color: '#2d8a4e' }}>
                   卵が孵化した！
                 </p>
               ) : (
-                <p className="text-sm font-bold mt-2" style={{ color: '#7c7870' }}>
+                <p className="text-sm font-bold mt-2" style={{ color: '#5a6a8a' }}>
                   入金完了！
                 </p>
               )}
             </div>
-            <p className="text-xl font-extrabold text-center animate-glow my-4" style={{ color: '#b89450' }}>
+            <p className="text-xl font-extrabold text-center animate-glow my-4" style={{ color: '#b08810' }}>
               +{depositResult.xpEarned} EXP
             </p>
             {depositResult.hatched && depositResult.companionName && (
-              <div className="glass-inner p-3 text-center mb-3" style={{ borderColor: 'rgba(64,160,96,0.3)' }}>
-                <p className="text-sm font-extrabold glow-green" style={{ color: '#40a060' }}>
+              <div className="rpg-panel-inner p-3 text-center mb-3" style={{ borderColor: 'rgba(64,160,96,0.3)' }}>
+                <p className="text-sm font-extrabold" style={{ color: '#2d8a4e' }}>
                   {depositResult.companionEmoji} {depositResult.companionName} が仲間になった！
                 </p>
               </div>
             )}
-            <button onClick={() => setDepositResult(null)} className="w-full btn-secondary mt-2">OK</button>
+            <button onClick={() => setDepositResult(null)} className="w-full btn-outline mt-2">OK</button>
           </div>
         </div>
       )}

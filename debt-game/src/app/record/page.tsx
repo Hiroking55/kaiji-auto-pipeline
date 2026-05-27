@@ -71,7 +71,7 @@ function RecordForm() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-4xl animate-soft-pulse">⚔️</p>
+        <p className="text-4xl animate-sparkle">⚔️</p>
       </div>
     );
   }
@@ -80,43 +80,43 @@ function RecordForm() {
     <div className="min-h-screen pb-24">
       <div className="max-w-md mx-auto px-4 pt-6 space-y-4">
         <div className="text-center">
-          <h1 className="text-2xl font-extrabold glow-gold" style={{ color: '#b89450' }}>クエスト出発</h1>
-          <p className="text-xs mt-1 font-medium" style={{ color: '#7c7870' }}>返済を記録して討伐ダメージを与えよう</p>
+          <h1 className="text-2xl font-extrabold" style={{ color: '#b08810' }}>クエスト出発</h1>
+          <p className="text-xs mt-1 font-medium" style={{ color: '#5a6a8a' }}>返済を記録して討伐ダメージを与えよう</p>
         </div>
 
-        <div className="glass p-5">
+        <div className="rpg-panel p-5">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#b89450' }}>討伐対象</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#b08810' }}>討伐対象</label>
               {bosses.length === 0 ? (
-                <p className="text-sm" style={{ color: '#4a4640' }}>討伐可能なモンスターがいません</p>
+                <p className="text-sm" style={{ color: '#8a96b0' }}>討伐可能なモンスターがいません</p>
               ) : (
-                <select value={selectedBossId} onChange={(e) => setSelectedBossId(e.target.value)} className="select-glass">
+                <select value={selectedBossId} onChange={(e) => setSelectedBossId(e.target.value)} className="select-rpg">
                   {bosses.map((b) => <option key={b.id} value={b.id}>{b.emoji} {b.name} (HP: {formatCurrency(b.current_hp)})</option>)}
                 </select>
               )}
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#b89450' }}>攻撃力（返済額）</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#b08810' }}>攻撃力（返済額）</label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-extrabold" style={{ color: '#b89450' }}>¥</span>
-                <input type="number" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0" min="1" required className="input-glass pl-9" />
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-extrabold" style={{ color: '#b08810' }}>¥</span>
+                <input type="number" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0" min="1" required className="input-rpg pl-9" />
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#b89450' }}>出撃日</label>
-              <input type="date" value={paidAt} onChange={(e) => setPaidAt(e.target.value)} required className="input-glass" style={{ colorScheme: 'dark' }} />
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#b08810' }}>出撃日</label>
+              <input type="date" value={paidAt} onChange={(e) => setPaidAt(e.target.value)} required className="input-rpg" style={{ colorScheme: 'light' }} />
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#b89450' }}>攻撃タイプ</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#b08810' }}>攻撃タイプ</label>
               <div className="grid grid-cols-2 gap-3">
                 {(['normal', 'extra'] as const).map(t => (
                   <button key={t} type="button" onClick={() => setType(t)}
                     className="py-3 rounded-xl text-sm font-bold transition-all"
                     style={{
-                      background: type === t ? (t === 'normal' ? 'rgba(232,144,64,0.15)' : 'rgba(232,184,73,0.15)') : 'rgba(10,14,28,0.5)',
-                      border: `1.5px solid ${type === t ? (t === 'normal' ? '#c07838' : '#b89450') : 'rgba(255,255,255,0.06)'}`,
-                      color: type === t ? (t === 'normal' ? '#c07838' : '#b89450') : '#4a4640',
+                      background: type === t ? (t === 'normal' ? 'rgba(232,144,64,0.15)' : 'rgba(232,184,73,0.15)') : 'rgba(43,58,103,0.06)',
+                      border: `1.5px solid ${type === t ? (t === 'normal' ? '#d9534f' : '#b08810') : 'rgba(255,255,255,0.06)'}`,
+                      color: type === t ? (t === 'normal' ? '#d9534f' : '#b08810') : '#8a96b0',
                       boxShadow: type === t ? `0 0 16px ${t === 'normal' ? 'rgba(232,144,64,0.15)' : 'rgba(232,184,73,0.15)'}` : 'none',
                     }}>
                     {t === 'normal' ? '⚔️ 通常攻撃' : '💥 必殺技'}
@@ -125,10 +125,10 @@ function RecordForm() {
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#b89450' }}>メモ（任意）</label>
-              <input type="text" value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="例: ボーナスから返済" className="input-glass" />
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#b08810' }}>メモ（任意）</label>
+              <input type="text" value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="例: ボーナスから返済" className="input-rpg" />
             </div>
-            <button type="submit" disabled={submitting || bosses.length === 0 || !amount} className="w-full btn-primary">
+            <button type="submit" disabled={submitting || bosses.length === 0 || !amount} className="w-full btn-rpg">
               {submitting ? '攻撃中...' : '⚔️ 出撃！'}
             </button>
           </form>
@@ -137,30 +137,30 @@ function RecordForm() {
         {/* Recent */}
         <div>
           <div className="section-bar">
-            <h2 className="text-[15px] font-extrabold" style={{ color: '#e8e6e2' }}>最近の狩猟記録</h2>
+            <h2 className="text-[15px] font-extrabold" style={{ color: '#2b3a67' }}>最近の狩猟記録</h2>
           </div>
           {recentPayments.length === 0 ? (
-            <div className="glass p-8 text-center">
+            <div className="rpg-panel p-8 text-center">
               <p className="text-2xl mb-2">🗡️</p>
-              <p className="text-xs" style={{ color: '#4a4640' }}>まだ狩猟記録がありません</p>
+              <p className="text-xs" style={{ color: '#8a96b0' }}>まだ狩猟記録がありません</p>
             </div>
           ) : (
             <div className="space-y-2">
               {recentPayments.map((p) => (
-                <div key={p.id} className="glass-inner p-3">
+                <div key={p.id} className="rpg-panel-inner p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <span className="text-xl">{p.boss_emoji}</span>
                       <div>
-                        <p className="text-xs font-bold" style={{ color: '#e8e6e2' }}>{p.boss_name}</p>
-                        <p className="text-[10px]" style={{ color: '#7c7870' }}>
-                          {p.paid_at}{p.type === 'extra' && <span className="ml-1.5" style={{ color: '#b89450' }}>★ 必殺技</span>}
+                        <p className="text-xs font-bold" style={{ color: '#2b3a67' }}>{p.boss_name}</p>
+                        <p className="text-[10px]" style={{ color: '#5a6a8a' }}>
+                          {p.paid_at}{p.type === 'extra' && <span className="ml-1.5" style={{ color: '#b08810' }}>★ 必殺技</span>}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-extrabold" style={{ color: '#c07838' }}>-{formatCurrency(p.amount)}</p>
-                      <p className="text-[10px] font-bold" style={{ color: '#7858a0' }}>+{p.xp_earned} EXP</p>
+                      <p className="text-xs font-extrabold" style={{ color: '#d9534f' }}>-{formatCurrency(p.amount)}</p>
+                      <p className="text-[10px] font-bold" style={{ color: '#7a4a8a' }}>+{p.xp_earned} EXP</p>
                     </div>
                   </div>
                 </div>
@@ -172,40 +172,40 @@ function RecordForm() {
 
       {/* Result Modal */}
       {result && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-5" style={{ background: 'rgba(0,0,0,0.85)' }}>
-          <div className="w-full max-w-sm glass-accent p-6 animate-slide-up">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-5" style={{ background: 'rgba(0,0,0,0.5)' }}>
+          <div className="w-full max-w-sm rpg-panel-accent p-6 animate-slide-up">
             <div className="text-center mb-4">
               <p className="text-5xl mb-3">{result.bossDefeated ? '💀' : result.type === 'extra' ? '💥' : '⚔️'}</p>
-              <p className="text-sm font-bold" style={{ color: '#e8e6e2' }}>{result.bossEmoji} {result.bossName} に</p>
-              <p className="text-2xl font-extrabold mt-1 glow-red" style={{ color: '#c07838' }}>
+              <p className="text-sm font-bold" style={{ color: '#2b3a67' }}>{result.bossEmoji} {result.bossName} に</p>
+              <p className="text-2xl font-extrabold mt-1" style={{ color: '#d9534f' }}>
                 {formatCurrency(result.amount)} ダメージ！
               </p>
             </div>
-            <p className="text-xl font-extrabold text-center animate-glow my-4" style={{ color: '#b89450' }}>+{result.xpEarned} EXP</p>
+            <p className="text-xl font-extrabold text-center animate-glow my-4" style={{ color: '#b08810' }}>+{result.xpEarned} EXP</p>
             {result.comboMultiplier > 1 && (
-              <div className="glass-inner p-2 text-center mb-3">
-                <p className="text-xs font-bold" style={{ color: '#c07838' }}>
+              <div className="rpg-panel-inner p-2 text-center mb-3">
+                <p className="text-xs font-bold" style={{ color: '#d9534f' }}>
                   🔥 {result.comboCount}コンボ！ ×{result.comboMultiplier.toFixed(1)} ボーナス
                 </p>
               </div>
             )}
             {result.levelUp && (
-              <div className="glass-inner p-3 text-center mb-3" style={{ borderColor: 'rgba(232,184,73,0.3)' }}>
-                <p className="text-sm font-extrabold glow-gold" style={{ color: '#b89450' }}>🎉 HR UP! → HR {result.newLevel}</p>
+              <div className="rpg-panel-inner p-3 text-center mb-3" style={{ borderColor: 'rgba(232,184,73,0.3)' }}>
+                <p className="text-sm font-extrabold" style={{ color: '#b08810' }}>🎉 HR UP! → HR {result.newLevel}</p>
               </div>
             )}
             {result.bossDefeated && (
-              <div className="glass-inner p-3 text-center mb-3" style={{ borderColor: 'rgba(76,206,123,0.3)' }}>
-                <p className="text-sm font-extrabold glow-green" style={{ color: '#40a060' }}>QUEST CLEAR!</p>
+              <div className="rpg-panel-inner p-3 text-center mb-3" style={{ borderColor: 'rgba(76,206,123,0.3)' }}>
+                <p className="text-sm font-extrabold" style={{ color: '#2d8a4e' }}>QUEST CLEAR!</p>
               </div>
             )}
             {result.achievementsEarned.length > 0 && (
-              <div className="glass-inner p-3 mb-3">
-                <p className="text-xs font-bold mb-1" style={{ color: '#b89450' }}>🏆 勲章獲得！</p>
-                {result.achievementsEarned.map((n, i) => <p key={i} className="text-xs" style={{ color: '#e8e6e2' }}>{n}</p>)}
+              <div className="rpg-panel-inner p-3 mb-3">
+                <p className="text-xs font-bold mb-1" style={{ color: '#b08810' }}>🏆 勲章獲得！</p>
+                {result.achievementsEarned.map((n, i) => <p key={i} className="text-xs" style={{ color: '#2b3a67' }}>{n}</p>)}
               </div>
             )}
-            <button onClick={() => setResult(null)} className="w-full btn-secondary mt-2">OK</button>
+            <button onClick={() => setResult(null)} className="w-full btn-outline mt-2">OK</button>
           </div>
         </div>
       )}
@@ -216,7 +216,7 @@ function RecordForm() {
 
 export default function RecordPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p className="text-4xl animate-soft-pulse">⚔️</p></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p className="text-4xl animate-sparkle">⚔️</p></div>}>
       <RecordForm />
     </Suspense>
   );

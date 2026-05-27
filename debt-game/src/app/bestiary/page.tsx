@@ -18,9 +18,9 @@ function formatDate(dateStr: string | null): string {
 function DifficultyStars({ difficulty }: { difficulty: number }) {
   const full = Math.min(difficulty, 9);
   return (
-    <span className="text-[10px] tracking-tight" style={{ color: '#b89450' }}>
+    <span className="text-[10px] tracking-tight" style={{ color: '#b08810' }}>
       {'★'.repeat(full)}
-      <span style={{ color: '#4a4640' }}>{'★'.repeat(Math.max(0, 9 - full))}</span>
+      <span style={{ color: '#8a96b0' }}>{'★'.repeat(Math.max(0, 9 - full))}</span>
     </span>
   );
 }
@@ -32,7 +32,7 @@ function BossMonsterCard({ boss }: { boss: Boss }) {
 
   return (
     <div
-      className="glass-inner p-4 flex flex-col items-center text-center gap-2"
+      className="rpg-panel-inner p-4 flex flex-col items-center text-center gap-2"
       style={{
         opacity: unlocked ? 1 : 0.3,
         filter: unlocked ? 'none' : 'grayscale(1)',
@@ -42,25 +42,25 @@ function BossMonsterCard({ boss }: { boss: Boss }) {
     >
       <span className="text-4xl">{unlocked ? boss.emoji : '🔒'}</span>
       <div>
-        <p className="text-sm font-extrabold" style={{ color: unlocked ? '#e8e6e2' : '#4a4640' }}>
+        <p className="text-sm font-extrabold" style={{ color: unlocked ? '#2b3a67' : '#8a96b0' }}>
           {unlocked ? boss.name : '???'}
         </p>
-        <p className="text-[10px] font-medium mt-0.5" style={{ color: '#7c7870' }}>
+        <p className="text-[10px] font-medium mt-0.5" style={{ color: '#5a6a8a' }}>
           {unlocked ? boss.subtitle : '討伐すると解放'}
         </p>
       </div>
       {unlocked ? (
         <div className="w-full space-y-1.5 mt-1">
           <div className="flex justify-between items-center">
-            <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#7c7870' }}>討伐日</span>
-            <span className="text-[10px] font-bold" style={{ color: '#e8e6e2' }}>{formatDate(boss.defeated_at)}</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#5a6a8a' }}>討伐日</span>
+            <span className="text-[10px] font-bold" style={{ color: '#2b3a67' }}>{formatDate(boss.defeated_at)}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#7c7870' }}>総ダメージ</span>
-            <span className="text-[10px] font-bold" style={{ color: '#40a060' }}>{formatCurrency(totalDamage)}</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#5a6a8a' }}>総ダメージ</span>
+            <span className="text-[10px] font-bold" style={{ color: '#2d8a4e' }}>{formatCurrency(totalDamage)}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#7c7870' }}>難易度</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#5a6a8a' }}>難易度</span>
             <DifficultyStars difficulty={difficulty} />
           </div>
         </div>
@@ -78,7 +78,7 @@ function CompanionMonsterCard({ goal }: { goal: SavingsGoal }) {
 
   return (
     <div
-      className="glass-inner p-4 flex flex-col items-center text-center gap-2"
+      className="rpg-panel-inner p-4 flex flex-col items-center text-center gap-2"
       style={{
         opacity: unlocked ? 1 : 0.3,
         filter: unlocked ? 'none' : 'grayscale(1)',
@@ -88,22 +88,22 @@ function CompanionMonsterCard({ goal }: { goal: SavingsGoal }) {
     >
       <span className="text-4xl">{unlocked ? (goal.companion_emoji || goal.emoji) : '🥚'}</span>
       <div>
-        <p className="text-sm font-extrabold" style={{ color: unlocked ? '#e8e6e2' : '#4a4640' }}>
+        <p className="text-sm font-extrabold" style={{ color: unlocked ? '#2b3a67' : '#8a96b0' }}>
           {unlocked ? goal.companion_name : goal.name}
         </p>
-        <p className="text-[10px] font-medium mt-0.5" style={{ color: '#7c7870' }}>
+        <p className="text-[10px] font-medium mt-0.5" style={{ color: '#5a6a8a' }}>
           {unlocked ? '仲間になった!' : '目標達成で孵化'}
         </p>
       </div>
       {unlocked ? (
         <div className="w-full space-y-1.5 mt-1">
           <div className="flex justify-between items-center">
-            <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#7c7870' }}>孵化日</span>
-            <span className="text-[10px] font-bold" style={{ color: '#e8e6e2' }}>{formatDate(goal.hatched_at)}</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#5a6a8a' }}>孵化日</span>
+            <span className="text-[10px] font-bold" style={{ color: '#2b3a67' }}>{formatDate(goal.hatched_at)}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#7c7870' }}>貯金額</span>
-            <span className="text-[10px] font-bold" style={{ color: '#40a060' }}>{formatCurrency(goal.current_amount)}</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#5a6a8a' }}>貯金額</span>
+            <span className="text-[10px] font-bold" style={{ color: '#2d8a4e' }}>{formatCurrency(goal.current_amount)}</span>
           </div>
         </div>
       ) : (
@@ -113,11 +113,11 @@ function CompanionMonsterCard({ goal }: { goal: SavingsGoal }) {
               className="hp-fill"
               style={{
                 width: `${Math.min(100, Math.round((goal.current_amount / goal.target_amount) * 100))}%`,
-                background: 'linear-gradient(90deg, #7c7870, #40a060)',
+                background: 'linear-gradient(90deg, #5a6a8a, #2d8a4e)',
               }}
             />
           </div>
-          <p className="text-[9px] font-medium mt-1" style={{ color: '#4a4640' }}>
+          <p className="text-[9px] font-medium mt-1" style={{ color: '#8a96b0' }}>
             {formatCurrency(goal.current_amount)} / {formatCurrency(goal.target_amount)}
           </p>
         </div>
@@ -132,7 +132,7 @@ function ExpeditionMonsterCard({ investment }: { investment: Investment }) {
 
   return (
     <div
-      className="glass-inner p-4 flex flex-col items-center text-center gap-2"
+      className="rpg-panel-inner p-4 flex flex-col items-center text-center gap-2"
       style={{
         borderColor: 'rgba(72,120,176,0.15)',
         boxShadow: '0 0 12px rgba(72,120,176,0.06)',
@@ -140,27 +140,27 @@ function ExpeditionMonsterCard({ investment }: { investment: Investment }) {
     >
       <span className="text-4xl">{investment.emoji}</span>
       <div>
-        <p className="text-sm font-extrabold" style={{ color: '#e8e6e2' }}>
+        <p className="text-sm font-extrabold" style={{ color: '#2b3a67' }}>
           {investment.name}
         </p>
-        <p className="text-[10px] font-medium mt-0.5" style={{ color: '#7c7870' }}>
+        <p className="text-[10px] font-medium mt-0.5" style={{ color: '#5a6a8a' }}>
           遠征中
         </p>
       </div>
       <div className="w-full space-y-1.5 mt-1">
         <div className="flex justify-between items-center">
-          <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#7c7870' }}>現在価値</span>
-          <span className="text-[10px] font-bold" style={{ color: '#e8e6e2' }}>{formatCurrency(investment.current_value)}</span>
+          <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#5a6a8a' }}>現在価値</span>
+          <span className="text-[10px] font-bold" style={{ color: '#2b3a67' }}>{formatCurrency(investment.current_value)}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#7c7870' }}>リターン</span>
-          <span className="text-[10px] font-bold" style={{ color: isPositive ? '#40a060' : '#c04040' }}>
+          <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#5a6a8a' }}>リターン</span>
+          <span className="text-[10px] font-bold" style={{ color: isPositive ? '#2d8a4e' : '#d9534f' }}>
             {isPositive ? '+' : ''}{returnRate}%
           </span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#7c7870' }}>開始日</span>
-          <span className="text-[10px] font-bold" style={{ color: '#e8e6e2' }}>{formatDate(investment.started_at)}</span>
+          <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#5a6a8a' }}>開始日</span>
+          <span className="text-[10px] font-bold" style={{ color: '#2b3a67' }}>{formatDate(investment.started_at)}</span>
         </div>
       </div>
     </div>
@@ -183,7 +183,7 @@ export default function BestiaryPage() {
   if (loading || !data) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-4xl animate-soft-pulse">📖</p>
+        <p className="text-4xl animate-sparkle">📖</p>
       </div>
     );
   }
@@ -209,12 +209,12 @@ export default function BestiaryPage() {
   return (
     <div className="pt-6 space-y-4">
       {/* Header */}
-      <div className="glass-accent p-5 text-center">
-        <p className="text-[9px] font-bold uppercase tracking-widest mb-2" style={{ color: '#7c7870' }}>MONSTER BESTIARY</p>
-        <h1 className="text-2xl font-extrabold" style={{ color: '#e8e6e2' }}>
+      <div className="rpg-panel-accent p-5 text-center">
+        <p className="text-[9px] font-bold uppercase tracking-widest mb-2" style={{ color: '#5a6a8a' }}>MONSTER BESTIARY</p>
+        <h1 className="text-2xl font-extrabold" style={{ color: '#2b3a67' }}>
           モンスター図鑑
         </h1>
-        <p className="text-sm font-bold mt-2 glow-gold" style={{ color: '#b89450' }}>
+        <p className="text-sm font-bold mt-2" style={{ color: '#b08810' }}>
           {totalDiscovered} / {totalMonsters} 体 発見済み
         </p>
       </div>
@@ -226,7 +226,7 @@ export default function BestiaryPage() {
             key={cat.key}
             onClick={() => setCategory(cat.key)}
             className={`flex-1 py-2.5 rounded-xl text-center transition-all duration-200 ${
-              category === cat.key ? 'btn-primary' : 'btn-secondary'
+              category === cat.key ? 'btn-rpg' : 'btn-outline'
             }`}
             style={category === cat.key ? {} : {}}
           >
@@ -240,8 +240,8 @@ export default function BestiaryPage() {
       {showBosses && bosses.length > 0 && (
         <div>
           <div className="section-bar">
-            <h2 className="text-[15px] font-extrabold" style={{ color: '#e8e6e2' }}>討伐モンスター</h2>
-            <span className="text-[11px] font-bold" style={{ color: '#7c7870' }}>
+            <h2 className="text-[15px] font-extrabold" style={{ color: '#2b3a67' }}>討伐モンスター</h2>
+            <span className="text-[11px] font-bold" style={{ color: '#5a6a8a' }}>
               {defeatedBosses}/{bosses.length}
             </span>
           </div>
@@ -261,8 +261,8 @@ export default function BestiaryPage() {
       {showCompanions && savingsGoals.length > 0 && (
         <div>
           <div className="section-bar">
-            <h2 className="text-[15px] font-extrabold" style={{ color: '#e8e6e2' }}>仲間モンスター</h2>
-            <span className="text-[11px] font-bold" style={{ color: '#7c7870' }}>
+            <h2 className="text-[15px] font-extrabold" style={{ color: '#2b3a67' }}>仲間モンスター</h2>
+            <span className="text-[11px] font-bold" style={{ color: '#5a6a8a' }}>
               {hatchedGoals}/{savingsGoals.length}
             </span>
           </div>
@@ -282,8 +282,8 @@ export default function BestiaryPage() {
       {showExpeditions && investments.length > 0 && (
         <div>
           <div className="section-bar">
-            <h2 className="text-[15px] font-extrabold" style={{ color: '#e8e6e2' }}>遠征モンスター</h2>
-            <span className="text-[11px] font-bold" style={{ color: '#7c7870' }}>
+            <h2 className="text-[15px] font-extrabold" style={{ color: '#2b3a67' }}>遠征モンスター</h2>
+            <span className="text-[11px] font-bold" style={{ color: '#5a6a8a' }}>
               {investments.length}体
             </span>
           </div>
@@ -297,10 +297,10 @@ export default function BestiaryPage() {
 
       {/* Empty States */}
       {totalMonsters === 0 && (
-        <div className="glass-inner p-8 text-center">
+        <div className="rpg-panel-inner p-8 text-center">
           <p className="text-4xl mb-3">📖</p>
-          <p className="text-sm font-bold" style={{ color: '#e8e6e2' }}>まだモンスターがいません</p>
-          <p className="text-[11px] mt-1" style={{ color: '#7c7870' }}>
+          <p className="text-sm font-bold" style={{ color: '#2b3a67' }}>まだモンスターがいません</p>
+          <p className="text-[11px] mt-1" style={{ color: '#5a6a8a' }}>
             借金を登録するか、貯金目標を作成しましょう
           </p>
         </div>
@@ -311,7 +311,7 @@ export default function BestiaryPage() {
         <Link
           href="/setup"
           className="inline-block text-[11px] font-bold py-2 px-4 rounded-lg transition-all"
-          style={{ color: '#7c7870', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+          style={{ color: '#5a6a8a', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
         >
           ⚙️ 設定
         </Link>
