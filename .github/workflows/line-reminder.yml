@@ -32,7 +32,7 @@ jobs:
             0) MSG="日曜日。今週の狩猟成果を振り返ろう📋";;
           esac
 
-          FULL_MSG="🏕️ Debt Hunter デイリーリマインド
+          FULL_MSG="🏕️ Rich Hunter デイリーリマインド
 
           $MSG
 

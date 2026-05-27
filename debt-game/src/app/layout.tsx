@@ -21,12 +21,12 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Debt Hunter - 借金討伐クエスト',
+  title: 'Rich Hunter - 借金討伐クエスト',
   description: '借金をモンスターに見立てて、クエストをクリアしながら返済していくゲーム',
   manifest: `${basePath}/manifest.json`,
   appleWebApp: {
     capable: true,
-    title: 'Debt Hunter',
+    title: 'Rich Hunter',
     statusBarStyle: 'black-translucent',
   },
   icons: {

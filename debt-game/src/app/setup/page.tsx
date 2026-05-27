@@ -81,7 +81,7 @@ export default function SetupPage() {
       {/* Header */}
       <div className="glass-accent p-6 text-center">
         <p className="text-4xl mb-3">⚔️</p>
-        <h1 className="text-2xl font-extrabold glow-gold" style={{ color: '#b89450' }}>Debt Hunter</h1>
+        <h1 className="text-2xl font-extrabold glow-gold" style={{ color: '#b89450' }}>Rich Hunter</h1>
         <p className="text-xs mt-1.5 font-medium" style={{ color: '#7c7870' }}>借金討伐クエスト — 冒険の準備</p>
       </div>
 
