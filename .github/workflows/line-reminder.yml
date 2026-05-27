@@ -2,7 +2,6 @@ name: LINE Daily Reminder
 
 on:
   schedule:
-    # 毎朝8時（日本時間）= UTC 23:00（前日）
     - cron: '0 23 * * *'
   workflow_dispatch:
 
@@ -20,7 +19,6 @@ jobs:
             exit 0
           fi
 
-          # Day of week messages
           DAY=$(date -u +%u)
           case $DAY in
             1) MSG="週の始まり！今週も借金討伐クエスト頑張ろう⚔️";;
@@ -32,19 +30,9 @@ jobs:
             0) MSG="日曜日。今週の狩猟成果を振り返ろう📋";;
           esac
 
-          FULL_MSG="🏕️ Rich Hunter デイリーリマインド
-
-          $MSG
-
-          👉 https://hiroking55.github.io/kaiji-auto-pipeline/"
+          TEXT="🏕️ Rich Hunter デイリーリマインド\n\n${MSG}\n\n👉 https://hiroking55.github.io/kaiji-auto-pipeline/"
 
           curl -s -X POST https://api.line.me/v2/bot/message/push \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $LINE_CHANNEL_TOKEN" \
-            -d "{
-              \"to\": \"$LINE_USER_ID\",
-              \"messages\": [{
-                \"type\": \"text\",
-                \"text\": \"$FULL_MSG\"
-              }]
-            }"
+            -H "Authorization: Bearer ${LINE_CHANNEL_TOKEN}" \
+            -d "{\"to\":\"${LINE_USER_ID}\",\"messages\":[{\"type\":\"text\",\"text\":\"${TEXT}\"}]}"
