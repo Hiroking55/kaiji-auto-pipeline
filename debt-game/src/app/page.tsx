@@ -13,9 +13,14 @@ export default function Page() {
   const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loginBonus, setLoginBonus] = useState<{ bonus: number; show: boolean }>({ bonus: 0, show: false });
 
   useEffect(() => {
-    processLogin();
+    const { streakBonus, isNewDay } = processLogin();
+    if (isNewDay && streakBonus > 0) {
+      setLoginBonus({ bonus: streakBonus, show: true });
+      setTimeout(() => setLoginBonus(prev => ({ ...prev, show: false })), 3000);
+    }
     const result = getDashboardData();
     if (!result) { router.push('/setup'); return; }
     setData(result);
@@ -39,6 +44,21 @@ export default function Page() {
 
   return (
     <div className="pt-6 space-y-4">
+      {/* Login Bonus Toast */}
+      {loginBonus.show && (
+        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-50 animate-slide-up">
+          <div className="glass-accent px-6 py-3 text-center">
+            <p className="text-xs font-bold" style={{ color: '#7c7870' }}>ログインボーナス</p>
+            <p className="text-lg font-extrabold animate-glow" style={{ color: '#b89450' }}>
+              +{loginBonus.bonus} EXP
+            </p>
+            <p className="text-[10px]" style={{ color: '#7c7870' }}>
+              {player.login_streak}日連続ログイン
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Hunter Profile */}
       <div className="glass-accent p-5">
         <div className="flex items-center gap-4 mb-4">

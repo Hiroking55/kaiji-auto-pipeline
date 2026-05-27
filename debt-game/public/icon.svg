@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#100e0a"/>
+  <!-- Shield shape -->
+  <path d="M256 80 L380 140 L380 280 Q380 380 256 440 Q132 380 132 280 L132 140 Z"
+        fill="none" stroke="#b89450" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M256 100 L365 155 L365 275 Q365 365 256 420 Q147 365 147 275 L147 155 Z"
+        fill="#1a1610" stroke="none"/>
+  <!-- Sword -->
+  <line x1="256" y1="150" x2="256" y2="360" stroke="#b89450" stroke-width="10" stroke-linecap="round"/>
+  <!-- Sword crossguard -->
+  <line x1="218" y1="300" x2="294" y2="300" stroke="#b89450" stroke-width="10" stroke-linecap="round"/>
+  <!-- Sword pommel -->
+  <circle cx="256" cy="370" r="10" fill="#b89450"/>
+  <!-- Sword blade tip -->
+  <polygon points="256,150 244,180 268,180" fill="#b89450"/>
+  <!-- Coin / yen symbol on shield -->
+  <circle cx="256" cy="230" r="32" fill="none" stroke="#b89450" stroke-width="6"/>
+  <text x="256" y="243" text-anchor="middle" font-family="sans-serif" font-size="36" font-weight="bold" fill="#b89450">&#165;</text>
+</svg>
