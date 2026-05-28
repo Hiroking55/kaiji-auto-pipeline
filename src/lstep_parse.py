@@ -2,18 +2,35 @@
 import csv
 import glob
 import os
+import re
 from typing import List, Dict
 
 
+_TS_RE = re.compile(r"_(\d{14})\.csv$")
+
+
+def _sort_key(path: str):
+    """ファイル名末尾の `_YYYYMMDDHHMMSS.csv` を最優先キー、
+    無ければ mtime にフォールバック。
+    GitHub Actions のチェックアウト直後は全ファイルが
+    同mtime になるため、 mtime 単独ソートは不安定。"""
+    m = _TS_RE.search(os.path.basename(path))
+    if m:
+        return (1, m.group(1))  # タイムスタンプあり = 確実な順序
+    return (0, str(os.path.getmtime(path)))  # 無い場合のみ mtime
+
+
 def _resolve_csv_path(path: str) -> str:
-    """指定パスが無い場合、 同じディレクトリの最新 .csv を探す"""
+    """指定パスが無い場合、 同じディレクトリの最新 .csv を探す。
+    ファイル名末尾の `_YYYYMMDDHHMMSS.csv` で降順ソートし最新を選ぶ
+    (mtime ソートは GitHub Actions では同時刻になり不安定なため不採用)。"""
     if os.path.exists(path):
         return path
     # data/lstep/ 内の任意の .csv を fallback (ファイル名がタイムスタンプ含むケース対応)
     dir_path = os.path.dirname(path) or "."
     candidates = sorted(
         glob.glob(os.path.join(dir_path, "*.csv")),
-        key=os.path.getmtime,
+        key=_sort_key,
         reverse=True,
     )
     if candidates:
