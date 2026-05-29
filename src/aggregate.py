@@ -125,13 +125,16 @@ DEFAULT_BUDGET = 1_800_000    # 月次予算 (¥)
 DEFAULT_CPA_THRESHOLD = 3_000  # 真CPA 基準 (¥)
 
 # 月別オーバーライド (キー = "YYYY-MM")
+# 🚨 このダッシュボードは「Meta広告」専用。 6月の数字は確定版(5/29制作戦略MTG)の
+#   Meta単体配分 = 660件 / ¥2,640,000 / CPA¥4,000 を使う。
+#   (全広告チャネル合計は 1,933件/¥7,730,000 だが、 それは別途「KPI進捗トラッカー(6月)」で管理)
 MONTHLY_TARGET_CV = {
     "2026-05": 470,
-    "2026-06": 1633,      # 6月マルチチャネルスケール計画
+    "2026-06": 660,       # 6月 Meta単体目標 (確定版: 264万 ÷ ¥4,000)
 }
 MONTHLY_BUDGET = {
     "2026-05": 1_800_000,
-    "2026-06": 6_532_000,  # 6月全チャネル合計予算
+    "2026-06": 2_640_000,  # 6月 Meta単体予算 (確定版: 264万円)
 }
 MONTHLY_CPA_THRESHOLD = {
     "2026-05": 3_000,
@@ -601,6 +604,7 @@ def _compute_dashboard(daily_rows: List[Dict]) -> Dict:
     days_left = _month_days_remaining(today_jst)
 
     return {
+        "month": cur_month,                                     # "2026-06" (= 当月。 見出し/サブテキストの月表記に使用)
         "today_date": today_str,                                # "2026-05-12"
         "today_label": today_disp.strftime("%m/%d") + " (" + "月火水木金土日"[today_disp.weekday()] + ")",
         "week_label": week_label,                               # "第3週 (05/11-05/17)"

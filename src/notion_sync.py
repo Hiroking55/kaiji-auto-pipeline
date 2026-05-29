@@ -242,6 +242,50 @@ def _get_kpi_value(parsed, dashboard: dict):
     return _format_kpi_value(metric, data.get(metric, 0))
 
 
+def _month_num(dashboard: dict) -> str:
+    """dashboard["month"] ("2026-06") → "6" (見出し用)。 取れなければ ""。"""
+    mo = dashboard.get("month", "")
+    if len(mo) >= 7:
+        return mo[5:7].lstrip("0") or "0"
+    return ""
+
+
+def _kpi_subtext(parsed, dashboard: dict):
+    """カード下のグレー補足テキストを当月内容で生成。
+    月が変わっても「目標 470」「5月累計」等が残らないよう、 値更新と同時に上書きする。
+    対応できないものは None (= 触らない)。"""
+    period, scope, metric = parsed
+    m = _month_num(dashboard)
+    if period == "special":
+        return f"残り{dashboard.get('month_days_left', 0)}日"
+    if period == "monthly":
+        if scope == "total":
+            if metric == "true_cv":
+                return f"目標 {dashboard.get('target_cv', 0):,}"
+            if metric == "cost":
+                return f"予算 ¥{dashboard.get('budget', 0):,}"
+            if metric == "true_cpa":
+                return f"基準 ¥{dashboard.get('cpa_threshold', 0):,}"
+        return f"{m}月累計" if m else None
+    if period == "weekly":
+        return dashboard.get("week_label") or None
+    if period == "today":
+        return dashboard.get("today_label") or None
+    return None
+
+
+def _safe_update_heading2(notion: Client, block_id: str, text: str):
+    """heading_2 セクション見出しを当月表記に上書き (失敗しても無視)。"""
+    try:
+        _notion_call(
+            notion.blocks.update,
+            block_id=block_id,
+            heading_2={"rich_text": [{"type": "text", "text": {"content": text}}]},
+        )
+    except Exception as e:
+        print(f"  [KPI] 見出し更新失敗 {text!r}: {type(e).__name__} {str(e)[:60]}")
+
+
 def _rich_text_of(block: dict) -> str:
     t = block.get("type", "")
     rt = block.get(t, {}).get("rich_text", [])
@@ -256,6 +300,9 @@ def sync_kpi_cards(notion: Client, page_id: str, dashboard: dict):
     children = _notion_call(notion.blocks.children.list, block_id=page_id)
 
     # 1. heading_2 でセクション境界を識別、column_list ID を集める
+    #    同時にセクション見出しを当月表記へ自動更新 (= 月初に「(5月)」が残らないように)。
+    month_num = _month_num(dashboard)
+    week_label = dashboard.get("week_label", "")
     sections_column_lists = []
     current_section = None
     for b in children["results"]:
@@ -264,8 +311,12 @@ def sync_kpi_cards(notion: Client, page_id: str, dashboard: dict):
             text = _rich_text_of(b)
             if "月次サマリ" in text:
                 current_section = "monthly"
+                if month_num:
+                    _safe_update_heading2(notion, b["id"], f"📊 月次サマリ ({month_num}月)")
             elif "週次サマリ" in text:
                 current_section = "weekly"
+                if week_label:
+                    _safe_update_heading2(notion, b["id"], f"📊 週次サマリ ({week_label})")
             else:
                 current_section = None
         elif t == "column_list" and current_section:
@@ -291,23 +342,40 @@ def sync_kpi_cards(notion: Client, page_id: str, dashboard: dict):
                     skipped += 1
                     continue
 
-                # callout 配下の heading_1 を更新
+                # callout 配下の heading_1 (値) と paragraph (グレー補足) を更新
                 nested = _notion_call(notion.blocks.children.list, block_id=c["id"])
+                subtext = _kpi_subtext(parsed, dashboard)
                 for n in nested["results"]:
-                    if n["type"] != "heading_1":
-                        continue
-                    try:
-                        _notion_call(
-                            notion.blocks.update,
-                            block_id=n["id"],
-                            heading_1={
-                                "rich_text": [{"type": "text", "text": {"content": new_value}}],
-                            },
-                        )
-                        updated += 1
-                    except Exception as e:
-                        print(f"  [KPI] {label!r} 更新失敗: {type(e).__name__} {str(e)[:100]}")
-                        failed += 1
+                    if n["type"] == "heading_1":
+                        try:
+                            _notion_call(
+                                notion.blocks.update,
+                                block_id=n["id"],
+                                heading_1={
+                                    "rich_text": [{"type": "text", "text": {"content": new_value}}],
+                                },
+                            )
+                            updated += 1
+                        except Exception as e:
+                            print(f"  [KPI] {label!r} 更新失敗: {type(e).__name__} {str(e)[:100]}")
+                            failed += 1
+                    elif n["type"] == "paragraph" and subtext is not None:
+                        # 最初の paragraph (= 目標/予算/基準 や 「N月累計」 等) だけ当月内容に上書き
+                        try:
+                            _notion_call(
+                                notion.blocks.update,
+                                block_id=n["id"],
+                                paragraph={
+                                    "rich_text": [{
+                                        "type": "text",
+                                        "text": {"content": subtext},
+                                        "annotations": {"color": "gray"},
+                                    }],
+                                },
+                            )
+                        except Exception as e:
+                            print(f"  [KPI] {label!r} 補足更新失敗: {type(e).__name__} {str(e)[:60]}")
+                        subtext = None  # 2つ目以降の paragraph は触らない
 
     # 更新マーカーの callout を最新時刻に
     try:
