@@ -12,7 +12,7 @@ WEEKDAY_JA = "月火水木金土日"
 
 # Notion API は不安定で timeout/レート上限が出やすい。GitHub Actions の outbound 接続も
 # 遅延することがあるので timeout を伸ばす + 各呼び出しにリトライを噛ませる。
-NOTION_TIMEOUT_MS = 60_000  # 60 秒
+NOTION_TIMEOUT_MS = 30_000  # 30 秒 (1呼び出しあたりの最悪 stall を抑制。Notion 通常応答は <10s)
 NOTION_RETRY_MAX = 4
 NOTION_RETRY_WAIT_BASE = 3  # 3, 6, 9, 12 秒で再試行
 
