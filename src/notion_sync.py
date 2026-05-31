@@ -398,6 +398,67 @@ def sync_kpi_cards(notion: Client, page_id: str, dashboard: dict):
     print(f"  [KPI] カード更新 {updated} / スキップ {skipped} / 失敗 {failed}")
 
 
+# チャネル内部名 → 表示名 (callout 用)
+CHANNEL_DISPLAY = {
+    "tiktok": "TikTok",
+    "line": "LINE",
+    "x": "X",
+    "native": "ネイティブ(SmartNews等)",
+    "google": "Google",
+    "affili": "アフィリエイト",
+}
+
+CHANNEL_CV_SENTINEL = "BOT-CHANNEL-CV"
+
+
+def sync_channel_cv_callout(notion: Client, page_id: str, channel_cv: dict):
+    """非Metaチャネルの真CV(件数のみ)を専用 callout に冪等表示する。
+
+    KPIカード群とは独立。 ページ直下に `[BOT-CHANNEL-CV]` センチネル付き callout を
+    1つだけ持ち、 毎回その本文を上書き(= 追記しないので重複しない)。
+    無ければ初回のみ作成。 channel_cv が空なら何もしない。
+    ※ ここはコストAPI未統合のため「真CV件数」のみ。 真CPA等は出さない(誤解防止)。
+    """
+    if not channel_cv:
+        return
+
+    stamp = datetime.now(JST).strftime("%Y-%m-%d %H:%M")
+    parts = []
+    for ch, cnt in sorted(channel_cv.items(), key=lambda kv: -kv[1]):
+        parts.append(f"{CHANNEL_DISPLAY.get(ch, ch)}: {cnt}件")
+    body = (
+        f"🤖[{CHANNEL_CV_SENTINEL}] 非Metaチャネル 真CV (件数のみ・非Metaコスト未統合) | "
+        + " / ".join(parts)
+        + f" | 更新 {stamp}"
+    )
+
+    callout_payload = {
+        "rich_text": [{"type": "text", "text": {"content": body}}],
+        "icon": {"type": "emoji", "emoji": "📡"},
+        "color": "blue_background",
+    }
+
+    try:
+        children = _notion_call(notion.blocks.children.list, block_id=page_id)
+        target_id = None
+        for b in children["results"]:
+            if b["type"] == "callout" and CHANNEL_CV_SENTINEL in _rich_text_of(b):
+                target_id = b["id"]
+                break
+        if target_id:
+            _notion_call(notion.blocks.update, block_id=target_id, callout=callout_payload)
+            print(f"  [channel-cv] callout 更新: {channel_cv}")
+        else:
+            _notion_call(
+                notion.blocks.children.append,
+                block_id=page_id,
+                children=[{"object": "block", "type": "callout", "callout": callout_payload}],
+            )
+            print(f"  [channel-cv] callout 新規作成: {channel_cv}")
+    except Exception as e:
+        print(f"  [channel-cv] 失敗: {type(e).__name__} {str(e)[:80]}")
+
+
 def sync_to_notion(results: dict):
     """日次 + クリエ別 + KPIカード を Notion に同期"""
     # Notion API は GitHub Actions の outbound 接続経由だと timeout しやすいので
@@ -434,3 +495,6 @@ def sync_to_notion(results: dict):
     # KPIカード書き込みに入る前に小休止して回避。
     time.sleep(3)
     sync_kpi_cards(notion, parent_page, dashboard)
+
+    # 非Metaチャネルの真CV(件数のみ)を専用 callout に冪等表示
+    sync_channel_cv_callout(notion, parent_page, results.get("channel_cv", {}))

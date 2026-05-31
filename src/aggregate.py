@@ -337,12 +337,13 @@ def aggregate(meta_jisha: List[Dict], meta_gaichu: List[Dict], lstep: List[Dict]
             if col.startswith("metaCR_"):
                 metacr_columns.append(col)
 
-    # 4-2b. マルチチャネルCVタグ (= TikTok/LINE/X/ネイティブ)。
-    # 命名規則: <channel>CR_<suffix> (例: tiktokCR_01 / lineCR_01 / xCR_01 / nativeCR_01)。
+    # 4-2b. マルチチャネルCVタグ (= TikTok/LINE/X/ネイティブ/Google/アフィリ)。
+    # 命名規則: <channel>CR_<suffix> (例: tiktokCR_01 / lineCR_01 / xCR_01 / nativeCR_01 / googleCR_01 / affiliCR_01)。
+    # ※ SmartNews 等のネイティブ広告は native を正準名に統一する (別名に割らない)。
     # Meta(metaCR_)は広告API統合済なのでクリエ別マッチングで処理。 それ以外のチャネルは
     # 広告コストAPIが未統合のため、 ここでは「チャネル別 真CV件数」 のみ独立集計する
     # (= タグを metaCR_ にしないと計上漏れになる事故を防ぐ + 将来コストAPI統合時の土台)。
-    NON_META_CR_RE = re.compile(r'^(tiktok|line|x|native)CR_')
+    NON_META_CR_RE = re.compile(r'^(tiktok|line|x|native|google|affili)CR_')
     channel_cv_columns = {}  # channel -> [Lstepカラム名]
     if lstep:
         for col in lstep[0].keys():
